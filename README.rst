@@ -56,7 +56,7 @@ Getting Started
 ***************
 
 .. raw:: html
-    <div class="banner"><img src="https://github.com/NEFM-TUDresden/GmshModel/blob/master/docs/images/RVE200SpheresGeo.png" width="45%"><img src="https://github.com/NEFM-TUDresden/GmshModel/blob/master/docs/images/RVE200SpheresMesh.png" width="45%"></div>
+    <img src="https://github.com/NEFM-TUDresden/GmshModel/blob/master/docs/images/RVE200SpheresGeo.png" width="40%"><img src="https://github.com/NEFM-TUDresden/GmshModel/blob/master/docs/images/RVE200SpheresMesh.png" width="40%">
     
 
 .. image:: docs/images/RVE200SpheresGeo.png

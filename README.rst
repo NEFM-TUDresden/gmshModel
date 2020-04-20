@@ -56,10 +56,10 @@ Getting Started
 ***************
 
 
-.. image:: docs/resources/RVE200SpheresGeo.png
+.. image:: docs/images/RVE200SpheresGeo.png
     :width: 49%
     :alt: 200SpheresGeo
-.. image:: docs/resources/RVE200SpheresMesh.png
+.. image:: docs/images/RVE200SpheresMesh.png
     :width: 49%
     :alt: 200SpheresMesh
 

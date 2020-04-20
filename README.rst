@@ -57,16 +57,8 @@ Getting Started
 
 .. raw:: html
 
-    <div><img src="https://github.com/NEFM-TUDresden/GmshModel/blob/master/docs/images/RVE200SpheresGeo.png" width="40%"><img src="https://github.com/NEFM-TUDresden/GmshModel/blob/master/docs/images/RVE200SpheresMesh.png" width="40%"></div>
+    <div><img src="https://github.com/NEFM-TUDresden/GmshModel/blob/master/docs/images/RVE200SpheresGeo.png" width="45%"><img src="https://github.com/NEFM-TUDresden/GmshModel/blob/master/docs/images/RVE200SpheresMesh.png" width="45%"></div>
     
-
-.. image:: docs/images/RVE200SpheresGeo.png
-    :width: 300px
-    :alt: 200SpheresGeo
-.. image:: docs/images/RVE200SpheresMesh.png
-    :width: 300px
-    :alt: 200SpheresMesh
-
 To generate the above periodic box in a ``[20x20x20]`` domain which contains 200 spherical 
 inclusions of radius 1, simply type:
 

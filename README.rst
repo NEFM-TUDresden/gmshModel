@@ -37,8 +37,8 @@ of Gmsh in a nice and easy to use programming environment such as Python.
 Installation
 ************
 GmshModel is an interface tool and makes use of many great contributions of other
-people. To experience the full functionality of Gmsh model, the following software 
-packages are required:
+people. To experience the full functionality of Gmsh model, the following (non-standard)
+software packages are required:
 
 1. a `dynamically built Gmsh <https://gitlab.onelab.info/gmsh/gmsh/-/wikis/Gmsh-compilation/>`_  to use the Gmsh-Python-API
 2. `meshio <https://github.com/nschloe/meshio/>`_  for the conversion of meshes to various output formats
@@ -65,7 +65,7 @@ inclusions of radius 1, simply type:
 .. code-block:: python
 
    # import required model type
-   import gmshModel.typeRandomInclusionRVE as RVE
+   import gmshModel.Model.RandomInclusionRVE.RandomInclusionRVE as RVE
 
    # initialize new RVE
    myRVE=RVE(size=[20,20,20], inclusionType="Sphere", inclusionSets=[1, 200])
@@ -88,14 +88,11 @@ inclusions of radius 1, simply type:
 
 Documentation
 *************
-The documentation of GmshModel is generated using `sphinx <https://www.sphinx-doc.org/en/master/>`_. 
-To see  information and links to the source code for the individual classes, click one of the following
-links.
 
 .. toctree::
-  :maxdepth: 2
-   
-  gmshModel/index
+   :maxdepth: 1
+
+   gmshModel/index
 
 
 License

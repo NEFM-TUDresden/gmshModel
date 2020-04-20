@@ -57,10 +57,10 @@ Getting Started
 
 
 .. image:: docs/images/RVE200SpheresGeo.png
-    :width: 49%
+    :width: 300px
     :alt: 200SpheresGeo
 .. image:: docs/images/RVE200SpheresMesh.png
-    :width: 49%
+    :width: 300px
     :alt: 200SpheresMesh
 
 To generate the above periodic box in a ``[20x20x20]`` domain which contains 200 spherical 

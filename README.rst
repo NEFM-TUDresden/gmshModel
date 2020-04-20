@@ -49,7 +49,11 @@ If the visualization functionality is not required and meshes exported in the
 Gmsh-internal ``.msh`` format are sufficient, a working installation of Gmsh and
 its Python-API is enough.
 
-To install GmshModel
+To install GmshModel, download the source files and use the following command:
+
+.. code-block:: python
+
+   pip install <path-to-source-files>
 
 
 Getting Started
@@ -88,12 +92,7 @@ inclusions of radius 1, simply type:
 
 Documentation
 *************
-
-.. toctree::
-   :maxdepth: 1
-
-   gmshModel/index
-
+Refer to the `documentation <https://gmshmodel.readthedocs.io/>`_ for detailed usage and implementation details.
 
 License
 *******

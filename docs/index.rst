@@ -48,7 +48,11 @@ If the visualization functionality is not required and meshes exported in the
 Gmsh-internal ``.msh`` format are sufficient, a working installation of Gmsh and
 its Python-API is enough.
 
-To install GmshModel
+To install GmshModel, download the source files and use the following command:
+
+.. code-block:: python
+
+   pip install <path-to-source-files>
 
 
 Getting Started
@@ -91,13 +95,17 @@ inclusions of radius 1, simply type:
 Documentation
 *************
 
+Here, you can find a detailed documentation on GmshModel, its classes and methods 
+as well as its usage with the help of minimal working examples.
+
+* The :ref:`api_ref` shows the structure of GmshModel
+* The :ref:`examples_ref` show the usage of GmshModel
+
+
 .. toctree::
-   :maxdepth: 1
+   :hidden:
+   :maxdepth: 2
 
    gmshModel/index
-
-
-License
-*******
-GmshModel is published under the `MIT-License <https://opensource.org/licenses/MIT/>`_
+   examples/index
 

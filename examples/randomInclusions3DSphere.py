@@ -12,7 +12,7 @@
 # Loading of the RandomInclusionRVE class
 # Before the model and mesh generation can start, the required class has to be
 # loaded. In this case it is the class RandomInclusionRVE
-from ..src.typeRandomInclusionRVE import RandomInclusionRVE
+from gmshModel.Model.RandomInclusionRVE import RandomInclusionRVE
 
 
 # Initialization of the RVE
@@ -22,24 +22,24 @@ from ..src.typeRandomInclusionRVE import RandomInclusionRVE
 #
 # size: list/array (mandatory)
 #   array defining the size of the RVE in the individual directions
-#   size=[L_x, L_y, L_z]
+#   -> size=[L_x, L_y, L_z]
 #
 # inclusionSets: list/array (mandatory)
 #   array defining the relevant information (radius and amount) for the individual
 #   groups of spherical inclusions to be placed
-#   inclusionSets=[[r_1, n_1] [r_2, n_2], ..., [r_n, n_n]]
+#   -> inclusionSets=[[r_1, n_1] [r_2, n_2], ..., [r_n, n_n]]
 #
 # inclusionType: string (mandatory)
 #   string defining the type of inclusions within the RVE
 #
 # origin: list/array (optional)
 #   array defining the origin of the RVE
-#   origin=[O_x, O_y, O_z]
+#   -> origin=[O_x, O_y, O_z]
 #
 # periodicityFlags: list/array (optional)
 #   array with flags (0/1) whether the current coordinate direction has to be
 #   treated as periodic
-#   periodicityFlags=[0/1, 0/1, 0/1]
+#   -> periodicityFlags=[0/1, 0/1, 0/1]
 #
 # domainGroup: string (optional)
 #   string defining which group the geometric objects defining the domain belong

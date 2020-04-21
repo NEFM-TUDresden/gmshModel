@@ -12,7 +12,7 @@
 # Loading of the RandomInclusionRVE class
 # Before the model and mesh generation can start, the required class has to be
 # loaded. In this case it is the class RandomInclusionRVE
-from ..src.typeRandomInclusionRVE import RandomInclusionRVE
+from gmshModel.Model.RandomInclusionRVE import RandomInclusionRVE
 
 
 # Initialization of the RVE

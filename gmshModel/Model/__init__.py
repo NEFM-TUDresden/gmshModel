@@ -1,4 +1,11 @@
 ################################################################################
 #                        __INIT__.PY FOR MODEL FOLDER                          #
 ################################################################################
-# So far, there is nothing to do here
+
+# import modules
+from . import (
+    GenericModel,
+    GenericRVE,
+    InclusionRVE,
+    RandomInclusionRVE,
+)

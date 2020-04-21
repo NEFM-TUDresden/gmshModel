@@ -20,8 +20,7 @@ __all__=["Geometry",
          "Visualization",
          "__version__"]
 
-# import gmsh and define default Gmsh configuration changes
-import gmsh
+# define default Gmsh configuration changes
 DEFAULT_GMSH_CONFIG_CHANGES={
     "General.Terminal": 0,                                                      # deactivate console output by default (only activated for mesh generation)
     "Mesh.CharacteristicLengthExtendFromBoundary": 0,                           # do not calculate mesh sizes from the boundary by default (since mesh sizes are specified by fields)

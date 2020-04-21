@@ -1,4 +1,9 @@
 ################################################################################
 #                   __INIT__.PY FOR VISUALIZATION FOLDER                       #
 ################################################################################
-# So far, there is nothing to do here
+
+# import modules
+from . import (
+    GeometryVisualization,
+    MeshVisualization,
+)

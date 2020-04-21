@@ -53,7 +53,7 @@ class GenericRVE(GenericModel):
     #########################
     # Initialization method #
     #########################
-    def __init__(self,size=None,origin=[0,0,0],periodicityFlags=[1,1,1],gmshConfig={}):
+    def __init__(self,size=None,origin=[0,0,0],periodicityFlags=[1,1,1],gmshConfigChanges={}):
         """Initialization method for box-shaped RVE models
 
         Parameters:
@@ -70,7 +70,7 @@ class GenericRVE(GenericModel):
             flags indicating the periodic axes of the box-shaped RVE model
             -> periodicityFlags=[0/1, 0/1, 0/1]
 
-        gmshConfig: dict
+        gmshConfigChanges: dict
             dictionary for user updates of the default Gmsh configuration
         """
         # plausibility checks for input variables:
@@ -99,7 +99,7 @@ class GenericRVE(GenericModel):
             origin=newOrigin                                                    # -> overwrite origin with new array
 
         # initialize parent (GenericModel) class attributes and methods
-        super().__init__(dimension=dimension,gmshConfig=gmshConfig)
+        super().__init__(dimension=dimension,gmshConfigChanges=gmshConfigChanges)
 
         # initialize attributes that all instances of GenericRVE should have
         self.origin=origin                                                      # initialize unset RVE origin
@@ -137,7 +137,7 @@ class GenericRVE(GenericModel):
         sides of the RVE boundary"""
         # calculate required information from the RVE data
         bboxRVE=np.r_[[self.origin], [self.origin+self.size]]                   # bounding box of the RVE: bboxRVE=[[minBBoxPoint],[maxBBoxPoint]]
-        tol=100*self.gmshConfiguration["Geometry.Tolerance"]                    # tolerance for entity detection
+        tol=100*self.getGmshOption("Geometry.Tolerance")                        # tolerance for entity detection
 
         # calculate translation vector and affine transformation matrix
         transVec=np.zeros((3,1))                                                # initialize translation vector for the current pair of boundary entities

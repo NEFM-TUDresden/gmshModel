@@ -65,13 +65,13 @@ class InclusionRVE(GenericRVE):
         array containing relevant inclusion information (center, radius) for
         distance calculations
 
-    gmshConfig: dict
+    gmshConfigChanges: dict
         dictionary for user updates of the default Gmsh configuration
     """
     #########################
     # Initialization method #
     #########################
-    def __init__(self,size=None,inclusionType=None,inclusionAxis=None,origin=[0,0,0],periodicityFlags=[1,1,1],gmshConfig={}):
+    def __init__(self,size=None,inclusionType=None,inclusionAxis=None,origin=[0,0,0],periodicityFlags=[1,1,1],gmshConfigChanges={}):
         """Initialization method for InclusionRVE objects
 
         Parameters:
@@ -97,12 +97,12 @@ class InclusionRVE(GenericRVE):
             flags indicating the periodic axes of the box-shaped RVE model
             -> periodicityFlags=[0/1, 0/1, 0/1]
 
-        gmshConfig: dict
+        gmshConfigChanges: dict
             dictionary for user updates of the default Gmsh configuration
         """
 
         # initialize parents classes attributes and methods
-        super().__init__(size=size,origin=origin,periodicityFlags=periodicityFlags,gmshConfig=gmshConfig)
+        super().__init__(size=size,origin=origin,periodicityFlags=periodicityFlags,gmshConfigChanges=gmshConfigChanges)
 
         # plausibility checks for additional input variables
         if inclusionType is None:
@@ -380,7 +380,7 @@ class InclusionRVE(GenericRVE):
     def _calculateMaxMeshSize(self):
         """Internal method to calculate the maximum mesh size"""
         if self.size is None:                                                   # RVE size has not been set
-            return self.__getGmshOption("Mesh.CharacteristicLengthMax")         # -> use Gmsh default setting of maximum mesh size
+            return self.getGmshOption("Mesh.CharacteristicLengthMax")           # -> use Gmsh default setting of maximum mesh size
         else:                                                                   # RVE size is set
             return np.amax(self.size)/10                                        # -> ensure at least 10 elements along the longest edge of the RVE
 

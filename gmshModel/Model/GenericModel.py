@@ -69,13 +69,10 @@ class GenericModel:
     dimension: int
         dimension of the model instance
 
-    gmshConfig: dict
-        dictionary storing the user-defined geometry configuration which is used
-        to update the default configuration
     modelName: string
         name of the Gmsh model and default name for all resulting files
 
-    gmshConfig: dict
+    gmshConfigChanges: dict
         dictionary for user updates of the default Gmsh configuration
 
     geometricObjects: list
@@ -105,7 +102,7 @@ class GenericModel:
     #########################
     # Initialization method #
     #########################
-    def __init__(self,dimension=None,gmshConfig={}):
+    def __init__(self,dimension=None,gmshConfigChanges={}):
         """Initialization method of a generic GmshModel object
 
         Parameters:
@@ -113,7 +110,7 @@ class GenericModel:
         dimension: int
             dimension of the model instance
 
-        gmshConfig: dict
+        gmshConfigChanges: dict
             dictionary for user updates of the default Gmsh configuration
         """
         # set unique model name
@@ -127,31 +124,9 @@ class GenericModel:
             "Misc": ".txt"                                                      # use ".txt" as default extension for miscellaneous information
         }
 
-        # initialize default Gmsh configuration
-        self.gmshConfiguration={
-            "General.Terminal": 0,                                              # deactivate console output by default (only activated for mesh generation)
-            "General.NumThreads": 1,                                            # use one thrad for the Gmsh-Python-API by default (multithreading only possible if compiled with OPENMP Flag)
-            "Geometry.Tolerance": 1e-08,                                        # geometrical tolerance
-            "Mesh.Binary": 0,                                                   # disable generation of binary meshes by default (FEMatlab Code compatability)
-            "Mesh.Format": 10,                                                  # set mesh file format to "auto" (determined from file extension)
-            "Mesh.MshFileVersion": 2,                                           # use Gmsh MeshFileVersion 2 by default (FEMatlab Code compatability)
-            "Mesh.Algorithm": 6,                                                # use Frontal-Delauney algorithm for 2D meshing by default
-            "Mesh.Algorithm3D": 1,                                              # use Delauney algorithm for 3D meshing by default
-            "Mesh.CharacteristicLengthExtendFromBoundary": 0,                   # do not calculate mesh sizes from the boundary by default (since mesh sizes are specified by fields)
-            "Mesh.CharacteristicLengthFromCurvature": 0,                        # do not calculate mesh sizes from curvature by default (since mesh sizes are specified by fields)
-            "Mesh.CharacteristicLengthFromPoints": 0,                           # do not calculate mesh sizes from points by default
-            "Mesh.CharacteristicLengthMin": 0,                                  # do not restrict the minimum mesh size
-            "Mesh.CharacteristicLengthMax": 1e22,                               # do not restrict the maximum mesh size
-            "Mesh.ElementOrder": 1,                                             # use linear elements by default
-            "Mesh.MinimumCirclePoints": 7,                                      # define default number of circle points used for calculation of element sizes from curvature
-            "Mesh.MaxNumThreads1D": 1,                                          # use one thrad for 1D meshing by default (multithreading only possible if compiled with OPENMP Flag)
-            "Mesh.MaxNumThreads2D": 1,                                          # use one thrad for 2D meshing by default (multithreading only possible if compiled with OPENMP Flag)
-            "Mesh.MaxNumThreads3D": 1,                                          # use one thrad for 3D meshing by default (multithreading only possible if compiled with OPENMP Flag)
-            "Mesh.OptimizeThreshold": 0.3,                                      # optimize mesh until no elements with a Jacobian smaller the 0.3 are found
-        }
-
         # initialize Gmsh-Python-API
-        self.gmshAPI=self.initializeGmsh(gmshConfig)                            # this assignment facilitates the usage of all methods provided by the gmsh.model class
+        self.gmshConfigChanges=DEFAULT_GMSH_CONFIG_CHANGES                      # initialize default Gmsh configuration changes
+        self.gmshAPI=self.initializeGmsh(gmshConfigChanges)                     # this assignment facilitates the usage of all methods provided by the gmsh.model class
 
         # initialize attributes that all instances of GenericModel should have
         self.dimension=dimension                                                # set (highest) dimension of the model
@@ -170,18 +145,18 @@ class GenericModel:
     ############################################
     # Method to initialize the Gmsh-Python-API #
     ############################################
-    def initializeGmsh(self,gmshConfig={}):
+    def initializeGmsh(self,gmshConfigChanges={}):
         """Gmsh initialization method
 
         This method initializes the Gmsh-Python-API and adds it to the GmshModel
 
         Parameters:
         -----------
-        gmshConfig: dict
+        gmshConfigChanges: dict
             dictionary with Gmsh configuration options that have to be set
         """
         gmsh.initialize('',False)                                               # initialize Gmsh Python-API without using local .gmshrc configuration file
-        self.updateGmshConfiguration(gmshConfig)                                # update default configuration with user updates and set the options
+        self.updateGmshConfiguration(gmshConfigChanges)                         # update default configuration with user updates and set the options
         gmshAPI=gmsh.model                                                      # define gmshAPI as the model class of the Gmsh-Python-API (contains only static methods -> no instance required)
 
         gmshAPI.add(self.modelName)                                             # add new model to the gmshAPI
@@ -226,7 +201,7 @@ class GenericModel:
     ####################################################################
     # Method to calculate refinement information and generate the mesh #
     ####################################################################
-    def createMesh(self,refinementOptions={}):
+    def createMesh(self,threads=None,refinementOptions={}):
         """Method to generate the model mesh
 
         This method contains the basic mesh generation steps for a Gmsh model:
@@ -236,9 +211,17 @@ class GenericModel:
 
         Parameters:
         -----------
+        threads: int
+            number of threads to use for the mesh generation
         refinementOptions: dict
             dictionary with user-defined options for the refinement field calculations
         """
+
+        if threads is not None:                                                 # set number of threads in Gmsh
+            self.updateGmshConfiguration({"Mesh.MaxNumThreads1D": threads,
+                                          "Mesh.MaxNumThreads2D": threads,
+                                          "Mesh.MaxNumThreads3D": threads})
+
         # deine refinement information and add them to the Gmsh model
         self.defineRefinementFields(refinementOptions=refinementOptions)        # placeholder method: has to be specified/overwritten for the individual models
         self.addRefinementFieldsToGmshModel()                                   # use Gmsh-API to add defined fields to the Gmsh model
@@ -308,16 +291,12 @@ class GenericModel:
             gmsh.write(fileDir+"/"+fileName+fileExt)                            # -> save mesh using built-in gmsh.write method
         elif MESHIO_AVAILABLE:                                                  # file extension is different from ".msh" and meshio is available
             if fileExt in SUPPORTED_MESH_FORMATS:                               # -> check if file extension is supported by meshio
-                with tf.TemporaryDirectory() as tmpDir:                         # ->-> create temporary file
-                    tmpFile=tmpDir+"/"+self.modelName+".msh"
-                    currentOpts={                                               # ->-> get current mesh file version and flag for binary output from Gmsh configuration
-                        "Mesh.Binary": self.gmshConfiguration["Mesh.Binary"],
-                        "Mesh.MshFileVersion": self.gmshConfiguration["Mesh.MshFileVersion"]
-                    }
-                    self.updateGmshConfiguration({"Mesh.Binary": 1,             # ->-> temporarily update Gmsh configuration to use binary output
-                                                  "Mesh.MshFileVersion": 4.1})  # ->-> temporarily update Gmsh configuration to use latest mesh file version
+                with tf.TemporaryDirectory() as tmpDir:                         # ->-> create temporary directory
+                    tmpFile=tmpDir+"/"+self.modelName+".msh"                    # ->-> create temporary file
+                    gmshBinaryConfig=self.getGmshOption("Mesh.Binary")          # ->-> get Gmsh configuration for binary mesh export
+                    self.setGmshOption("Mesh.Binary",1)                         # ->-> temporarily activate binary mesh export (reduce file size, increase speed)
                     gmsh.write(tmpFile)                                         # ->-> use built-in gmsh.write method to generate binary mesh in temporary folder
-                    self.updateGmshConfiguration(currentOpts)                   # ->-> reset gmsh configuration
+                    self.setGmshOption("Mesh.Binary",gmshBinaryConfig)          # ->-> reset Gmsh configuration
                     self._convertMesh(tmpFile,fileDir+"/"+fileName+fileExt)     # ->-> convert mesh to required file format
             else:                                                               # raise error if mesh file format is not supported by meshio
                 raise ValueError("Unknown mesh file extension {}. The output mesh format must be supported by the meshio library.".format(fileExt))
@@ -522,8 +501,8 @@ class GenericModel:
         configurationUpdate: dict
             dictionary of configuration options to be updated
         """
-        self.gmshConfiguration.update(configurationUpdate)                      # update stored Gmsh configuration
-        for optionName, optionValue in self.gmshConfiguration.items():          # loop over all configuration settings
+        self.gmshConfigChanges.update(configurationUpdate)                      # update stored Gmsh configuration
+        for optionName, optionValue in self.gmshConfigChanges.items():          # loop over all configuration settings
             self.setGmshOption(optionName=optionName,optionValue=optionValue)   # -> activate changed configuration
 
 

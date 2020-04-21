@@ -14,7 +14,15 @@ from . import (
     Visualization,
 )
 
+# decide what happens for "from gmshModel import *"
 __all__=["Geometry",
          "Model",
          "Visualization",
          "__version__"]
+
+# import gmsh and define default Gmsh configuration changes
+import gmsh
+DEFAULT_GMSH_CONFIG_CHANGES={
+    "General.Terminal": 0,                                                      # deactivate console output by default (only activated for mesh generation)
+    "Mesh.CharacteristicLengthExtendFromBoundary": 0,                           # do not calculate mesh sizes from the boundary by default (since mesh sizes are specified by fields)
+}

@@ -49,7 +49,7 @@ from gmshModel.Model.RandomInclusionRVE import RandomInclusionRVE
 #   string defining which group the geometric objects defining the inclusions
 #   belong to (to reference this group within boolean operations)
 #
-# gmshConfig: dict (optional)
+# gmshConfigChanges: dict (optional)
 #   dictionary for user updates of the default Gmsh configuration
 #
 initParameters={                                                                # save all possible parameters in one dict to facilitate the method call
@@ -60,25 +60,8 @@ initParameters={                                                                
     "periodicityFlags": [1, 1, 1],                                              # define all axis directions as periodic
     "domainGroup": "domain",                                                    # use "domain" as name for the domainGroup
     "inclusionGroup": "inclusions",                                             # use "inclusions" as name for the inclusionGroup
-    "gmshConfig": {"General.Terminal": 0,                                       # deactivate console output by default (only activated for mesh generation)
-                   "General.NumThreads": 1,                                     # use one thrad for the Gmsh-Python-API by default (multithreading only possible if compiled with OPENMP Flag)
-                   "Geometry.Tolerance": 1e-08,                                 # geometrical tolerance
-                   "Mesh.Binary": 0,                                            # disable generation of binary meshes by default (FEMatlab Code compatability)
-                   "Mesh.Format": 10,                                           # set mesh file format to "auto" (determined from file extension)
-                   "Mesh.MshFileVersion": 2,                                    # use Gmsh MeshFileVersion 2 by default (FEMatlab Code compatability)
-                   "Mesh.Algorithm": 6,                                         # use Frontal-Delauney algorithm for 2D meshing by default
-                   "Mesh.Algorithm3D": 1,                                       # use Delauney algorithm for 3D meshing by default
-                   "Mesh.CharacteristicLengthExtendFromBoundary": 0,            # do not calculate mesh sizes from the boundary by default (since mesh sizes are specified by fields)
-                   "Mesh.CharacteristicLengthFromCurvature": 0,                 # do not calculate mesh sizes from curvature by default (since mesh sizes are specified by fields)
-                   "Mesh.CharacteristicLengthFromPoints": 0,                    # do not calculate mesh sizes from points by default
-                   "Mesh.CharacteristicLengthMin": 0,                           # do not restrict the minimum mesh size
-                   "Mesh.CharacteristicLengthMax": 1e22,                        # do not restrict the maximum mesh size
-                   "Mesh.ElementOrder": 1,                                      # use linear elements by default
-                   "Mesh.MinimumCirclePoints": 7,                               # define default number of circle points used for calculation of element sizes from curvature
-                   "Mesh.MaxNumThreads1D": 1,                                   # use one thrad for 1D meshing by default (multithreading only possible if compiled with OPENMP Flag)
-                   "Mesh.MaxNumThreads2D": 1,                                   # use one thrad for 2D meshing by default (multithreading only possible if compiled with OPENMP Flag)
-                   "Mesh.MaxNumThreads3D": 1,                                   # use one thrad for 3D meshing by default (multithreading only possible if compiled with OPENMP Flag)
-                   "Mesh.OptimizeThreshold": 0.3,                               # optimize mesh until no elements with a Jacobian smaller the 0.3 are found
+    "gmshConfigChanges": {"General.Terminal": 0,                                # deactivate console output by default (only activated for mesh generation)
+                          "Mesh.CharacteristicLengthExtendFromBoundary": 0,     # do not calculate mesh sizes from the boundary by default (since mesh sizes are specified by fields)
     }
 }
 testRVE=RandomInclusionRVE(**initParameters)
@@ -109,10 +92,13 @@ testRVE.createGmshModel(**modelingParameters)
 # within the model have to be calculated and added to the Gmsh model. Once, the
 # mesh sizes are specified,the mesh can be generated. Available parameters are:
 #
+# threads: int
+#   number of threads to use for the meshing procedure
 # refinementOptions: dict (optional)
 #   dictionary containing user updates for the refinement field calculation
 #
 meshingParameters={                                                             # save all possible parameters in one dict to facilitate the method call
+    "threads": None,                                                            # do not activate parallel meshing by default
     "refinementOptions": {"maxMeshSize": "auto",                                # automatically calculate maximum mesh size with built-in method
                           "inclusionRefinement": True,                          # flag to indicate active refinement of inclusions
                           "interInclusionRefinement": True,                     # flag to indicate active refinement of space between inclusions (inter-inclusion refinement)

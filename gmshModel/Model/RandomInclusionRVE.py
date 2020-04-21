@@ -75,13 +75,13 @@ class RandomInclusionRVE(InclusionRVE):
     inclusionGroup: string
         name of the group the inclusions should belong to
 
-    gmshConfig: dict
+    gmshConfigChanges: dict
         dictionary for user updates of the default Gmsh configuration
     """
     #########################
     # Initialization method #
     #########################
-    def __init__(self,inclusionSets=None,size=None,inclusionType=None,inclusionAxis=None,origin=[0,0,0],periodicityFlags=[1,1,1],domainGroup="domain",inclusionGroup="inclusions",gmshConfig={}):
+    def __init__(self,inclusionSets=None,size=None,inclusionType=None,inclusionAxis=None,origin=[0,0,0],periodicityFlags=[1,1,1],domainGroup="domain",inclusionGroup="inclusions",gmshConfigChanges={}):
         """Initialization method for RandomInclusionRVE object instances
 
         Parameters:
@@ -125,11 +125,11 @@ class RandomInclusionRVE(InclusionRVE):
         inclusionGroup: string
             name of the group the inclusions should belong to
 
-        gmshConfig: dict
+        gmshConfigChanges: dict
             dictionary for user updates of the default Gmsh configuration
         """
         # initialize parents classes attributes and methods
-        super().__init__(size=size,inclusionType=inclusionType,inclusionAxis=inclusionAxis,origin=origin,periodicityFlags=periodicityFlags,gmshConfig=gmshConfig)
+        super().__init__(size=size,inclusionType=inclusionType,inclusionAxis=inclusionAxis,origin=origin,periodicityFlags=periodicityFlags,gmshConfigChanges=gmshConfigChanges)
 
         # plausibility checks for input variables
         if inclusionSets is None:

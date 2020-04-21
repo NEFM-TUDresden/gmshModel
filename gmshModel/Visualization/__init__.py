@@ -3,7 +3,5 @@
 ################################################################################
 
 # import modules
-from . import (
-    GeometryVisualization,
-    MeshVisualization,
-)
+from .GeometryVisualization import GeometryVisualization
+from .MeshVisualization import MeshVisualization

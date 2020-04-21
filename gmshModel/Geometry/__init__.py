@@ -3,7 +3,4 @@
 ################################################################################
 
 # import modules
-from . import (
-    GeometricObjects,
-    DistanceCalculations,
-)
+from .GeometricObjects import GeometricObjects

@@ -3,9 +3,7 @@
 ################################################################################
 
 # import modules
-from . import (
-    GenericModel,
-    GenericRVE,
-    InclusionRVE,
-    RandomInclusionRVE,
-)
+from .GenericModel import GenericModel
+from .GenericRVE import GenericRVE
+from .InclusionRVE import InclusionRVE
+from .RandomInclusionRVE import RandomInclusionRVE

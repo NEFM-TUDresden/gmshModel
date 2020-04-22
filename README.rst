@@ -5,15 +5,15 @@
 
 gmshModel
 =========
-`Gmsh <https://gmsh.info/>`_ is a powerful tool for the generation of meshes for 
+`Gmsh <https://gmsh.info/>`_ is a powerful tool for the generation of meshes for
 numerical simulations but the built-in scripting language makes the meshing
-procedure and especially an automatization really hard. Luckily, Gmsh provides 
+procedure and especially an automatization really hard. Luckily, Gmsh provides
 a Python-API with which all the capabilites of Gmsh can be used within Python.
 
-GmshModel is intended to be an extendable tool that facilitates the mesh generation 
-by interfacing the Gmsh-Python-API: it provides a basic framework for an automated  
+GmshModel is intended to be an extendable tool that facilitates the mesh generation
+by interfacing the Gmsh-Python-API: it provides a basic framework for an automated
 mesh generation for self-defined model types and, with that, allows to automate the
-generation of complex models as, e.g., representative volume elements. To this 
+generation of complex models as, e.g., representative volume elements. To this
 end, GmshModel divides the mesh modeling procedure into basic steps:
 
 1. Setting up a geometry using basic geometric entities and boolean operations.
@@ -22,10 +22,10 @@ end, GmshModel divides the mesh modeling procedure into basic steps:
 4. Saving the mesh to various output formats.
 5. Visualizing the resulting mesh.
 
-So far, gmshModel is especially designed to automate the generation of representative 
-volume elements that contain multiple inclusion objects. An extension of gmshModel 
+So far, gmshModel is especially designed to automate the generation of representative
+volume elements that contain multiple inclusion objects. An extension of gmshModel
 should is however possible by adding new geometric objects and model types to the
-framework. 
+framework.
 
 It is not the purpose of GmshModel to replace the Gmsh scripting language or other
 great tools such as `pygmsh <https://github.com/nschloe/pygmsh>`_  for the generation
@@ -45,17 +45,17 @@ software packages are required:
 3. `pyvista <https://www.pyvista.org/>`_ for the visualization of meshes
 4. `pythonocc <https://github.com/tpaviot/pythonocc-core/>`_ for the visualization of the model geometry
 
-If the visualization functionality is not required and meshes exported in the 
+If the visualization functionality is not required and meshes exported in the
 Gmsh-internal ``.msh`` format are sufficient, a working installation of Gmsh and
 its Python-API is enough.
 
 To install gmshModel via PyPi, just do
 
 .. code-block:: python
-  
+
   # install basic gmshModel
   pip install gmshModel
-  
+
   # install gmshModel with additional export and visualization features
   pip install gmshModel[all]
 
@@ -63,11 +63,19 @@ To install gmshModel via PyPi, just do
 Getting Started
 ***************
 
-.. raw:: html
+.. image:: docs/images/RVE200SpheresGeo.png
+   :alt: Sample Geometry
+   :align: left
+   :width: 45%
+
+.. image:: docs/images/RVE200SpheresMesh.png
+:alt: Sample Mesh
+:align: right
+:width: 45%
 
     <div><img src="https://github.com/NEFM-TUDresden/GmshModel/blob/master/docs/images/RVE200SpheresGeo.png" width="45%"><img src="https://github.com/NEFM-TUDresden/GmshModel/blob/master/docs/images/RVE200SpheresMesh.png" width="45%"></div>
-    
-To generate the above periodic box in a ``[20x20x20]`` domain which contains ``200`` spherical 
+
+To generate the above periodic box in a ``[20x20x20]`` domain which contains ``200`` spherical
 inclusions of radius ``1``, simply type:
 
 .. code-block:: python
@@ -103,5 +111,3 @@ The gmshModel documentation is available `here <https://gmshmodel.readthedocs.io
 License
 *******
 GmshModel is published under the `MIT-License <https://opensource.org/licenses/MIT/>`_
-
-

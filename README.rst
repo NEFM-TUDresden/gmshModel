@@ -97,14 +97,7 @@ inclusions of radius ``1``, simply type:
 Documentation
 *************
 
-The gmshModel documentation is available `here https://gmshmodel.readthedocs.io/en/latest/>`_.
-
-.. toctree::
-   :hidden:
-   :maxdepth: 2
-
-   gmshModel/index
-   examples/index
+The gmshModel documentation is available `here <https://gmshmodel.readthedocs.io/en/latest/>`_.
 
 
 License

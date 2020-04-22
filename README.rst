@@ -69,9 +69,9 @@ Getting Started
    :width: 45%
 
 .. image:: docs/images/RVE200SpheresMesh.png
-:alt: Sample Mesh
-:align: right
-:width: 45%
+   :alt: Sample Mesh
+   :align: right
+   :width: 45%
 
     <div><img src="https://github.com/NEFM-TUDresden/GmshModel/blob/master/docs/images/RVE200SpheresGeo.png" width="45%"><img src="https://github.com/NEFM-TUDresden/GmshModel/blob/master/docs/images/RVE200SpheresMesh.png" width="45%"></div>
 

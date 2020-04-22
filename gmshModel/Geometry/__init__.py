@@ -3,4 +3,11 @@
 ################################################################################
 
 # import modules
-from .GeometricObjects import GeometricObjects
+from .GeometricObjects import (
+    GeometricObject,
+    Box,
+    Rectangle,
+    Sphere,
+    Cylinder,
+    Circle,
+)

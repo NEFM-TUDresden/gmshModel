@@ -59,10 +59,10 @@ means that, if they were not passed, the resulting mesh would be the same.
    #   dictionary for user updates of the default Gmsh configuration
    #
    initParameters={                                                                # save all possible parameters in one dict to facilitate the method call
-       "inclusionSets": [1, 10],                                                   # place 10 inclusions with radius 1
+       "inclusionSets": [1, 13],                                                   # place 13 inclusions with radius 1
        "inclusionType": "Cylinder",                                                # define inclusionType as "Cylinder"
-       "inclusionAxis": [0, 0, 1],                                                 # define inclusionAxis direction
-       "size": [10, 10, 10],                                                       # set RVE size to [10,10,10]
+       "inclusionAxis": [0, 0, 2.5],                                               # define inclusionAxis direction
+       "size": [10, 10, 2.5],                                                      # set RVE size to [10,10,2.5]
        "origin": [0, 0, 0],                                                        # set RVE origin to [0,0,0]
        "periodicityFlags": [1, 1, 1],                                              # define all axis directions as periodic
        "domainGroup": "domain",                                                    # use "domain" as name for the domainGroup

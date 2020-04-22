@@ -605,7 +605,7 @@ class GenericModel:
         -----------
         objClass: class
             class the geometric object is defined in
-        **objData: keyworded object data
+        objData: keyworded object data
             enumeration of keyworded arguments needed for the creation of the
             new geometric object of class objectClass
         """

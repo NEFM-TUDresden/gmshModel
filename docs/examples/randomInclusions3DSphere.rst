@@ -55,9 +55,9 @@ means that, if they were not passed, the resulting mesh would be the same.
    #   dictionary for user updates of the default Gmsh configuration
    #
    initParameters={                                                                # save all possible parameters in one dict to facilitate the method call
-       "inclusionSets": [1, 10],                                                   # place 10 inclusions with radius 1
+       "inclusionSets": [1, 12],                                                   # place 12 inclusions with radius 1
        "inclusionType": "Sphere",                                                  # define inclusionType as "Sphere"
-       "size": [10, 10, 10],                                                       # set RVE size to [10,10,10]
+       "size": [6, 6, 6],                                                          # set RVE size to [6,6,6]
        "origin": [0, 0, 0],                                                        # set RVE origin to [0,0,0]
        "periodicityFlags": [1, 1, 1],                                              # define all axis directions as periodic
        "domainGroup": "domain",                                                    # use "domain" as name for the domainGroup

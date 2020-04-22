@@ -21,7 +21,6 @@ import numpy as np                                                              
 import pickle                                                                   # pickle for saving and loading of gmshModels
 import logging                                                                  # logging for log messages
 logger=logging.getLogger(__name__)                                              # set logger
-import pdb                                                                      # pdb for debugging
 
 # additional program libraries
 import gmsh                                                                     # Gmsh Python-API

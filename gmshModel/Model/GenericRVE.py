@@ -15,7 +15,6 @@
 # Standard Python libraries
 import numpy as np                                                              # numpy for array computations
 import copy as cp                                                               # copy for deepcopies of arrays
-import pdb                                                                      # pdb for debugging
 
 # self-defined class definitions and modules
 from .GenericModel import GenericModel                                          # generic model class definition (parent class)
@@ -152,6 +151,7 @@ class GenericRVE(GenericModel):
             bboxBnd=cp.deepcopy(bboxRVE)                                        # -> initialze bounding box for the current boundary as copy of bboxRVE
             bboxBnd[1-iSide,axis]=bboxRVE[iSide,axis]                           # -> modify the coordinate of the relevant dimension to match the boundary under consideration
             bboxBnd=bboxBnd+np.array([[-tol],[tol]])                            # -> add tolerances to the bounding box
+
 
             # find entities on boundary under consideration
             entityTags=self.getIDsFromTags(self.gmshAPI.getEntitiesInBoundingBox(*bboxBnd[0], *bboxBnd[1], self.dimension-1))

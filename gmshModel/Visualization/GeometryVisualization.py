@@ -13,7 +13,6 @@ import numpy as np                                                              
 import tempfile as tf                                                           # tempfile for temporary files and folders
 import logging                                                                  # logging for ẃarning messages
 logger=logging.getLogger(__name__)                                              # -> set logger
-# import pdb                                                                      # pdb for debugging
 
 # additional program libraries
 try:                                                                            # try import of pythonocc library

@@ -1,6 +1,5 @@
 import setuptools
 import os
-import pdb
 
 # get required information from package
 packageName="gmshModel"                                                         # name of the package
@@ -18,6 +17,11 @@ with open("README.rst", "r") as fileHandle:                                     
 
 # set install_requires
 installRequires=["numpy"]
+
+# set extras_require
+extrasRequire={
+        "all": ["meshio>= 4", "pyvista>= 0.24.1"]
+    }
 
 # setup
 setuptools.setup(
@@ -42,7 +46,5 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     python_requires='>=3.5, <3.8',
     install_requires=installRequires,
-    extras_require={
-        "all": ["meshio>= 4", "pyvista>= 0.24"]
-    },
+    extras_require=extrasRequire,
 )

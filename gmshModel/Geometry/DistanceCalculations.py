@@ -1,5 +1,5 @@
 import numpy as np
-import pdb
+
 
 def distancePointPoint(P1,P2):
     """Calculate the distance between to points P1 and P2"""

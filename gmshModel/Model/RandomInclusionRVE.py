@@ -14,7 +14,6 @@
 # Standard Python libraries
 import numpy as np                                                              # numpy for fast array computations
 import copy as cp                                                               # copy  for deepcopies
-# import pdb                                                                      # pdb for debugging
 
 # self defined class definitions and modules
 from .InclusionRVE import InclusionRVE                                          # generic RVE class definition (parent class)

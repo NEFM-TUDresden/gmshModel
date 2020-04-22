@@ -14,7 +14,6 @@ import copy as cp                                                               
 import tempfile as tf                                                           # tempfile for temporary files and folders
 import logging                                                                  # logging for warning messages
 logger=logging.getLogger(__name__)                                              # -> set logger
-# import pdb                                                                      # pdb for debugging
 
 # additional program libraries
 try:                                                                            # try import of pyvista library
@@ -95,28 +94,28 @@ class MeshVisualization():
         self.model=model
 
         # set plotting theme
-        pv.set_plot_theme("paraview")                                       # use Paraview style for plotting
+        pv.set_plot_theme("paraview")                                           # use Paraview style for plotting
 
         # get necessary model information for the default configuration
         physicalIDs=model.getIDsFromTags(model.gmshAPI.getPhysicalGroups(dim=model.dimension))  # get group IDs for physical groups of the highest dimension
-        modelBBox=model._getGmshModelBoundingBox()                          # get the overall bounding box of the Gmsh model
+        modelBBox=model._getGmshModelBoundingBox()                              # get the overall bounding box of the Gmsh model
 
         # define settings
         self.defaultSettings={
-                "lowerThreshold": min(physicalIDs),                         # set lower threshold value to minimum value of active scalar field
-                "upperThreshold": max(physicalIDs),                         # set upper threshold value to minimum value of active scalar field
-                "boxBounds": modelBBox.T.reshape(6)                         # define bounds of extraction box to match bounds of the model (factor 1.25 will be applied automatically)
+                "lowerThreshold": min(physicalIDs),                             # set lower threshold value to minimum value of active scalar field
+                "upperThreshold": max(physicalIDs),                             # set upper threshold value to minimum value of active scalar field
+                "boxBounds": modelBBox.T.reshape(6)                             # define bounds of extraction box to match bounds of the model (factor 1.25 will be applied automatically)
         }
-        self.currentSettings=cp.deepcopy(self.defaultSettings)              # copy default settings as initial version of current settings
+        self.currentSettings=cp.deepcopy(self.defaultSettings)                  # copy default settings as initial version of current settings
 
         # initialize arrays required for proper mesh visualization
-        self.plotterObj=pv.Plotter(title="GmshModel Mesh Visualization")    # initialize plotterObj from pyvista and set title
-        self.mesh=None                                                      # initialize mesh
-        self.thresholdAlgorithm=None                                        # initialize threshold algorithm
-        self.extractionBox=vtk.vtkBox()                                     # initiliaze dummy extraction box to update information of boxWidget
-        self.extractionBoxBounds=pv.PolyData()                              # initialize dummy extraction box bounds to store information of boxWidget bounds
-        self.extractionAlgorithm=None                                       # initialize extraction algorithm
-        self.activeWidgets=[]                                               # initialize list of active widgets
+        self.plotterObj=pv.Plotter(title="GmshModel Mesh Visualization")        # initialize plotterObj from pyvista and set title
+        self.mesh=None                                                          # initialize mesh
+        self.thresholdAlgorithm=None                                            # initialize threshold algorithm
+        self.extractionBox=vtk.vtkBox()                                         # initiliaze dummy extraction box to update information of boxWidget
+        self.extractionBoxBounds=pv.PolyData()                                  # initialize dummy extraction box bounds to store information of boxWidget bounds
+        self.extractionAlgorithm=None                                           # initialize extraction algorithm
+        self.activeWidgets=[]                                                   # initialize list of active widgets
 
         # visualize the model mesh
         self.visualizeMesh()
@@ -143,7 +142,7 @@ class MeshVisualization():
             self.model.saveMesh(tmpFile)                                        # create temporary file
 
             self.mesh=pv.UnstructuredGrid(tmpFile)                              # load mesh from temporary file with pyvista
-            self.physicalIDs,self.physicalNames = self.mesh.active_scalars_info # get names and IDs of the active scalar field (physical groups)
+            self.scalars = self.mesh.active_scalars_info                        # get field ID and name of active scalar field
 
             # add widgets and key events
             self.addSliderWidgets()                                             # add slider widgets for threshold filter
@@ -151,7 +150,7 @@ class MeshVisualization():
             self.addKeyPressEvents()                                            # add defined key press events
 
             # add mesh to plotterObj
-            self.plotterObj.add_mesh(self.mesh,scalars=self.physicalNames,name="mesh",reset_camera=False,clim=[self.currentSettings["lowerThreshold"],self.currentSettings["upperThreshold"]],show_edges=True)
+            self.plotterObj.add_mesh(self.mesh,scalars=self.scalars[1],name="mesh",reset_camera=False,clim=[self.currentSettings["lowerThreshold"],self.currentSettings["upperThreshold"]],show_edges=True)
 
             # update settings of the rendering scene and show plot
             self.plotterObj.remove_scalar_bar()                                 # remove scalar bar (since no results will be shown but just the mesh)
@@ -200,10 +199,9 @@ class MeshVisualization():
         pipeline. Based on the settings of the slider widgets, the visibility
         of physical groups is enabled oder disabled.
         """
-
         self.thresholdAlgorithm = vtk.vtkThreshold()                            # use vtkThreshold filter class of vtk library
         self.thresholdAlgorithm.SetInputDataObject(self.mesh)                   # set mesh to plot as input data object
-        self.thresholdAlgorithm.SetInputArrayToProcess(0, 0, 0, self.physicalIDs, self.physicalNames) # args: (idx, port, connection, field, name)
+        self.thresholdAlgorithm.SetInputArrayToProcess(0, 0, 0, self.scalars[0].value, self.scalars[1]) # args: (idx, port, connection, field, name)
         self.thresholdAlgorithm.Update()                                        # update threshold algorithm
         self.mesh=pv.wrap(self.thresholdAlgorithm.GetOutput())                  # update mesh once and connect it with with the algorithm output
 

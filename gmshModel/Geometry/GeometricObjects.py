@@ -10,8 +10,6 @@
 ###########################
 # Standard Python libraries
 import numpy as np                                                              # numpy for fast array computations
-# import pdb                                                                      # pdb for debugging
-
 
 ################################################################################
 #                       Define generic GeometricObject                         #

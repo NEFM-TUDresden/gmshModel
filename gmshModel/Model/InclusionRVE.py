@@ -15,7 +15,6 @@
 # Standard Python libraries
 import numpy as np                                                              # numpy for array computations
 import copy as cp                                                               # copy for deepcopies of arrays
-# import pdb                                                                      # pdb for debugging
 
 # self-defined class definitions and modules
 from .GenericRVE import GenericRVE                                              # generic RVE class definition (parent class)
@@ -114,6 +113,7 @@ class InclusionRVE(GenericRVE):
                 raise ValueError("Wrong amount of non-zero elements in \"inclusionAxis\"! For cylindrical inclusions, the variable \"inclusionAxis\" has to specify the length and direction of the cylinder axis which, at the moment, has to be parallel to one of the coordinate axes. Check your input.")
 
         # determine relevant axes for distance calculations
+        self.inclusionAxis=np.asarray(inclusionAxis)                            # save inclusion axis as numpy array to class object
         axesIndices=np.arange(0,3)                                              # array with indices of all axes
         if inclusionType == "Sphere":                                           # spherical inclusions
             self.relevantAxes=axesIndices                                       # -> all axes are relevant for distance

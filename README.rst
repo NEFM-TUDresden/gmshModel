@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-GmshModel
+gmshModel
 =========
 `Gmsh <https://gmsh.info/>`_ is a powerful tool for the generation of meshes for 
 numerical simulations but the built-in scripting language makes the meshing
@@ -22,13 +22,13 @@ end, GmshModel divides the mesh modeling procedure into basic steps:
 4. Saving the mesh to various output formats.
 5. Visualizing the resulting mesh.
 
-So far, GmshModel is especially designed to automate the generation of representative 
+So far, gmshModel is especially designed to automate the generation of representative 
 volume elements that contain multiple inclusion objects. An extension of gmshModel 
 should is however possible by adding new geometric objects and model types to the
 framework. 
 
 It is not the purpose of GmshModel to replace the Gmsh scripting language or other
-great tools such as `PyGmsh <https://github.com/nschloe/pygmsh>`_  for the generation
+great tools such as `pygmsh <https://github.com/nschloe/pygmsh>`_  for the generation
 of meshes. GmshModel rather tries to function as an interface to Gmsh to facilitate
 the automation of recurring, complex meshing tasks that require the full functionality
 of Gmsh in a nice and easy to use programming environment such as Python.
@@ -42,14 +42,22 @@ software packages are required:
 
 1. a `dynamically built Gmsh <https://gitlab.onelab.info/gmsh/gmsh/-/wikis/Gmsh-compilation/>`_  to use the Gmsh-Python-API
 2. `meshio <https://github.com/nschloe/meshio/>`_  for the conversion of meshes to various output formats
-3. `PyVista <https://www.pyvista.org/>`_ for the visualization of meshes
-4. `PythonOCC <https://github.com/tpaviot/pythonocc-core/>`_ for the visualization of the model geometry
+3. `pyvista <https://www.pyvista.org/>`_ for the visualization of meshes
+4. `pythonocc <https://github.com/tpaviot/pythonocc-core/>`_ for the visualization of the model geometry
 
 If the visualization functionality is not required and meshes exported in the 
 Gmsh-internal ``.msh`` format are sufficient, a working installation of Gmsh and
 its Python-API is enough.
 
-To install GmshModel
+To install gmshModel via PyPi, just do
+
+.. code-block:: python
+  
+  # install basic gmshModel
+  pip install gmshModel
+  
+  # install gmshModel with additional export and visualization features
+  pip install gmshModel[all]
 
 
 Getting Started
@@ -59,8 +67,8 @@ Getting Started
 
     <div><img src="https://github.com/NEFM-TUDresden/GmshModel/blob/master/docs/images/RVE200SpheresGeo.png" width="45%"><img src="https://github.com/NEFM-TUDresden/GmshModel/blob/master/docs/images/RVE200SpheresMesh.png" width="45%"></div>
     
-To generate the above periodic box in a ``[20x20x20]`` domain which contains 200 spherical 
-inclusions of radius 1, simply type:
+To generate the above periodic box in a ``[20x20x20]`` domain which contains ``200`` spherical 
+inclusions of radius ``1``, simply type:
 
 .. code-block:: python
 
@@ -89,10 +97,14 @@ inclusions of radius 1, simply type:
 Documentation
 *************
 
+The gmshModel documentation is available `here https://gmshmodel.readthedocs.io/en/latest/>`_.
+
 .. toctree::
-   :maxdepth: 1
+   :hidden:
+   :maxdepth: 2
 
    gmshModel/index
+   examples/index
 
 
 License

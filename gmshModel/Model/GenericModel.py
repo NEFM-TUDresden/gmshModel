@@ -125,7 +125,10 @@ class GenericModel:
         }
 
         # initialize Gmsh-Python-API
-        self.gmshConfigChanges=DEFAULT_GMSH_CONFIG_CHANGES                      # initialize default Gmsh configuration changes
+        self.gmshConfigChanges={                                                # default Gmsh configuration changes
+            "General.Terminal": 0,                                              # deactivate console output by default (only activated for mesh generation)
+            "Mesh.CharacteristicLengthExtendFromBoundary": 0,                   # do not calculate mesh sizes from the boundary by default (since mesh sizes are specified by fields)
+        }
         self.gmshAPI=self.initializeGmsh(gmshConfigChanges)                     # this assignment facilitates the usage of all methods provided by the gmsh.model class
 
         # initialize attributes that all instances of GenericModel should have

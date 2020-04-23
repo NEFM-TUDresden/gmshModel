@@ -43,7 +43,8 @@ can be installed using one of the following commands:
 
 It is also possible to download the source code from `GitHub <https://github.com/NEFM-TUDresden/GmshModel/>`_
 or `PyPi <https://pypi.org/project/gmshModel/>`_ and install gmshModel manually. For more details, check
-the Installation site of the documentation.
+the `Installation <https://gmshmodel.readthedocs.io/en/latest/gettingStarted/installation.html/>`_ page
+of the documentation.
 
 
 Dependencies
@@ -65,7 +66,7 @@ its Python-API is enough.
 Getting Started
 ***************
 
-.. image:: docs/images/GettingStarted.png
+.. image:: https://github.com/NEFM-TUDresden/gmshModel/tree/master/docs/images/GettingStarted.png
    :alt: Sample Geometry and Mesh
 
 To generate the above periodic box in a ``[20x20x20]`` domain which contains ``200`` spherical

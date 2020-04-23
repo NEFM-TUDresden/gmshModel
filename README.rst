@@ -66,7 +66,7 @@ its Python-API is enough.
 Getting Started
 ***************
 
-.. image:: https://github.com/NEFM-TUDresden/gmshModel/tree/master/docs/images/GettingStarted.png
+.. image:: https://raw.githubusercontent.com/NEFM-TUDresden/gmshModel/tree/master/docs/images/GettingStarted.png
    :alt: Sample Geometry and Mesh
 
 To generate the above periodic box in a ``[20x20x20]`` domain which contains ``200`` spherical

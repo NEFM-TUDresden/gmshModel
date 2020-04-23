@@ -30,7 +30,7 @@ its basic version. For advanced features, the following packages are required:
 
 If ``pip`` is used for the package installation, meshio and pyvista will be
 installed automatically, if the ``[all]`` option is used. Pythonocc is not available
-at PyPi and therefore has the be compiled from source as well.
+at PyPi and therefore has the be `compiled from source <https://github.com/tpaviot/pythonocc-core/blob/master/INSTALL.md/>`_.
 
 
 Installation using PyPi

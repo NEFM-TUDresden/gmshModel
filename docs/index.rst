@@ -80,6 +80,7 @@ gmshModel.
    :hidden:
 
    gettingStarted/installation
+   gettingStarted/visualization
    examples/index
 
 

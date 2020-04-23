@@ -63,6 +63,8 @@ To install gmshModel via PyPi, just do
 Getting Started
 ***************
 
+.. list-table::
+
 .. image:: docs/images/RVE200SpheresGeo.png
    :alt: Sample Geometry
    :align: left
@@ -72,8 +74,6 @@ Getting Started
    :alt: Sample Mesh
    :align: right
    :width: 45%
-
-    <div><img src="https://github.com/NEFM-TUDresden/GmshModel/blob/master/docs/images/RVE200SpheresGeo.png" width="45%"><img src="https://github.com/NEFM-TUDresden/GmshModel/blob/master/docs/images/RVE200SpheresMesh.png" width="45%"></div>
 
 To generate the above periodic box in a ``[20x20x20]`` domain which contains ``200`` spherical
 inclusions of radius ``1``, simply type:

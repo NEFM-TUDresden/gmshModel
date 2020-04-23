@@ -45,4 +45,12 @@ different groups according to the defined physical groups in the gmshModel.
 Additionally, an extraction box widget can be used to extract regions of the mesh
 and have a closer look to them.
 
-.. image:: ../images/Visualization.png
+.. image:: ../images/VisualizationBasic.png
+   :width: 80%
+   :align: center
+   :alt: basic visualization
+
+.. image:: ../images/VisualizationMenu.png
+   :width: 80%
+   :align: center
+   :alt: visualization menu

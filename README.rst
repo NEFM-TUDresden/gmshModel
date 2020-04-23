@@ -63,7 +63,7 @@ To install gmshModel via PyPi, just do
 Getting Started
 ***************
 
-.. image:: ../docs/images/GettingStarted.png
+.. image:: docs/images/GettingStarted.png
    :alt: Sample Geometry and Mesh
 
 To generate the above periodic box in a ``[20x20x20]`` domain which contains ``200`` spherical

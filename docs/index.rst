@@ -87,7 +87,11 @@ Documentation
 *************
 
 Here, you can find out how gmshModel works, which classes and methods are involved
-and how you can use them to generate your own model.
+and how you can use them to generate your own model:
+
+* :ref:`api_geometry_ref` gives information on available geometric objects
+* :ref:`api_model_ref` explains all available models
+* :ref:`api_visualization_ref` gives information on the visualization capabilities of gmshModel
 
 .. toctree::
    :hidden:

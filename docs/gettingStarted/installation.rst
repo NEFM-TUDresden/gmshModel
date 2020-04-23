@@ -50,9 +50,9 @@ it can simply be installed using one of the following commands:
 Manual installation
 *******************
 For a manual installation of gmshModel, the source code has to be downloaded from
-`Github <https://github.com/NEFM-TUDresden/gmshModel/>`_ or `PyPi`. Once this is
-done, the installation from within the downloaded source code is as easy as using
-the commands:
+`Github <https://github.com/NEFM-TUDresden/gmshModel/>`_ or `PyPi <https://pypi.org/project/gmshModel/>`_.
+Once this is done, the installation from within the downloaded source code is as
+easy as using the commands:
 
 .. code-block:: python
 

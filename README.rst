@@ -65,15 +65,15 @@ Getting Started
 
 .. list-table::
 
-.. image:: docs/images/RVE200SpheresGeo.png
-   :alt: Sample Geometry
-   :align: left
-   :width: 45%
+   * - .. image:: docs/images/RVE200SpheresGeo.png
+          :alt: Sample Geometry
+          :align: left
+          :width: 45%
 
-.. image:: docs/images/RVE200SpheresMesh.png
-   :alt: Sample Mesh
-   :align: right
-   :width: 45%
+   * - .. image:: docs/images/RVE200SpheresMesh.png
+       :alt: Sample Mesh
+       :align: right
+       :width: 45%
 
 To generate the above periodic box in a ``[20x20x20]`` domain which contains ``200`` spherical
 inclusions of radius ``1``, simply type:

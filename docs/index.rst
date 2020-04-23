@@ -44,7 +44,7 @@ and all of its features: ::
     :alt: 200SpheresMesh
 
 To check out what you can do with gmshModel and generate the above periodic mesh
-with ``200```randomly placed spherical inclusions of radius ``1`` in a ``[20x20x20]``
+with ``200`` randomly placed spherical inclusions of radius ``1`` in a ``[20x20x20]``
 domain, simply use the following code:
 
 .. code-block:: python
@@ -92,7 +92,7 @@ and how you can use them to generate your own model.
 .. toctree::
    :hidden:
    :maxdepth: 2
-   :caption: API-Reference
+   :caption: Documentation
 
    gmshModel/index
 

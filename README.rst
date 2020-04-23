@@ -64,7 +64,7 @@ Getting Started
 ***************
 
 .. list-table::
-   :width: 50 50
+   :widths: 50 50
 
    * - .. image:: docs/images/RVE200SpheresGeo.png
           :alt: Sample Geometry

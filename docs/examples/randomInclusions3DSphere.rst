@@ -1,5 +1,5 @@
-Random distribution of cylindrical inclusions in a box-shaped domain
-====================================================================
+Random distribution of spherical inclusions in a box-shaped domain
+==================================================================
 
 This example shows the generation of a an RVE with randomly placed, spherical
 inclusions. The basic procedure of the model an mesh generation are pointed

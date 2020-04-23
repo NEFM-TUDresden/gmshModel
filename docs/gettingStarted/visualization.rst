@@ -30,7 +30,7 @@ features:
 +-----------+--------------------------------+
 | ``q``     | close visualization window     |
 +-----------+--------------------------------+
-| ``m``     | toggle mvisualization menu     |
+| ``m``     | toggle visualization menu      |
 +-----------+--------------------------------+
 | ``space`` | confirm settings and re-render |
 +-----------+--------------------------------+

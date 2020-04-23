@@ -1,19 +1,14 @@
-.. gmshModel documentation master file, created by
-   sphinx-quickstart on Thu Apr 16 21:45:42 2020.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 GmshModel
 =========
-`Gmsh <https://gmsh.info/>`_ is a powerful tool for the generation of meshes for 
+`Gmsh <https://gmsh.info/>`_ is a powerful tool for the generation of meshes for
 numerical simulations but the built-in scripting language makes the meshing
-procedure and especially an automatization really hard. Luckily, Gmsh provides 
+procedure and especially an automatization really hard. Luckily, Gmsh provides
 a Python-API with which all the capabilites of Gmsh can be used within Python.
 
-GmshModel is intended to be an extendable tool that facilitates the mesh generation 
-by interfacing the Gmsh-Python-API: it provides a basic framework for an automated  
+GmshModel is intended to be an extendable tool that facilitates the mesh generation
+by interfacing the Gmsh-Python-API: it provides a basic framework for an automated
 mesh generation for self-defined model types and, with that, allows to automate the
-generation of complex models as, e.g., representative volume elements. To this 
+generation of complex models as, e.g., representative volume elements. To this
 end, GmshModel divides the mesh modeling procedure into basic steps:
 
 1. Setting up a geometry using basic geometric entities and boolean operations.
@@ -22,9 +17,9 @@ end, GmshModel divides the mesh modeling procedure into basic steps:
 4. Saving the mesh to various output formats.
 5. Visualizing the resulting mesh.
 
-So far, GmshModel is especially designed to automate the generation of representative 
-volume elements that contain multiple inclusion objects. An extension of gmshModel 
-is however possible by adding new geometric objects and model types to the framework. 
+So far, GmshModel is especially designed to automate the generation of representative
+volume elements that contain multiple inclusion objects. An extension of gmshModel
+is however possible by adding new geometric objects and model types to the framework.
 
 It is not the purpose of GmshModel to replace the Gmsh scripting language or other
 great tools such as `PyGmsh <https://github.com/nschloe/pygmsh>`_  for the generation
@@ -33,30 +28,13 @@ the automation of recurring, complex meshing tasks that require the full functio
 of Gmsh in a nice and easy to use programming environment such as Python.
 
 
-Installation
-************
-GmshModel is an interface tool and makes use of many great contributions of other
-people. To experience the full functionality of Gmsh model, the following (non-standard)
-software packages are required:
-
-1. a `dynamically built Gmsh <https://gitlab.onelab.info/gmsh/gmsh/-/wikis/Gmsh-compilation/>`_  to use the Gmsh-Python-API
-2. `meshio <https://github.com/nschloe/meshio/>`_  for the conversion of meshes to various output formats
-3. `PyVista <https://www.pyvista.org/>`_ for the visualization of meshes
-4. `PythonOCC <https://github.com/tpaviot/pythonocc-core/>`_ for the visualization of the model geometry
-
-If the visualization functionality is not required and meshes exported in the 
-Gmsh-internal ``.msh`` format are sufficient, a working installation of Gmsh and
-its Python-API is enough.
-
-To install GmshModel, download the source files and use the following command:
-
-.. code-block:: python
-
-   pip install <path-to-source-files>
-
-
 Getting Started
 ***************
+To get all information on how to install gmshModel, see :ref:`installation_ref`.
+If you are using ``pip``, simply use the following command to install gmshModel
+and all of its features: ::
+
+   $ pip install gmshModel[all]
 
 .. image:: images/RVE200SpheresGeo.png
     :width: 49%
@@ -65,8 +43,9 @@ Getting Started
     :width: 49%
     :alt: 200SpheresMesh
 
-To generate the above periodic box in a ``[20x20x20]`` domain which contains 200 spherical 
-inclusions of radius 1, simply type:
+To check out what you can do with gmshModel and generate the above periodic mesh
+with ``200```randomly placed spherical inclusions of radius ``1`` in a ``[20x20x20]``
+domain, simply use the following code:
 
 .. code-block:: python
 
@@ -92,20 +71,33 @@ inclusions of radius 1, simply type:
    myRVE.close()
 
 
+Go to :ref:`examples_ref` to check out more examples of meshes generated using
+gmshModel.
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Getting Started
+   :hidden:
+
+   gettingStarted/installation
+   examples/index
+
+
 Documentation
 *************
 
-Here, you can find a detailed documentation on GmshModel, its classes and methods 
-as well as its usage with the help of minimal working examples.
-
-* The :ref:`api_ref` shows the structure of GmshModel
-* The :ref:`examples_ref` show the usage of GmshModel
-
+Here, you can find out how gmshModel works, which classes and methods are involved
+and how you can use them to generate your own model.
 
 .. toctree::
    :hidden:
    :maxdepth: 2
+   :caption: API-Reference
 
    gmshModel/index
-   examples/index
 
+
+Index
+*****
+
+* :ref:`genindex`

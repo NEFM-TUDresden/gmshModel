@@ -9,12 +9,15 @@ configurations are passed as dictionaries to the individual classes and
 methods - the dictionaries containing the default values are passed. This
 means that, if they were not passed, the resulting mesh would be the same.
 
+Code
+****
+
 .. code-block:: python
 
    # Loading of the RandomInclusionRVE class
    # Before the model and mesh generation can start, the required class has to be
    # loaded. In this case it is the class RandomInclusionRVE
-   from gmshModel.Models.RandomInclusionRVE import RandomInclusionRVE
+   from gmshModel.Models import RandomInclusionRVE as RVE
 
 
    # Initialization of the RVE
@@ -137,3 +140,19 @@ means that, if they were not passed, the resulting mesh would be the same.
    # can be achieved by calling the close() method of the model
    #
    testRVE.close()
+   
+Result
+******
+
+If the mesh generation is successful, the result should look similar to the following:
+
+.. image:: ../images/RandomInclusions2DCircle.png
+   :width: 60%
+   :align: center
+
+Since the geometry involves a random placement of the circular inclusions, the mesh
+will slightly vary for each run of the example. However, in the end there should always
+be ``18`` circular inclusions with two different radii. The applied (default) refinement 
+options try to ensure that there are about 3 elements between close inclusions and around
+``18`` elements per inclusion circumference.
+ 

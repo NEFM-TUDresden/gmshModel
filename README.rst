@@ -1,8 +1,3 @@
-.. gmshModel documentation master file, created by
-   sphinx-quickstart on Thu Apr 16 21:45:42 2020.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 gmshModel
 =========
 `Gmsh <https://gmsh.info/>`_ is a powerful tool for the generation of meshes for
@@ -14,27 +9,43 @@ GmshModel is intended to be an extendable tool that facilitates the mesh generat
 by interfacing the Gmsh-Python-API: it provides a basic framework for an automated
 mesh generation for self-defined model types and, with that, allows to automate the
 generation of complex models as, e.g., representative volume elements. To this
-end, GmshModel divides the mesh modeling procedure into basic steps:
+end, gmshModel divides the mesh modeling procedure into basic steps:
 
 1. Setting up a geometry using basic geometric entities and boolean operations.
-2. Adding the geometric objects to Gmsh, performing the boolean operations and defining physical groups.
+2. Adding the geometric objects to Gmsh, performing boolean operations and defining physical groups.
 3. Creating a mesh with user-defined refinement fields.
 4. Saving the mesh to various output formats.
 5. Visualizing the resulting mesh.
 
 So far, gmshModel is especially designed to automate the generation of representative
 volume elements that contain multiple inclusion objects. An extension of gmshModel
-should is however possible by adding new geometric objects and model types to the
-framework.
+is however possible by adding new geometric objects and model types to the framework.
 
-It is not the purpose of GmshModel to replace the Gmsh scripting language or other
+It is not the purpose of gmshModel to replace the Gmsh scripting language or other
 great tools such as `pygmsh <https://github.com/nschloe/pygmsh>`_  for the generation
 of meshes. GmshModel rather tries to function as an interface to Gmsh to facilitate
 the automation of recurring, complex meshing tasks that require the full functionality
-of Gmsh in a nice and easy to use programming environment such as Python.
+of Gmsh within a nice and easy to use environment such as Python.
 
 
 Installation
+************
+GmshModel is available from the `Python Package Index <https://pypi.org/>`_ and
+can be installed using one of the following commands:
+
+.. code-block:: python
+
+   # for a basic installation of gmshModel
+   pip install gmshModel
+
+   # for additional export and visualization features
+   pip install gmshModel[all]
+
+It is also possible to download the source code from `GitHub <https://github.com/NEFM-TUDresden/GmshModel/>`_
+or PyPi and install gmshModel manually. For more details, check the Installation site of the documentation.
+
+
+Dependencies
 ************
 GmshModel is an interface tool and makes use of many great contributions of other
 people. To experience the full functionality of Gmsh model, the following (non-standard)
@@ -48,16 +59,6 @@ software packages are required:
 If the visualization functionality is not required and meshes exported in the
 Gmsh-internal ``.msh`` format are sufficient, a working installation of Gmsh and
 its Python-API is enough.
-
-To install gmshModel via PyPi, just do
-
-.. code-block:: python
-
-  # install basic gmshModel
-  pip install gmshModel
-
-  # install gmshModel with additional export and visualization features
-  pip install gmshModel[all]
 
 
 Getting Started

@@ -50,7 +50,7 @@ domain, simply use the following code:
 .. code-block:: python
 
    # import required model type
-   import gmshModel.Model.RandomInclusionRVE.RandomInclusionRVE as RVE
+   from gmshModel.Model import RandomInclusionRVE as RVE
 
    # initialize new RVE
    myRVE=RVE(size=[20,20,20], inclusionType="Sphere", inclusionSets=[1, 200])

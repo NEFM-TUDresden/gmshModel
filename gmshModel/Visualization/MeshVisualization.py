@@ -309,7 +309,16 @@ class MeshVisualization():
     def showCommandLineHelp():
         """Internal method to show command line help after the rendering window
         is displayed"""
-        pass
+        infoText=("Use one of the following key events to control the plot:"
+                  ""
+                  "\tx \tset view to y-z-plane"
+                  "\ty \tset view to z-x-plane"
+                  "\tz \tset view to x-y-plane"
+                  "\tm \ttoggle menu"
+                  "\tspace \tconfirm menu settings"
+                  "\td \trestore default settings"
+                  "\tq \tclose rendering window")
+        logger.info(infoText)
 
 
 
@@ -364,7 +373,10 @@ class MeshVisualization():
     ##############################################
     def _keyPressEvents(self):
         """Internal method setting up user-defined key-press events"""
-        if self.plotterObj.iren.GetKeySym() == "m":                             # check if "m"-key was pressed
+        if self.plotterObj.iren.GetKeySym() == "h":                             # check if "h"-key was pressed
+            self.showCommandLineHelp()                                          # -> show help
+
+        elif self.plotterObj.iren.GetKeySym() == "m":                           # check if "m"-key was pressed
             self.toggleMenu()                                                   # -> toggle menu
 
         elif self.plotterObj.iren.GetKeySym() == "d":                           # check if "d"-key was pressed

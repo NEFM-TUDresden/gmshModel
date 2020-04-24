@@ -41,10 +41,10 @@ it can simply be installed using one of the following commands:
 .. code-block:: python
 
    # for a basic installation of gmshModel
-   pip install gmshModel
+   python3 -m pip install gmshModel
 
    # for additional export and visualization features
-   pip install gmshModel[all]
+   python3 -m pip install gmshModel[all]
 
 
 Manual installation

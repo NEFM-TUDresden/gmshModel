@@ -11,8 +11,11 @@ of the ``GenericModel``: since all available model types inherit the methods of
 .. code-block:: python
 
    ...
+
    # visualize the mesh of myModel
    myModel.visualizeMesh()
+
+   ...
 
 
 The mesh visualization is based on the `pyvista <https://github.com/pyvista/pyvista/>`_

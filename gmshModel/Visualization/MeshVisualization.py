@@ -273,7 +273,7 @@ class MeshVisualization():
     ##################################
     def addKeyPressEvents(self):
         """Method to add all user-defined key-press events"""
-        activeKeys=["m", "d", "space", "x", "y", "z"]                           # define list of keys with active (user-defined) key press events
+        activeKeys=["h", "m", "d", "space", "x", "y", "z"]                      # define list of keys with active (user-defined) key press events
         for key in activeKeys:                                                  # loop over all active keys
             self.plotterObj.add_key_event(key,self._keyPressEvents)             # add corresponding key press events
 
@@ -306,19 +306,22 @@ class MeshVisualization():
     ####################################
     # Method to show command line help #
     ####################################
-    def showCommandLineHelp():
+    def showCommandLineHelp(self):
         """Internal method to show command line help after the rendering window
         is displayed"""
-        infoText=("Use one of the following key events to control the plot:"
-                  ""
-                  "\tx \tset view to y-z-plane"
-                  "\ty \tset view to z-x-plane"
-                  "\tz \tset view to x-y-plane"
-                  "\tm \ttoggle menu"
-                  "\tspace \tconfirm menu settings"
-                  "\td \trestore default settings"
-                  "\tq \tclose rendering window")
-        logger.info(infoText)
+        infoText=("\nUse one of the following key events to control the plot:\n"
+                  "\n"
+                  "\ts \tactivate surface representation of objects\n"
+                  "\tw \tactivate wireframe representation if objects\n"
+                  "\tv \tenable isometric view\n"
+                  "\tx \tset view to y-z-plane\n"
+                  "\ty \tset view to z-x-plane\n"
+                  "\tz \tset view to x-y-plane\n"
+                  "\tm \ttoggle menu\n"
+                  "\tspace \tconfirm menu settings\n"
+                  "\td \trestore default settings\n"
+                  "\tq \tclose rendering window\n")
+        print(infoText)
 
 
 

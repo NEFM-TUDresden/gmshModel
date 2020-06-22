@@ -1,5 +1,12 @@
 gmshModel
 =========
+
+.. |pypi| image:: https://badge.fury.io/py/gmshModel.svg
+    :target: https://pypi.org/projects/gmshModel
+
+.. |MIT| image:: https://img.shields.io/badge/License-MIT-yellow.svg
+   :target: https://opensource.org/licenses/MIT
+
 `Gmsh <https://gmsh.info/>`_ is a powerful tool for the generation of meshes for
 numerical simulations but the built-in scripting language makes the meshing
 procedure and especially an automatization really hard. Luckily, Gmsh provides
@@ -18,8 +25,9 @@ end, gmshModel divides the mesh modeling procedure into basic steps:
 5. Visualizing the resulting mesh.
 
 So far, gmshModel is especially designed to automate the generation of representative
-volume elements that contain multiple inclusion objects. An extension of gmshModel
-is however possible by adding new geometric objects and model types to the framework.
+volume elements that contain multiple inclusion objects and well-known unit cells
+with different types of inclusions. An extension of gmshModel is however possible by
+adding new geometric objects and model types to the framework.
 
 It is not the purpose of gmshModel to replace the Gmsh scripting language or other
 great tools such as `pygmsh <https://github.com/nschloe/pygmsh>`_  for the generation

@@ -2,7 +2,7 @@ gmshModel
 =========
 
 .. |pypi| image:: https://badge.fury.io/py/gmshModel.svg
-    :target: https://pypi.org/projects/gmshModel
+    :target: https://pypi.org/project/gmshModel
 
 .. |MIT| image:: https://img.shields.io/badge/License-MIT-yellow.svg
    :target: https://opensource.org/licenses/MIT

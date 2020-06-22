@@ -7,6 +7,8 @@ gmshModel
 .. |MIT| image:: https://img.shields.io/badge/License-MIT-yellow.svg
    :target: https://opensource.org/licenses/MIT
 
+|pypi| |MIT|
+
 `Gmsh <https://gmsh.info/>`_ is a powerful tool for the generation of meshes for
 numerical simulations but the built-in scripting language makes the meshing
 procedure and especially an automatization really hard. Luckily, Gmsh provides

@@ -181,7 +181,7 @@ class InclusionRVE(GenericRVE):
             self.interInclusionRefinement(incInfo)                              # -> perform refinement between inclusions
 
         # merge all fields within one "Min"-Field
-        relevantFields=np.arange(0,len(self.refinementFields))
+        relevantFields=np.arange(1,len(self.refinementFields)+1)                # start with "1" since Gmsh starts counting with 1
         self.refinementFields.append({"fieldType": "Min", "fieldInfos": {"FieldsList": relevantFields}})
 
         # set "Min"-Field as background field in Gmsh
@@ -238,13 +238,13 @@ class InclusionRVE(GenericRVE):
         axes=self.relevantAxes                                                  # get relevant axes for distance calculations
 
         # initialize required arrays
-        extIncInfo=np.zeros((8*np.shape(incInfo)[0],np.shape(incInfo)[1]))      # initialize extended incInfo array (ensure that all inclusion information will fit; get rid of unused space at the end of the function)
+        extIncInfo=np.zeros((27*np.shape(incInfo)[0],np.shape(incInfo)[1]))     # initialize extended incInfo array (ensure that all inclusion information will fit; get rid of unused space at the end of the function)
         totalIncInstances=0                                                     # initialize number of set inclusion instances
 
         # loop over all "original" inclusions
         for iInc in range(0,np.shape(incInfo)[0]):
 
-            # get current inclusion form original incInfo array and initialize number of instances
+            # get current inclusion from original incInfo array and initialize number of instances
             thisIncInfo=np.atleast_2d(incInfo[iInc,:])
             thisIncInstances=1
 
@@ -258,16 +258,19 @@ class InclusionRVE(GenericRVE):
                 thisIncCopies=cp.deepcopy(thisIncInfo)                          # initialize current copy with current inclusion data (deepcopy)
                 thisIncCopies[:,axes[closeBnds[1,iBnd]]]+=(-1)**closeBnds[0,iBnd]*self.size[axes[closeBnds[1,iBnd]]] # modify inclusion centers of copies
                 thisIncInfo=np.r_[thisIncInfo,thisIncCopies]                    # append copied inclusions to current inclusion data
-                thisIncInstances=np.shape(thisIncInfo)[0]                       # update number of required inclusion instances
+
+            # use unique for the unlikely case of inclusions that are close to
+            # positive and negative boundaries (inclusions close to the center)
+            thisIncInfo=np.unique(thisIncInfo,axis=0)                           # original and copies of this inclusion
+            thisIncInstances=np.shape(thisIncInfo)[0]                           # number of instances for this inclusion
 
             # update extended incInfo array
-            extIncInfo[totalIncInstances:totalIncInstances+thisIncInstances,:]=thisIncInfo  # save information on current inclusion and its copies
+            extIncInfo[totalIncInstances:totalIncInstances+thisIncInstances,:]=thisIncInfo # save information on current inclusion and its copies
             totalIncInstances+=thisIncInstances                                 # updated number of total inclusion instances
 
         # prepare output arrays
         extIncInfo=extIncInfo[0:totalIncInstances,:]                            # get relevant colums of extIncinfo array
         extIncInfo[:,0:3]+=np.atleast_2d(self.origin)                           # add origin to extIncInfo array coordinates
-
         return extIncInfo
 
 
@@ -335,7 +338,7 @@ class InclusionRVE(GenericRVE):
         if refinementOptions["inclusionRefinement"]==True:                      # refinement of inclusions is active and has already been performed
             minMeshSizes=2*np.pi*incInfo[:,[3]]/refinementOptions["elementsPerCircumference"] # -> calculate minimum mesh sizes for the individual inclusions
         else:                                                                   # refinement of inclusions is not active
-            minMeshSizes=refinementOptions["domainMeshSize"]*np.ones((np.shape(incInfo)[0],1)) # -> set minimum mesh size for each inclusion to maxMeshSize
+            minMeshSizes=refinementOptions["maxMeshSize"]*np.ones((np.shape(incInfo)[0],1)) # -> set minimum mesh size for each inclusion to maxMeshSize
 
         # get relevant axes for distance calculations
         axes=self.relevantAxes
@@ -356,7 +359,7 @@ class InclusionRVE(GenericRVE):
             # -> inclusion combinations is used to check whether - with this
             # -> mesh density (plus safety coefficient) - the required amount
             # -> of elements between the inclusions can be ensured
-            incsForRefinement=np.array(np.where(normDistIncBnds.flatten()<=1.1*nElemsBetween*np.maximum(minMeshSizes[iInc,[0]],minMeshSizes[iInc+1:,[0]]).flatten()))
+            incsForRefinement=np.array(np.where( (normDistIncBnds.flatten()<=1.1*nElemsBetween*np.maximum(minMeshSizes[iInc,[0]],minMeshSizes[iInc+1:,[0]]).flatten()) & (normDistIncBnds.flatten() > 0) ))
 
             # loop over all inclusion combinations that have to be refined
             for iRefine in incsForRefinement.flatten():
@@ -567,9 +570,9 @@ class InclusionRVE(GenericRVE):
         """
         axesString=["x", "y", "z"]                                              # define axes string (needed for problems with only 2 relevant axes)
         if len(self.relevantAxes)==2:                                           # problems with 2 relevant axes (Cylinders/Disks)
-            refineFunction="{5}-({5}-{6})*Exp(-1/2*(((Sqrt(({0}-({2}))^2+({1}-({3}))^2)-({4}))/({7}))^2))".format(*[axesString[ax] for ax in self.relevantAxes[:]],*data)
+            refineFunction="{5}-({5}-({6}))*Exp(-1/2*(((Sqrt(({0}-({2}))^2+({1}-({3}))^2)-({4}))/({7}))^2))".format(*[axesString[ax] for ax in self.relevantAxes[:]],*data)
         elif len(self.relevantAxes)==3:                                         # problems with 3 relevant axes (Spheres)
-            refineFunction="{4}-({4}-{5})*Exp(-1/2*(((Sqrt((x-({0}))^2+(y-({1}))^2+(z-({2}))^2)-({3}))/({6}))^2))".format(*data)
+            refineFunction="{4}-({4}-({5}))*Exp(-1/2*(((Sqrt((x-({0}))^2+(y-({1}))^2+(z-({2}))^2)-({3}))/({6}))^2))".format(*data)
 
         return refineFunction
 
@@ -607,8 +610,8 @@ class InclusionRVE(GenericRVE):
         """
         if len(self.relevantAxes)==2:
             axesString=["x", "y", "z"]
-            refineFunction="({9}+{10})/2+({9}-{10})/2*Tanh((Sqrt((({2})*({0}-({6}))+({3})*({1}-({7})))^2+({12})^2*(({4})*({0}-({6}))+({5})*({1}-({7})))^2)-({8}))*({11}))".format(*[axesString[ax] for ax in self.relevantAxes[:]],*data)
+            refineFunction="({9}+({10}))/2+({9}-({10}))/2*Tanh((Sqrt((({2})*({0}-({6}))+({3})*({1}-({7})))^2+({12})^2*(({4})*({0}-({6}))+({5})*({1}-({7})))^2)-({8}))*({11}))".format(*[axesString[ax] for ax in self.relevantAxes[:]],*data)
         elif len(self.relevantAxes)==3:
-            refineFunction="({13}+{14})/2+({13}-{14})/2*Tanh((Sqrt((({0})*(x-({9}))+({1})*(y-({10}))+({2})*(z-({11})))^2+({16})^2*(({3})*(x-({9}))+({4})*(y-({10}))+({5})*(z-({11})))^2+({16})^2*(({6})*(x-({9}))+({7})*(y-({10}))+({8})*(z-({11})))^2)-({12}))*({15}))".format(*data)
+            refineFunction="({13}+({14}))/2+({13}-({14}))/2*Tanh((Sqrt((({0})*(x-({9}))+({1})*(y-({10}))+({2})*(z-({11})))^2+({16})^2*(({3})*(x-({9}))+({4})*(y-({10}))+({5})*(z-({11})))^2+({16})^2*(({6})*(x-({9}))+({7})*(y-({10}))+({8})*(z-({11})))^2)-({12}))*({15}))".format(*data)
 
         return refineFunction

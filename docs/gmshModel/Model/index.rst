@@ -15,3 +15,8 @@ children of GenericModel
    GenericRVE
    InclusionRVE
    RandomInclusionRVE
+   GenericUnitCell
+   SimpleCubicCell
+   BodyCenteredCubicCell
+   FaceCenteredCubicCell
+   HexagonalCell

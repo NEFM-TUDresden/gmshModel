@@ -1,7 +1,7 @@
 Random distribution of cylindrical inclusions in a box-shaped domain
 ====================================================================
 
-This example shows the generation of a an RVE with randomly placed, cylindrical
+This example shows the generation of an RVE with randomly placed, cylindrical
 inclusions. The basic procedure of the model an mesh generation are pointed
 out and the resulting mesh is visualized. For the example, only the standard
 configuration is used. However, in order to show all available options - user
@@ -14,16 +14,16 @@ Code
 
 .. code-block:: python
 
-   # Loading of the RandomInclusionRVE class
+   # Loading of the SimpleCubicCell class
    # Before the model and mesh generation can start, the required class has to be
-   # loaded. In this case it is the class RandomInclusionRVE
-   from ..src.typeRandomInclusionRVE import RandomInclusionRVE
+   # loaded. In this case it is the class SimpleCubicCell
+   from gmshModel.Model import SimpleCubicCell as Cell
 
 
-   # Initialization of the RVE
-   # In order to generate a mesh for RVEs with randomly placed inclusions, relevant
-   # data have to be passed for the initialization of a new object instance. For
-   # RVEs of the type under consideration, the following parameters are possible:
+   # Initialization of the unit cell
+   # In order to generate a mesh for simple cubic unit cells with spherical inclusions,
+   # relevant data have to be passed for the initialization of a new object instance. For
+   # unit cells of the type under consideration, the following parameters are possible:
    #
    # size: list/array (mandatory)
    #   array defining the size of the RVE in the individual directions
@@ -146,7 +146,7 @@ Code
    # can be achieved by calling the close() method of the model
    #
    testRVE.close()
-   
+
 Result
 ******
 
@@ -158,6 +158,6 @@ If the mesh generation is successful, the result should look similar to the foll
 
 Since the geometry involves a random placement of the cylindrical inclusions, the mesh
 will slightly vary for each run of the example. However, in the end there should always
-be ``13`` cylindrical inclusions that are periodically continued over all boundaries. 
-The applied (default) refinement options try to ensure that there are about 3 elements 
+be ``13`` cylindrical inclusions that are periodically continued over all boundaries.
+The applied (default) refinement options try to ensure that there are about 3 elements
 between close inclusions and around ``18`` elements per inclusion circumference.

@@ -74,11 +74,11 @@ Code
    initParameters={                                                                # save all possible parameters in one dict to facilitate the method call
        "numberCells": [1,1,2],                                                     # generate 1 unit cell in axis directions perpendicular to the chain, generate 2 chains in chain direction
        "inclusionRadius": 1,                                                       # set the inclusion radius to 1
-       "chainRadius": 1.2,                                                         # set the chain radius to 1.2
+       "chainRadius": 1.25,                                                        # set the chain radius to 1.25
        "inclusionType": "Sphere",                                                  # define inclusionType as "Sphere"
        "chainDirection": [0,0,1],                                                  # generate chain in 3-direction
        "theta": np.pi/3,                                                           # set angle between neighboring inclusions to 60 degrees
-       "size": [10, 10, 18],                                                       # set cell size  (resulting layer distance of 1.5)
+       "size": [10, 10, 21],                                                       # set cell size  (resulting layer distance of 1.75)
        "origin": [0, 0, 0],                                                        # set cell origin to [0,0,0]
        "periodicityFlags": [1, 1, 1],                                              # define all axis directions as periodic
        "domainGroup": "domain",                                                    # use "domain" as name for the domainGroup

@@ -3,7 +3,7 @@
 ################################################################################
 # This file provides a class definition for a generation of inclusion-based unit
 # cells. The class inherits from the InclusionRVE class and extends it in order
-# to specify the the requirements of all derived unit cells child classes.
+# to specify the requirements of all derived unit cells child classes.
 
 ###########################
 # Load required libraries #
@@ -62,7 +62,7 @@ class GenericUnitCell(InclusionRVE):
     inclusionAxis:list/array
         array defining the inclusion axis (only relevant for inclusionType "Cylinder")
         -> currently restricted to Cylinders parallel to one of the coordinate axes
-        -> inclusionAxes=[Ax, Ay, Az]
+        -> inclusionAxis=[Ax, Ay, Az]
 
     relevantAxes: list/array
         array defining the relevant axes for distance calculations
@@ -119,18 +119,11 @@ class GenericUnitCell(InclusionRVE):
         inclusionAxis:list/array
             array defining the inclusion axis (only relevant for inclusionType "Cylinder")
             -> currently restricted to Cylinders parallel to one of the coordinate axes
-            -> inclusionAxes=[Ax, Ay, Az]
-
-        relevantAxes: list/array
-            array defining the relevant axes for distance calculations
+            -> inclusionAxis=[Ax, Ay, Az]
 
         periodicityFlags: list/array
             flags indicating the periodic axes of the unit cell
             -> periodicityFlags=[0/1, 0/1, 0/1]
-
-        inclusionInfo: array
-            array containing relevant inclusion information (center, radius) for
-            distance calculations
 
         domainGroup: string
             name of the group the unit cells domain should belong to
@@ -147,7 +140,7 @@ class GenericUnitCell(InclusionRVE):
         if distance is not None and size is not None:
             raise TypeError("Duplicate information for the unit cell detected. To prevent conflicting information, only one of the variables \"distance\" and \"size\" is supposed to be passed. Check your input.")
 
-        # additionally check if inclusionType and is passed, since it is needed here
+        # additionally check if inclusionType is passed, since it is needed here
         # (This is a duplicate check, since inclusionType will be checked again
         #  within the parent classes __init__)
         if inclusionType is None:
@@ -233,7 +226,7 @@ class GenericUnitCell(InclusionRVE):
     # Method for the definition of physical groups #
     ################################################
     def definePhysicalGroups(self,**args):
-        """Overwritten method of the GenericModel class to define and the
+        """Overwritten method of the GenericModel class to define the
         required physical groups for the model mesh generation
 
         In order to be able to assign different material properties to different

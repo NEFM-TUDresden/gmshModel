@@ -16,3 +16,5 @@ formats are exported.
    bodyCenteredCubicCell2DCircle
    faceCenteredCubicCell3DCylinder
    hexagonalCell3DSphere
+   helicalChain2DCircle
+   helicalChain3DSphere

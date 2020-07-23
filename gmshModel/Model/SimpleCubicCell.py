@@ -120,16 +120,9 @@ class SimpleCubicCell(GenericUnitCell):
             -> currently restricted to Cylinders parallel to one of the coordinate axes
             -> inclusionAxes=[Ax, Ay, Az]
 
-        relevantAxes: list/array
-            array defining the relevant axes for distance calculations
-
         periodicityFlags: list/array
             flags indicating the periodic axes of the simple cubic unit cell
             -> periodicityFlags=[0/1, 0/1, 0/1]
-
-        inclusionInfo: array
-            array containing relevant inclusion information (center, radius) for
-            distance calculations
 
         domainGroup: string
             name of the group the unit cells domain should belong to

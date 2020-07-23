@@ -2,7 +2,7 @@ Simple cubic unit cell with spherical inclusions
 ================================================
 
 This example shows the generation of a unit cell with a simple cubic distribution
-of spherical inclusions. The basic procedures of the model an mesh generation
+of spherical inclusions. The basic procedures of the model and mesh generation
 are pointed out and the resulting mesh is visualized. For the example, only the
 standard configuration is used. However, in order to show all available options -
 user configurations are passed as dictionaries to the individual classes and

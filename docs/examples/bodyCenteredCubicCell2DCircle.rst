@@ -2,7 +2,7 @@ Body-centered cubic unit cell with circular inclusions
 ======================================================
 
 This example shows the generation of a unit cell with a body-centered cubic
-distribution of circular inclusions. The basic procedures of the model an
+distribution of circular inclusions. The basic procedures of the model and
 mesh generation are pointed out and the resulting mesh is visualized. For the
 example, only the standard configuration is used. However, in order to show
 all available options - user configurations are passed as dictionaries to the

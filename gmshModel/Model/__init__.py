@@ -12,3 +12,4 @@ from .SimpleCubicCell import SimpleCubicCell
 from .BodyCenteredCubicCell import BodyCenteredCubicCell
 from .FaceCenteredCubicCell import FaceCenteredCubicCell
 from .HexagonalCell import HexagonalCell
+from .HelicalChain import HelicalChain

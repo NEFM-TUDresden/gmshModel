@@ -2,7 +2,7 @@ Face-centered cubic unit cell with cylindrical inclusions
 =========================================================
 
 This example shows the generation of a unit cell with a face-centered cubic
-distribution of cylindrical inclusions. The basic procedures of the model an
+distribution of cylindrical inclusions. The basic procedures of the model and
 mesh generation are pointed out and the resulting mesh is visualized. For the
 example, only the standard configuration is used. However, in order to show
 all available options - user configurations are passed as dictionaries to the

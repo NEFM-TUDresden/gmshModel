@@ -2,7 +2,7 @@ Random distribution of circular inclusions in a rectangular domain
 ==================================================================
 
 This example shows the generation of an RVE with randomly placed, circular
-inclusions. The basic procedure of the model an mesh generation are pointed
+inclusions. The basic procedure of the model and mesh generation are pointed
 out and the resulting mesh is visualized. For the example, only the standard
 configuration is used. However, in order to show all available options - user
 configurations are passed as dictionaries to the individual classes and

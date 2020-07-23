@@ -51,7 +51,7 @@ class InclusionRVE(GenericRVE):
     inclusionAxis:list/array
         array defining the inclusion axis (only relevant for inclusionType "Cylinder")
         -> currently restricted to Cylinders parallel to one of the coordinate axes
-        -> inclusionAxes=[Ax, Ay, Az]
+        -> inclusionAxis=[Ax, Ay, Az]
 
     relevantAxes: list/array
         array defining the relevant axes for distance calculations

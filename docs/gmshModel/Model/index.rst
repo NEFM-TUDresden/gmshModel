@@ -20,3 +20,4 @@ children of GenericModel
    BodyCenteredCubicCell
    FaceCenteredCubicCell
    HexagonalCell
+   HelicalChain

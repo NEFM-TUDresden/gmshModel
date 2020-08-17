@@ -24,24 +24,19 @@ logger=logging.getLogger(__name__)                                              
 
 # additional program libraries
 import gmsh                                                                     # Gmsh Python-API
-try:                                                                            # meshio for mesh file conversions
-    import meshio                                                               # meshio is available
-    MESHIO_AVAILABLE=True                                                       # -> set availability of meshio
-except ImportError:                                                             # meshio is not available
-    MESHIO_AVAILABLE=False                                                      # -> set availability of meshio
-    logger.warning("Library \"meshio\" not found. In order to export meshes in formats other than \".msh\", the meshio library is needed.")
+import meshio                                                                   # meshio for mesh file format conversions
 
 # self-defined class definitions and modules
-from ..Geometry import GeometricObjects as geomObj                                       # classes for implemented geometric objects
+from ..Geometry import GeometricObjects as geomObj                              # classes for implemented geometric objects
 from ..Visualization.GeometryVisualization import GeometryVisualization, PYTHONOCC_AVAILABLE   # class for geometry visualization
-from ..Visualization.MeshVisualization import MeshVisualization, PYVISTA_AVAILABLE             # class for mesh visualization
+from ..Visualization.MeshVisualization import MeshVisualization                 # class for mesh visualization
 
 
 #############################
 # Set configuration options #
 #############################
 SUPPORTED_GEOMETRY_FORMATS=[".brep", ".stp", ".step"]                           # set supported geometry formats
-SUPPORTED_MESH_FORMATS=list(meshio.extension_to_filetype.keys()) if MESHIO_AVAILABLE else [".msh"] # set supported mesh file formats
+SUPPORTED_MESH_FORMATS=list(meshio.extension_to_filetype.keys())                # set supported mesh file formats
 
 
 #############################
@@ -291,7 +286,7 @@ class GenericModel:
         os.makedirs(fileDir,exist_ok=True)                                      # ensure that the file directory exists
         if fileExt == ".msh":                                                   # file extension is "".msh"
             gmsh.write(fileDir+"/"+fileName+fileExt)                            # -> save mesh using built-in gmsh.write method
-        elif MESHIO_AVAILABLE:                                                  # file extension is different from ".msh" and meshio is available
+        else:                                                                   # file extension is different from ".msh"
             if fileExt in SUPPORTED_MESH_FORMATS:                               # -> check if file extension is supported by meshio
                 with tf.TemporaryDirectory() as tmpDir:                         # ->-> create temporary directory
                     tmpFile=tmpDir+"/"+self.modelName+".msh"                    # ->-> create temporary file
@@ -302,8 +297,6 @@ class GenericModel:
                     self._convertMesh(tmpFile,fileDir+"/"+fileName+fileExt)     # ->-> convert mesh to required file format
             else:                                                               # raise error if mesh file format is not supported by meshio
                 raise ValueError("Unknown mesh file extension {}. The output mesh format must be supported by the meshio library.".format(fileExt))
-        else:
-            raise ValueError("Unsupported mesh file format {} for unavailabe meshio package. Install the meshio library to export meshes to other formats than \".msh\".".format(fileExt))
 
 
     #####################################################
@@ -360,10 +353,7 @@ class GenericModel:
     ############################################################
     def visualizeMesh(self):
         """Method to visualize the generated mesh using pyvista and vtk"""
-        if PYVISTA_AVAILABLE:                                                   # optional pyvista package is available
-            MeshVisualization(self)                                             # -> visualize the mesh
-        else:                                                                   # optional pyvista package is unavailable
-            logger.warning("Mesh visualization is unavailable due to missing packages.") # -> do nothing but printing a warning
+        MeshVisualization(self)                                                 # -> visualize the mesh
 
 
     ####################################################################

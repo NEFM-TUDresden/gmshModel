@@ -16,13 +16,8 @@ import logging                                                                  
 logger=logging.getLogger(__name__)                                              # -> set logger
 
 # additional program libraries
-try:                                                                            # try import of pyvista library
-    import pyvista as pv                                                        # -> load pyVista visualization module
-    import vtk                                                                  # -> load vtk since pyvista depends on it, i.e. it must be available
-    PYVISTA_AVAILABLE=True                                                      # -> set availability flag to True
-except ImportError:                                                             # handle unavailable pyvista module
-    PYVISTA_AVAILABLE=False                                                     # -> set availability flag to False
-    logger.warning("The mesh visualization class depends on the pyvista package. It seems like you have not installed it. The mesh visualization is therefore unavailable.")
+import pyvista as pv                                                            # -> load pyVista visualization module
+import vtk                                                                      # -> load vtk since pyvista depends on it, i.e. it must be available
 
 
 ##################################

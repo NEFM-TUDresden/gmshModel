@@ -64,10 +64,6 @@ software packages are required:
 3. `pyvista <https://www.pyvista.org/>`_ for the visualization of meshes
 4. `pythonocc <https://github.com/tpaviot/pythonocc-core/>`_ for the visualization of the model geometry
 
-If the visualization functionality is not required and meshes exported in the
-Gmsh-internal ``.msh`` format are sufficient, a working installation of Gmsh and
-its Python-API is enough.
-
 
 Getting Started
 ***************

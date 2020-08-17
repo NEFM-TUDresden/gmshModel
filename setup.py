@@ -16,12 +16,10 @@ with open("README.rst", "r") as fileHandle:                                     
     readmeInfo = fileHandle.read()                                              # -> get README information
 
 # set install_requires
-installRequires=["numpy"]
+installRequires=["numpy",
+                 "meshio>=4",
+                 "pyvista>=0.24.1"]
 
-# set extras_require
-extrasRequire={
-        "all": ["meshio>= 4", "pyvista>= 0.24.1"]
-    }
 
 # setup
 setuptools.setup(
@@ -48,5 +46,4 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     python_requires='>=3.5',
     install_requires=installRequires,
-    extras_require=extrasRequire,
 )

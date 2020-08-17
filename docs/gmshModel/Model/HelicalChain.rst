@@ -12,6 +12,6 @@ are arranged in a helical chain that is parallel to one of the coordinate axes.
 Class Definition
 ----------------
 
-.. autoclass:: gmshModel.Model.HexagonalCell.HexagonalCell
+.. autoclass:: gmshModel.Model.HelicalChain.HelicalChain
    :show-inheritance:
    :members:

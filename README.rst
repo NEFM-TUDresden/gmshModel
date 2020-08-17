@@ -4,8 +4,8 @@ gmshModel
 .. |pypi| image:: https://badge.fury.io/py/gmshModel.svg
     :target: https://pypi.org/project/gmshModel
 
-.. |MIT| image:: https://img.shields.io/badge/License-MIT-yellow.svg
-   :target: https://opensource.org/licenses/MIT
+.. |MIT| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
+   :target: https://opensource.org/licenses/gpl-3.0.html
 
 |pypi| |MIT|
 
@@ -41,15 +41,11 @@ of Gmsh within a nice and easy to use environment such as Python.
 Installation
 ************
 GmshModel is available from the `Python Package Index <https://pypi.org/>`_ and
-can be installed using one of the following commands:
+can be installed using the following command:
 
 .. code-block:: python
 
-   # for a basic installation of gmshModel
    python3 -m pip install gmshModel
-
-   # for additional export and visualization features
-   python3 -m pip install gmshModel[all]
 
 It is also possible to download the source code from `GitHub <https://github.com/NEFM-TUDresden/GmshModel/>`_
 or `PyPi <https://pypi.org/project/gmshModel/>`_ and install gmshModel manually. For more details, check
@@ -114,4 +110,4 @@ The gmshModel documentation is available `here <https://gmshmodel.readthedocs.io
 
 License
 *******
-GmshModel is published under the `MIT-License <https://opensource.org/licenses/MIT/>`_
+GmshModel is published under the `GPLv3 license <https://www.gnu.org/licenses/gpl-3.0.en.html>`_

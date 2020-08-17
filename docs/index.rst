@@ -32,9 +32,9 @@ Getting Started
 ***************
 To get all information on how to install gmshModel, see :ref:`installation_ref`.
 If you are using ``pip``, simply use the following command to install gmshModel
-and all of its features: ::
+and its features: ::
 
-   $ python3 -m pip install gmshModel[all]
+   $ python3 -m pip install gmshModel
 
 .. image:: images/RVE200SpheresGeo.png
     :width: 49%

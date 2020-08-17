@@ -41,11 +41,12 @@ setuptools.setup(
                  "Programming Language :: Python :: 3.5",
                  "Programming Language :: Python :: 3.6",
                  "Programming Language :: Python :: 3.7",
+                 "Programming Language :: Python :: 3.8",
                  "License :: OSI Approved :: MIT License",
                  "Topic :: Scientific/Engineering"],
     keywords="Gmsh mesh preprocessing",
     packages=setuptools.find_packages(),
-    python_requires='>=3.5, <3.8',
+    python_requires='>=3.5',
     install_requires=installRequires,
     extras_require=extrasRequire,
 )

@@ -1,13 +1,19 @@
 gmshModel
 =========
 
-.. |pypi| image:: https://badge.fury.io/py/gmshModel.svg
-    :target: https://pypi.org/project/gmshModel
+.. |pypi| image:: https://img.shields.io/pypi/v/gmshModel
+   :target: https://pypi.org/project/gmshModel
 
-.. |MIT| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
+.. |conda| https://img.shields.io/conda/vn/conda-forge/gmshModel
+   :target: https://anaconda.org/conda-forge/gmshmodel
+
+.. |pyver| image:: https://img.shields.io/pypi/pyversions/gmshModel.svg?color=orange
+   :target: https://www.python.org/
+
+.. |GPL| image:: https://img.shields.io/github/license/NEFM-TUDresden/gmshModel?color=blue
    :target: https://opensource.org/licenses/gpl-3.0.html
 
-|pypi| |MIT|
+|pypi| |conda| |pyver| |GPL|
 
 `Gmsh <https://gmsh.info/>`_ is a powerful tool for the generation of meshes for
 numerical simulations but the built-in scripting language makes the meshing
@@ -28,7 +34,7 @@ end, gmshModel divides the mesh modeling procedure into basic steps:
 
 So far, gmshModel is especially designed to automate the generation of representative
 volume elements that contain multiple inclusion objects and well-known unit cells
-with different types of inclusions. An extension of gmshModel is however possible by
+with different types of inclusions. An extension of gmshModel is, however, possible by
 adding new geometric objects and model types to the framework.
 
 It is not the purpose of gmshModel to replace the Gmsh scripting language or other
@@ -46,6 +52,13 @@ can be installed using the following command:
 .. code-block:: python
 
    python3 -m pip install gmshModel
+
+The integration of gmshModel into `conda-forge <https://anaconda.org/conda-forge/gmshmodel>_`
+allows to use a similar procedure for Conda users:
+
+.. code-block:: python
+
+   conda install -c conda-forge gmshModel
 
 It is also possible to download the source code from `GitHub <https://github.com/NEFM-TUDresden/GmshModel/>`_
 or `PyPi <https://pypi.org/project/gmshModel/>`_ and install gmshModel manually. For more details, check

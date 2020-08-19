@@ -36,6 +36,10 @@ and its features: ::
 
    $ python3 -m pip install gmshModel
 
+For ``conda`` users, the installation command is straightforward, too:
+
+   $ conda install -c conda-forge gmshModel
+
 .. image:: images/RVE200SpheresGeo.png
     :width: 49%
     :alt: 200SpheresGeo

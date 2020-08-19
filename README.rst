@@ -13,7 +13,7 @@ gmshModel
 .. |GPL| image:: https://img.shields.io/pypi/l/gmshModel?color=orange
    :target: https://opensource.org/licenses/gpl-3.0.html
 
-.. |pypiStats| image:: https://img.shields.io/pypi/dm/gmshModel?color=yellow&label=downloads%20%28PyPi%29
+.. |pypiStats| image:: https://img.shields.io/pypi/dm/gmshModel?color=yellow
    :target: https://pypistats.org/packages/gmshmodel
 
 |pypi| |conda| |pyver| |GPL| |pypiStats|

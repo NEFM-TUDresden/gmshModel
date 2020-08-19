@@ -10,7 +10,7 @@ gmshModel
 .. |pyver| image:: https://img.shields.io/pypi/pyversions/gmshModel.svg?color=blue
    :target: https://www.python.org/
 
-.. |GPL| image:: https://img.shields.io/github/license/NEFM-TUDresden/gmshModel?color=orange
+.. |GPL| image:: https://img.shields.io/pypi/l/gmshModel?color=orange
    :target: https://opensource.org/licenses/gpl-3.0.html
 
 |pypi| |conda| |pyver| |GPL|

@@ -1,10 +1,10 @@
 gmshModel
 =========
 
-.. |pypi| image:: https://img.shields.io/pypi/v/gmshModel
+.. |pypi| image:: https://img.shields.io/pypi/v/gmshModel?color=forestgreen
    :target: https://pypi.org/project/gmshModel
 
-.. |conda| image:: https://img.shields.io/conda/v/conda-forge/gmshModel
+.. |conda| image:: https://img.shields.io/conda/v/conda-forge/gmshModel?color=forestgreen
    :target: https://anaconda.org/conda-forge/gmshmodel
 
 .. |pyver| image:: https://img.shields.io/pypi/pyversions/gmshModel.svg?color=orange
@@ -53,8 +53,8 @@ can be installed using the following command:
 
    python3 -m pip install gmshModel
 
-The integration of gmshModel into `conda-forge <https://anaconda.org/conda-forge/gmshmodel>`_
-allows to use a similar procedure for Conda users:
+The integration of gmshModel into the `conda-forge <https://anaconda.org/conda-forge/gmshmodel>`_
+channel allows to use a similar procedure for Conda users:
 
 .. code-block:: python
 

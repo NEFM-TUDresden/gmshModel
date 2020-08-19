@@ -7,10 +7,10 @@ gmshModel
 .. |conda| image:: https://img.shields.io/conda/v/conda-forge/gmshModel?color=forestgreen
    :target: https://anaconda.org/conda-forge/gmshmodel
 
-.. |pyver| image:: https://img.shields.io/pypi/pyversions/gmshModel.svg?color=orange
+.. |pyver| image:: https://img.shields.io/pypi/pyversions/gmshModel.svg?color=blue
    :target: https://www.python.org/
 
-.. |GPL| image:: https://img.shields.io/github/license/NEFM-TUDresden/gmshModel?color=blue
+.. |GPL| image:: https://img.shields.io/github/license/NEFM-TUDresden/gmshModel?color=orange
    :target: https://opensource.org/licenses/gpl-3.0.html
 
 |pypi| |conda| |pyver| |GPL|

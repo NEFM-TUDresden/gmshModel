@@ -46,14 +46,14 @@ of Gmsh within a nice and easy to use environment such as Python.
 
 Installation
 ************
-GmshModel is available from the `Python Package Index <https://pypi.org/>`_ and
+GmshModel is available from the `Python Package Index <https://pypi.org/project/gmshModel/>`_ and
 can be installed using the following command:
 
 .. code-block:: python
 
    python3 -m pip install gmshModel
 
-The integration of gmshModel into `conda-forge <https://anaconda.org/conda-forge/gmshmodel>_`
+The integration of gmshModel into `conda-forge <https://anaconda.org/conda-forge/gmshmodel>`_
 allows to use a similar procedure for Conda users:
 
 .. code-block:: python

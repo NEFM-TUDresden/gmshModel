@@ -52,16 +52,12 @@ Installation
 GmshModel is available from the `Python Package Index <https://pypi.org/project/gmshModel/>`_ and
 can be installed using the following command:
 
-.. code-block:: python
-
-   python3 -m pip install gmshModel
+   $ python3 -m pip install gmshModel
 
 The integration of gmshModel into the `conda-forge <https://anaconda.org/conda-forge/gmshmodel>`_
 channel allows to use a similar procedure for Conda users:
 
-.. code-block:: python
-
-   conda install -c conda-forge gmshModel
+   $ conda install -c conda-forge gmshModel
 
 It is also possible to download the source code from `GitHub <https://github.com/NEFM-TUDresden/GmshModel/>`_
 or `PyPi <https://pypi.org/project/gmshModel/>`_ and install gmshModel manually. For more details, check

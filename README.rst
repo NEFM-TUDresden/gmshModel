@@ -1,10 +1,10 @@
 gmshModel
 =========
 
-.. |pypi| image:: https://img.shields.io/pypi/v/gmshModel?color=forestgreen
+.. |pypi| image:: https://img.shields.io/pypi/v/gmshModel?color=green3
    :target: https://pypi.org/project/gmshModel
 
-.. |conda| image:: https://img.shields.io/conda/v/conda-forge/gmshModel?color=forestgreen
+.. |conda| image:: https://img.shields.io/conda/v/conda-forge/gmshModel?color=green3
    :target: https://anaconda.org/conda-forge/gmshmodel
 
 .. |pyver| image:: https://img.shields.io/pypi/pyversions/gmshModel.svg?color=blue
@@ -13,7 +13,10 @@ gmshModel
 .. |GPL| image:: https://img.shields.io/pypi/l/gmshModel?color=orange
    :target: https://opensource.org/licenses/gpl-3.0.html
 
-|pypi| |conda| |pyver| |GPL|
+.. |pypiStats| image:: https://img.shields.io/pypi/dm/gmshModel?color=yellow&label=downloads%20%28Pypi%29
+   :target: https://pypistats.org/packages/gmshmodel
+
+|pypi| |conda| |pyver| |GPL| |pypiStats|
 
 `Gmsh <https://gmsh.info/>`_ is a powerful tool for the generation of meshes for
 numerical simulations but the built-in scripting language makes the meshing

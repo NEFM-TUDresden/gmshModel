@@ -1,19 +1,19 @@
 gmshModel
 =========
 
-.. |pypi| image:: https://img.shields.io/pypi/v/gmshModel?color=green3
+.. |pypi| image:: https://img.shields.io/pypi/v/gmshModel?color=blue
    :target: https://pypi.org/project/gmshModel
 
-.. |conda| image:: https://img.shields.io/conda/v/conda-forge/gmshModel?color=green3
+.. |conda| image:: https://img.shields.io/conda/v/conda-forge/gmshModel?color=blue
    :target: https://anaconda.org/conda-forge/gmshmodel
 
-.. |pyver| image:: https://img.shields.io/pypi/pyversions/gmshModel.svg?color=blue
+.. |pyver| image:: https://img.shields.io/pypi/pyversions/gmshModel.svg?color=green3
    :target: https://www.python.org/
 
 .. |GPL| image:: https://img.shields.io/pypi/l/gmshModel?color=orange
    :target: https://opensource.org/licenses/gpl-3.0.html
 
-.. |pypiStats| image:: https://img.shields.io/pypi/dm/gmshModel?color=yellow&label=downloads%20%28Pypi%29
+.. |pypiStats| image:: https://img.shields.io/pypi/dm/gmshModel?color=yellow&label=downloads%20%28PyPi%29
    :target: https://pypistats.org/packages/gmshmodel
 
 |pypi| |conda| |pyver| |GPL| |pypiStats|

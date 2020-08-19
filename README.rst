@@ -4,7 +4,7 @@ gmshModel
 .. |pypi| image:: https://img.shields.io/pypi/v/gmshModel
    :target: https://pypi.org/project/gmshModel
 
-.. |conda| https://img.shields.io/conda/v/conda-forge/gmshModel
+.. |conda| image:: https://img.shields.io/conda/v/conda-forge/gmshModel
    :target: https://anaconda.org/conda-forge/gmshmodel
 
 .. |pyver| image:: https://img.shields.io/pypi/pyversions/gmshModel.svg?color=orange

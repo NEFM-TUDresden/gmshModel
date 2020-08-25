@@ -2,6 +2,10 @@ import numpy as np
 import math
 
 def FeapExport(model):
+
+	# nodal transformation for connectivity needed for 2nd order tetrahedron
+	# -> swap last two entries
+	tet_2 = [0 , 1 , 2 , 3 , 4 , 5 , 6 , 7 , 9 , 8]
 	
 	# prerequisites - abbreviations for easier access
 	model = model.gmshAPI
@@ -90,7 +94,11 @@ def FeapExport(model):
 				matNum = int(elem2mat[np.where(elem2mat[:,0]==elemTags[i][j]),1])
 				totalElemCount = totalElemCount + 1
 				outfile.writelines(str(totalElemCount)+' 0 '+str(matNum)+' ')
-				currConnectivity = connectivity[i][j*currNodesPerElem:(j+1)*currNodesPerElem]
+				if dim == 3 and currNodesPerElem == 10:
+					currConnectivity = connectivity[i][j*currNodesPerElem:(j+1)*currNodesPerElem]
+					currConnectivity = currConnectivity[tet_2]
+				else:
+					currConnectivity = connectivity[i][j*currNodesPerElem:(j+1)*currNodesPerElem]
 				connectStr13 = np.array2string(currConnectivity[0:min(len(currConnectivity),13)],max_line_width=100000)
 				outfile.writelines(connectStr13[1:-1]+'\n')
 				# writing entries 14 - x of connectivity in new lines

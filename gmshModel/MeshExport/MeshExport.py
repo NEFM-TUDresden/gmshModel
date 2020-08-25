@@ -15,8 +15,22 @@ def FeapExport(model):
 	
 	# get information on nodes
 	nodeTags, nodalCoord, paramCoord = mesh.getNodes(dim,-1,includeBoundary=True)
-	nNodes = len(nodeTags)
+	nodeTags,indices = np.unique(nodeTags, return_index=True)
+	nNodes = max(nodeTags)
 	print("Number of nodes:",nNodes)
+	
+	# sort nodes and coordinates before writing
+	nodalX = nodalCoord[0::3]
+	nodalY = nodalCoord[1::3]
+	nodalZ = nodalCoord[2::3]
+	nodalX = nodalX[indices]
+	nodalY = nodalY[indices]
+	nodalZ = nodalZ[indices]
+	
+	nodalCoord = np.zeros(int(nNodes*3))
+	nodalCoord[0::3] = nodalX
+	nodalCoord[1::3] = nodalY
+	nodalCoord[2::3] = nodalZ
 	
 	# get information on elements
 	elemTypes,elemTags,connectivity = mesh.getElements(dim,-1)
@@ -52,13 +66,13 @@ def FeapExport(model):
 	with open('PROB_'+meshfile,'wt') as outfile:
 		outfile.writelines(str(nNodes)+' '+str(nElem)+' '+str(numberOfMat)+' '+str(dim)+' '+str(dim)+' '+str(maxNodesPerElem)+'\n')
 		outfile.writelines('! nodes, elements, material sets, mesh dimension, maximum nodal DOF (default = dim), max nodes/element')
-		
+				
 	# write mesh file MESH_XXX with nodal coordinates and element connectivity for every element type
 	with open('MESH_'+meshfile,'wt') as outfile:
 		outfile.writelines('COORDinate\n')
 		for i in range(0,nNodes):
 			coordStr = np.array2string(nodalCoord[3*i:3*(i+1)],max_line_width=100000)
-			outfile.writelines(str(i+1)+' '+coordStr[1:-1]+'\n')
+			outfile.writelines(str(i+1)+' 0 '+coordStr[1:-1]+'\n')
 			
 		totalElemCount = 0
 		for i in range(0,len(elemTypes)):

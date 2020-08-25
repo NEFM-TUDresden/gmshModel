@@ -30,6 +30,7 @@ import meshio                                                                   
 from ..Geometry import GeometricObjects as geomObj                              # classes for implemented geometric objects
 from ..Visualization.GeometryVisualization import GeometryVisualization, PYTHONOCC_AVAILABLE   # class for geometry visualization
 from ..Visualization.MeshVisualization import MeshVisualization                 # class for mesh visualization
+from ..MeshExport import FeapExport
 
 
 #############################
@@ -284,8 +285,10 @@ class GenericModel:
 
         # create mesh file depending on the chosen file extension
         os.makedirs(fileDir,exist_ok=True)                                      # ensure that the file directory exists
-        if fileExt == ".msh":                                                   # file extension is "".msh"
+        if fileExt == ".msh":                                                   # file extension is ".msh"
             gmsh.write(fileDir+"/"+fileName+fileExt)                            # -> save mesh using built-in gmsh.write method
+        elif fileExt == ".feap":																								# file extension is ".feap" -> write feap mesh files
+            FeapExport(self)
         else:                                                                   # file extension is different from ".msh"
             if fileExt in SUPPORTED_MESH_FORMATS:                               # -> check if file extension is supported by meshio
                 with tf.TemporaryDirectory() as tmpDir:                         # ->-> create temporary directory

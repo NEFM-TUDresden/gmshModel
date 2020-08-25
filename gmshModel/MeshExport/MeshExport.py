@@ -57,7 +57,7 @@ def FeapExport(model):
 	with open('MESH_'+meshfile,'wt') as outfile:
 		outfile.writelines('COORDinate\n')
 		for i in range(0,nNodes):
-			coordStr = np.array2string(nodalCoord[3*i:3*(i+1)])
+			coordStr = np.array2string(nodalCoord[3*i:3*(i+1)],max_line_width=100000)
 			outfile.writelines(str(i+1)+' '+coordStr[1:-1]+'\n')
 			
 		totalElemCount = 0
@@ -77,11 +77,11 @@ def FeapExport(model):
 				totalElemCount = totalElemCount + 1
 				outfile.writelines(str(totalElemCount)+' 0 '+str(matNum)+' ')
 				currConnectivity = connectivity[i][j*currNodesPerElem:(j+1)*currNodesPerElem]
-				connectStr13 = np.array2string(currConnectivity[0:max(len(currConnectivity),13)])
+				connectStr13 = np.array2string(currConnectivity[0:min(len(currConnectivity),13)],max_line_width=100000)
 				outfile.writelines(connectStr13[1:-1]+'\n')
 				# writing entries 14 - x of connectivity in new lines
 				# automatic linebreak every 16th entry
 				for cLines in range(0,int(math.ceil(max(currNodesPerElem-13,0)/16))):
-					connectStr14x = np.array2string(currConnectivity[13+cLines*16:min(13+cLines*16,currNodesPerElem)])
-					outfile.writelines(connectStr14x[1:-1]+'\n')
+					connectStr14x = np.array2string(currConnectivity[13+cLines*16:min(13+(cLines+1)*16,currNodesPerElem)],max_line_width=100000)
+					outfile.writelines('    '+connectStr14x[1:-1]+'\n')
 				

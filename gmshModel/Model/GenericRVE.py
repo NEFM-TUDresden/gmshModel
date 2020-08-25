@@ -79,7 +79,7 @@ class GenericRVE(GenericModel):
             elif len(np.shape(varValue)) > 1:                                   # check for right amount of array dimensions
                 raise ValueError("Wrong amount of array dimensions for variable \"{}\"! For a cuboid RVE, the variable \"{}\" can only be one-dimensional. Check your input data.".format(varName))
             elif not len(varValue) in [2,3]:                                    # check for right amount of values
-                raise ValueError("Wrong number of values for variable \"{}\"! For a cuboid RVE, the variable \"{}\" has to have 2 or 3 values. Check your input data.").format(varName)
+                raise ValueError("Wrong number of values for variable \"{}\"! For a cuboid RVE, the variable \"{}\" has to have 2 or 3 values. Check your input data.".format(varName))
             elif varName is "size" and np.count_nonzero(varValue) not in [2,3]: # check for right amount of non-zero values (size only)
                 raise ValueError("Wrong number of non-zero values for variable \"{}\"! Only 2D/3D RVEs supported: the variable \"{}\" has to have 2 or 3 non-zero values. Check your input data.".format(varName))
 

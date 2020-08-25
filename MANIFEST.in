@@ -1,0 +1,7 @@
+include *.rst
+include LICENSE
+include examples/*.py
+include docs/conf.py
+include docs/Makefile
+recursive-include docs *.rst
+

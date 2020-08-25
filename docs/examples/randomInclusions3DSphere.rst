@@ -1,8 +1,8 @@
 Random distribution of spherical inclusions in a box-shaped domain
 ==================================================================
 
-This example shows the generation of a an RVE with randomly placed, spherical
-inclusions. The basic procedure of the model an mesh generation are pointed
+This example shows the generation of an RVE with randomly placed, spherical
+inclusions. The basic procedure of the model and mesh generation are pointed
 out and the resulting mesh is visualized. For the example, only the standard
 configuration is used. However, in order to show the available options - all
 user configurations are passed as dictionaries to the individual classes and
@@ -139,8 +139,8 @@ Code
    # can be achieved by calling the close() method of the model
    #
    testRVE.close()
-   
-   
+
+
 Result
 ******
 
@@ -152,6 +152,6 @@ If the mesh generation is successful, the result should look similar to the foll
 
 Since the geometry involves a random placement of the spherical inclusions, the mesh
 will slightly vary for each run of the example. However, in the end there should always
-be ``12`` cylindrical inclusions that are periodically continued over all boundaries. 
-The applied (default) refinement options try to ensure that there are about 3 elements 
+be ``12`` cylindrical inclusions that are periodically continued over all boundaries.
+The applied (default) refinement options try to ensure that there are about 3 elements
 between close inclusions and around ``18`` elements per inclusion circumference.

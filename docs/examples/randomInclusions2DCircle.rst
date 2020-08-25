@@ -1,8 +1,8 @@
 Random distribution of circular inclusions in a rectangular domain
 ==================================================================
 
-This example shows the generation of a an RVE with randomly placed, circular
-inclusions. The basic procedure of the model an mesh generation are pointed
+This example shows the generation of an RVE with randomly placed, circular
+inclusions. The basic procedure of the model and mesh generation are pointed
 out and the resulting mesh is visualized. For the example, only the standard
 configuration is used. However, in order to show all available options - user
 configurations are passed as dictionaries to the individual classes and
@@ -17,7 +17,7 @@ Code
    # Loading of the RandomInclusionRVE class
    # Before the model and mesh generation can start, the required class has to be
    # loaded. In this case it is the class RandomInclusionRVE
-   from gmshModel.Models import RandomInclusionRVE as RVE
+   from gmshModel.Model import RandomInclusionRVE as RVE
 
 
    # Initialization of the RVE
@@ -140,7 +140,7 @@ Code
    # can be achieved by calling the close() method of the model
    #
    testRVE.close()
-   
+
 Result
 ******
 
@@ -152,7 +152,6 @@ If the mesh generation is successful, the result should look similar to the foll
 
 Since the geometry involves a random placement of the circular inclusions, the mesh
 will slightly vary for each run of the example. However, in the end there should always
-be ``18`` circular inclusions with two different radii. The applied (default) refinement 
+be ``18`` circular inclusions with two different radii. The applied (default) refinement
 options try to ensure that there are about 3 elements between close inclusions and around
 ``18`` elements per inclusion circumference.
- 

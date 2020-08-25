@@ -1,5 +1,5 @@
 ################################################################################
-#               CLASS DEFINITION FOR RVE TYPE RANDOMINCLUSIONS                 #
+#     CLASS FOR INCLUSION RVE MESHES GENERATED USING THE GMSH-PYTHON-API       #
 ################################################################################
 # This file provides a class definition for a generation of RVEs with randomly
 # placed inclusions. The class inherits from the InclusionRVE class and extends
@@ -27,7 +27,7 @@ class RandomInclusionRVE(InclusionRVE):
 
     This class provides required information for box-shaped, RVEs with randomly
     distributed inclusions. It inherits from the InclusionRVE class and extends
-    its attributes in methods to handle the inclusion placement as well as the
+    its attributes and methods to handle the inclusion placement as well as the
     definition of required boolean operations and physical groups.
 
     Attributes:

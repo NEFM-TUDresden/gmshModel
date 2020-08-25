@@ -2,7 +2,7 @@ InclusionRVE
 ============
 The InclusionRVE provides a class definition for a generation of RVEs with inclusions
 using Python and Gmsh. The class inherits from the GenericRVE class and extends
-it in order order to handle distance and refinement calculations
+it in order to handle distance and refinement calculations
 
 Currently, the class is restricted to RVEs with rectangular (2D)/ box-shaped
 (3D) domains (explicitly assumed within the setupPeriodicity() method) which

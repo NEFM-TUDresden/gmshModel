@@ -16,13 +16,8 @@ import logging                                                                  
 logger=logging.getLogger(__name__)                                              # -> set logger
 
 # additional program libraries
-try:                                                                            # try import of pyvista library
-    import pyvista as pv                                                        # -> load pyVista visualization module
-    import vtk                                                                  # -> load vtk since pyvista depends on it, i.e. it must be available
-    PYVISTA_AVAILABLE=True                                                      # -> set availability flag to True
-except ImportError:                                                             # handle unavailable pyvista module
-    PYVISTA_AVAILABLE=False                                                     # -> set availability flag to False
-    logger.warning("The mesh visualization class depends on the pyvista package. It seems like you have not installed it. The mesh visualization is therefore unavailable.")
+import pyvista as pv                                                            # -> load pyVista visualization module
+import vtk                                                                      # -> load vtk since pyvista depends on it, i.e. it must be available
 
 
 ##################################
@@ -273,7 +268,7 @@ class MeshVisualization():
     ##################################
     def addKeyPressEvents(self):
         """Method to add all user-defined key-press events"""
-        activeKeys=["m", "d", "space", "x", "y", "z"]                           # define list of keys with active (user-defined) key press events
+        activeKeys=["h", "m", "d", "space", "x", "y", "z"]                      # define list of keys with active (user-defined) key press events
         for key in activeKeys:                                                  # loop over all active keys
             self.plotterObj.add_key_event(key,self._keyPressEvents)             # add corresponding key press events
 
@@ -306,10 +301,22 @@ class MeshVisualization():
     ####################################
     # Method to show command line help #
     ####################################
-    def showCommandLineHelp():
+    def showCommandLineHelp(self):
         """Internal method to show command line help after the rendering window
         is displayed"""
-        pass
+        infoText=("\nUse one of the following key events to control the plot:\n"
+                  "\n"
+                  "\ts \tactivate surface representation of objects\n"
+                  "\tw \tactivate wireframe representation if objects\n"
+                  "\tv \tenable isometric view\n"
+                  "\tx \tset view to y-z-plane\n"
+                  "\ty \tset view to z-x-plane\n"
+                  "\tz \tset view to x-y-plane\n"
+                  "\tm \ttoggle menu\n"
+                  "\tspace \tconfirm menu settings\n"
+                  "\td \trestore default settings\n"
+                  "\tq \tclose rendering window\n")
+        print(infoText)
 
 
 
@@ -364,7 +371,10 @@ class MeshVisualization():
     ##############################################
     def _keyPressEvents(self):
         """Internal method setting up user-defined key-press events"""
-        if self.plotterObj.iren.GetKeySym() == "m":                             # check if "m"-key was pressed
+        if self.plotterObj.iren.GetKeySym() == "h":                             # check if "h"-key was pressed
+            self.showCommandLineHelp()                                          # -> show help
+
+        elif self.plotterObj.iren.GetKeySym() == "m":                           # check if "m"-key was pressed
             self.toggleMenu()                                                   # -> toggle menu
 
         elif self.plotterObj.iren.GetKeySym() == "d":                           # check if "d"-key was pressed

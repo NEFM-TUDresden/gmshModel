@@ -1,7 +1,7 @@
 ################################################################################
 #              EXAMPLE FOR 2D RANDOMINCLUSION RVE WITH CIRCLES                 #
 ################################################################################
-# This example shows the generation of a an RVE with randomly placed, circular
+# This example shows the generation of an RVE with randomly placed, circular
 # inclusions. The basic procedure of the model an mesh generation are pointed
 # out and the resulting mesh is visualized. For the example, only the standard
 # configuration is used. However, in order to show all available options - user
@@ -127,6 +127,6 @@ testRVE.visualizeMesh()
 
 
 # Close Gmsh model
-# For a proper closing of the Gmsh-Python-API, thAPI has to be finalized. This
+# For a proper closing of the Gmsh-Python-API, the API has to be finalized. This
 # can be achieved by calling the close() method of the model
 testRVE.close()

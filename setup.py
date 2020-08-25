@@ -16,12 +16,11 @@ with open("README.rst", "r") as fileHandle:                                     
     readmeInfo = fileHandle.read()                                              # -> get README information
 
 # set install_requires
-installRequires=["numpy"]
+installRequires=["numpy",
+                 "gmsh",
+                 "meshio>=4",
+                 "pyvista>=0.24.1"]
 
-# set extras_require
-extrasRequire={
-        "all": ["meshio>= 4", "pyvista>= 0.24.1"]
-    }
 
 # setup
 setuptools.setup(
@@ -30,21 +29,27 @@ setuptools.setup(
     author="Philipp Metsch",
     author_email="philipp.metsch@tu-dresden.de",
     url='https://github.com/NEFM-TUDresden/GmshModel',
+    project_urls={
+        "Code": "https://github.com/NEFM-TUDresden/GmshModel",
+        "Issues": "https://github.com/NEFM-TUDresden/GmshModel/issues",
+        "Documentation": "https://gmshmodel.readthedocs.io/en/latest/",
+    },
     description="A mesh modeling interface to the Gmsh-Python-API",
     long_description=readmeInfo,
     long_description_content_type="text/x-rst",
-    license="MIT",
-    classifiers=["Development Status :: 3 - Alpha",
+    classifiers=["Development Status :: 5 - Production/Stable",
                  "Intended Audience :: Developers",
                  "Intended Audience :: Science/Research",
                  "Programming Language :: Python :: 3",
+                 "Programming Language :: Python :: 3.5",
                  "Programming Language :: Python :: 3.6",
                  "Programming Language :: Python :: 3.7",
-                 "License :: OSI Approved :: MIT License",
-                 "Topic :: Scientific/Engineering"],
+                 "Programming Language :: Python :: 3.8",
+                 "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+                 "Topic :: Scientific/Engineering",
+                 "Topic :: Utilities"],
     keywords="Gmsh mesh preprocessing",
     packages=setuptools.find_packages(),
-    python_requires='>=3.5, <3.8',
+    python_requires='>=3.5',
     install_requires=installRequires,
-    extras_require=extrasRequire,
 )

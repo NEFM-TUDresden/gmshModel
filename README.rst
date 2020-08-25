@@ -1,5 +1,23 @@
 gmshModel
 =========
+
+.. |pypi| image:: https://img.shields.io/pypi/v/gmshModel?color=blue
+   :target: https://pypi.org/project/gmshModel
+
+.. |conda| image:: https://img.shields.io/conda/v/conda-forge/gmshModel?color=blue
+   :target: https://anaconda.org/conda-forge/gmshmodel
+
+.. |pyver| image:: https://img.shields.io/pypi/pyversions/gmshModel.svg?color=green3
+   :target: https://www.python.org/
+
+.. |GPL| image:: https://img.shields.io/pypi/l/gmshModel?color=orange
+   :target: https://opensource.org/licenses/gpl-3.0.html
+
+.. |pypiStats| image:: https://img.shields.io/pypi/dm/gmshModel?color=yellow
+   :target: https://pypistats.org/packages/gmshmodel
+
+|pypi| |conda| |pyver| |GPL| |pypiStats|
+
 `Gmsh <https://gmsh.info/>`_ is a powerful tool for the generation of meshes for
 numerical simulations but the built-in scripting language makes the meshing
 procedure and especially an automatization really hard. Luckily, Gmsh provides
@@ -18,8 +36,9 @@ end, gmshModel divides the mesh modeling procedure into basic steps:
 5. Visualizing the resulting mesh.
 
 So far, gmshModel is especially designed to automate the generation of representative
-volume elements that contain multiple inclusion objects. An extension of gmshModel
-is however possible by adding new geometric objects and model types to the framework.
+volume elements that contain multiple inclusion objects and well-known unit cells
+with different types of inclusions. An extension of gmshModel is, however, possible by
+adding new geometric objects and model types to the framework.
 
 It is not the purpose of gmshModel to replace the Gmsh scripting language or other
 great tools such as `pygmsh <https://github.com/nschloe/pygmsh>`_  for the generation
@@ -30,20 +49,19 @@ of Gmsh within a nice and easy to use environment such as Python.
 
 Installation
 ************
-GmshModel is available from the `Python Package Index <https://pypi.org/>`_ and
-can be installed using one of the following commands:
+GmshModel is available from the `Python Package Index <https://pypi.org/project/gmshModel/>`_ and
+can be installed using the following command: ::
 
-.. code-block:: python
+   $ python3 -m pip install gmshModel
 
-   # for a basic installation of gmshModel
-   pip install gmshModel
+The integration of gmshModel into the `conda-forge <https://anaconda.org/conda-forge/gmshmodel>`_
+channel allows to use a similar procedure for Conda users: ::
 
-   # for additional export and visualization features
-   pip install gmshModel[all]
+   $ conda install -c conda-forge gmshModel
 
 It is also possible to download the source code from `GitHub <https://github.com/NEFM-TUDresden/GmshModel/>`_
 or `PyPi <https://pypi.org/project/gmshModel/>`_ and install gmshModel manually. For more details, check
-the `Installation <https://gmshmodel.readthedocs.io/en/latest/gettingStarted/installation.html/>`_ page
+the `Installation <https://gmshmodel.readthedocs.io/en/latest/gettingStarted/installation.html>`_ page
 of the documentation.
 
 
@@ -57,10 +75,6 @@ software packages are required:
 2. `meshio <https://github.com/nschloe/meshio/>`_  for the conversion of meshes to various output formats
 3. `pyvista <https://www.pyvista.org/>`_ for the visualization of meshes
 4. `pythonocc <https://github.com/tpaviot/pythonocc-core/>`_ for the visualization of the model geometry
-
-If the visualization functionality is not required and meshes exported in the
-Gmsh-internal ``.msh`` format are sufficient, a working installation of Gmsh and
-its Python-API is enough.
 
 
 Getting Started
@@ -104,4 +118,4 @@ The gmshModel documentation is available `here <https://gmshmodel.readthedocs.io
 
 License
 *******
-GmshModel is published under the `MIT-License <https://opensource.org/licenses/MIT/>`_
+GmshModel is published under the `GPLv3 license <https://www.gnu.org/licenses/gpl-3.0.en.html>`_

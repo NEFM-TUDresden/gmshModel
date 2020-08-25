@@ -198,7 +198,7 @@ class GenericModel:
     ####################################################################
     # Method to calculate refinement information and generate the mesh #
     ####################################################################
-    def createMesh(self,threads=None,refinementOptions={}):
+    def createMesh(self,threads=None,order=1,refinementOptions={}):
         """Method to generate the model mesh
 
         This method contains the basic mesh generation steps for a Gmsh model:
@@ -230,6 +230,7 @@ class GenericModel:
         # generate mesh (with activate console output)
         self._gmshOutput(1)                                                     # activate Gmsh console output
         self.gmshAPI.mesh.generate(self.dimension)                              # generate mesh using the Gmsh-API
+        self.gmshAPI.mesh.setOrder(order)																				# set mesh order
         self._gmshOutput(0)                                                     # deactivate Gmsh console output
 
 

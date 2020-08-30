@@ -117,7 +117,7 @@ testRVE.createMesh(**meshingParameters)
 # format - has to be passed. The package supports all mesh file formats that are
 # supported by meshio. If no filename is passed, meshes are stored to the current
 # directory using the unique model name and the default mesh file format (.msh)
-testRVE.saveMesh("randomInclusions2DCirlce.vtu")
+testRVE.saveMesh("randomInclusions2DCircle.msh")
 
 
 # Show resulting mesh

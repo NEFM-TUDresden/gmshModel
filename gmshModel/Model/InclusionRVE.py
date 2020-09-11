@@ -232,7 +232,7 @@ class InclusionRVE(GenericRVE):
         """
 
         # get relevant data for calculations
-        incInfo=self.inclusionInfo                                              # get information of set inclusions
+        incInfo=cp.deepcopy(self.inclusionInfo)                                 # get information of set inclusions (deepcopy to prevent changes of the model)
         incInfo[:,0:3]=incInfo[:,0:3]-np.atleast_2d(self.origin)                # temporariliy eliminate origin offset for all inclusions to simplify calculations
         bndPoints=np.asarray([[0, 0, 0], self.size])                            # temporariliy assume an RVE with origin at [0,0,0] to simplify calculations
         axes=self.relevantAxes                                                  # get relevant axes for distance calculations

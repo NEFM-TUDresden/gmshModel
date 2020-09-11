@@ -371,7 +371,7 @@ class RandomInclusionRVE(InclusionRVE):
             name of the file to save the inclusion information in
         """
         fileDir,fileName,fileExt=self._getFileParts(file,"Misc")                # split fileName into file parts
-        with open(fileDir+"/"+fileName+fileExt) as incInfoFile:                 # open file
+        with open(fileDir+"/"+fileName+fileExt,"w") as incInfoFile:                 # open file
             np.savetxt(incInfoFile,self.inclusionInfo)                          # save information to file
 
 

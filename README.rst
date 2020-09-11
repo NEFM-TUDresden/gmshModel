@@ -61,8 +61,8 @@ channel allows to use a similar procedure for Conda users: ::
 
 It is also possible to download the source code from `GitHub <https://github.com/NEFM-TUDresden/GmshModel/>`_
 or `PyPi <https://pypi.org/project/gmshModel/>`_ and install gmshModel manually. For more details, check
-the `Installation <https://gmshmodel.readthedocs.io/en/latest/gettingStarted/installation.html>`_ page
-of the documentation.
+the `installation page <https://gmshmodel.readthedocs.io/en/latest/gettingStarted/installation.html>`_ of 
+the documentation.
 
 
 Dependencies

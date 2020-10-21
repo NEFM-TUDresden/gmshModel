@@ -116,7 +116,7 @@ Code
                              "interInclusionRefinement": True,                     # flag to indicate active refinement of space between inclusions (inter-inclusion refinement)
                              "elementsPerCircumference": 18,                       # use 18 elements per inclusion circumference for inclusion refinement
                              "elementsBetweenInclusions": 3,                       # ensure 3 elements between close inclusions for inter-inclusion refinement
-                             "inclusionRefinementWidth": 3,                        # use a relative (to inclusion radius) refinement width of 1 for inclusion refinement
+                             "inclusionRefinementWidth": 3,                        # use a relative (to inclusion radius) refinement width of 3 for inclusion refinement
                              "transitionElements": "auto",                         # automatically calculate number of transitioning elements (elements in which tanh function jumps from h_min to h_max) for inter-inclusion refinement
                              "aspectRatio": 1.5                                    # aspect ratio for inter-inclusion refinement: ratio of refinement in inclusion distance and perpendicular directions
        }

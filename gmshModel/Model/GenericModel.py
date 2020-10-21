@@ -287,7 +287,7 @@ class GenericModel:
         os.makedirs(fileDir,exist_ok=True)                                      # ensure that the file directory exists
         if fileExt == ".msh":                                                   # file extension is ".msh"
             gmsh.write(fileDir+"/"+fileName+fileExt)                            # -> save mesh using built-in gmsh.write method
-        elif fileExt == ".feap":																								# file extension is ".feap" -> write feap mesh files
+        elif fileExt == ".feap":                                                # file extension is ".feap" -> write feap mesh files
             FeapExport(self)
         else:                                                                   # file extension is different from ".msh"
             if fileExt in SUPPORTED_MESH_FORMATS:                               # -> check if file extension is supported by meshio

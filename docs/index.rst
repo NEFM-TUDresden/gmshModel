@@ -36,7 +36,7 @@ and its features: ::
 
    $ python3 -m pip install gmshModel
 
-For ``conda`` users, the installation command is straightforward, too:
+For ``conda`` users, the installation command is straightforward, too: ::
 
    $ conda install -c conda-forge gmshModel
 
@@ -97,6 +97,7 @@ and how you can use them to generate your own model:
 * :ref:`api_geometry_ref` gives information on available geometric objects
 * :ref:`api_model_ref` explains all available models
 * :ref:`api_visualization_ref` gives information on the visualization capabilities of gmshModel
+* :ref:`api_meshExport_ref` comments on additional mesh output formats (extending meshio)
 
 .. toctree::
    :hidden:

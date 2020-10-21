@@ -245,26 +245,27 @@ class InclusionRVE(GenericRVE):
         for iInc in range(0,np.shape(incInfo)[0]):
 
             # get current inclusion from original incInfo array and initialize number of instances
-            thisIncInfo=np.atleast_2d(incInfo[iInc,:])
-            thisIncInstances=1
+            thisIncInfo=np.atleast_2d(incInfo[iInc,:])                          # information of original inclusion
+            copyDirs=np.zeros((1,3),dtype=bool)                                 # array to mark copies of the original inclusion in specific directions
+            thisIncInstances=1                                                  # number of instances for this inclusion
 
             # get distance of inclusion to boundaries
             distBndsCenter=np.absolute(self._getDistanceVector(thisIncInfo[0,:],bndPoints,axes)) # calculate (per-direction) distance of inclusion center to domain boundaries
-            distBnds=distBndsCenter-thisIncInfo[0,3]                                              # get corresponding distance of inclusion boundary
-            closeBnds=np.array(np.where((distBnds<=relDistBnd*thisIncInfo[0,3]) & (distBnds>0)))  # check which inclusions are close to which boundaries of the domain; omit inclusions with negative distances to the boundaries, since they are periodic copies of other inclusions and do not need to be checked separately
+            distBnds=distBndsCenter-thisIncInfo[0,3]                                             # get corresponding distance of inclusion boundary
+            closeBnds=np.array(np.where((distBnds<=relDistBnd*thisIncInfo[0,3]) & (distBnds>0))) # check which inclusions are close to which boundaries of the domain; omit inclusions with negative distances to the boundaries, since they are periodic copies of other inclusions and do not need to be checked separately
 
             # loop over all "close" boundaries
             for iBnd in range(0,np.shape(closeBnds)[1]):
-                thisIncCopies=cp.deepcopy(thisIncInfo)                          # initialize current copy with current inclusion data (deepcopy)
-                thisIncCopies[:,axes[closeBnds[1,iBnd]]]+=(-1)**closeBnds[0,iBnd]*self.size[axes[closeBnds[1,iBnd]]] # modify inclusion centers of copies
+                validIncs=~copyDirs[:,axes[closeBnds[1,iBnd]]]                  # get valid inclusions to copy, i.e.: inclusions that have not been copied along this axis before
+                thisIncCopies=cp.deepcopy(thisIncInfo[validIncs,:])             # initialize current copy with current inclusion data (deepcopy)
+                isCopyInDir=cp.deepcopy(copyDirs[validIncs,:])                  # initialize indicator for copies in specific directions
+                thisIncCopies[:,axes[closeBnds[1,iBnd]]]+=(-1)**closeBnds[0,iBnd]*self.size[axes[closeBnds[1,iBnd]]] # modify inclusion centers of copies (only if they are not already a copy in this direction -> prevent superfluous copies)
+                isCopyInDir[:,axes[closeBnds[1,iBnd]]]=True                     # set current axis direction to True (indicate that this already is a copy in the specified direction)
                 thisIncInfo=np.r_[thisIncInfo,thisIncCopies]                    # append copied inclusions to current inclusion data
-
-            # use unique for the unlikely case of inclusions that are close to
-            # positive and negative boundaries (inclusions close to the center)
-            thisIncInfo=np.unique(thisIncInfo,axis=0)                           # original and copies of this inclusion
-            thisIncInstances=np.shape(thisIncInfo)[0]                           # number of instances for this inclusion
+                copyDirs=np.r_[copyDirs,isCopyInDir]                            # append markers to overall array
 
             # update extended incInfo array
+            thisIncInstances=np.shape(thisIncInfo)[0]                           # number of instances for this inclusion
             extIncInfo[totalIncInstances:totalIncInstances+thisIncInstances,:]=thisIncInfo # save information on current inclusion and its copies
             totalIncInstances+=thisIncInstances                                 # updated number of total inclusion instances
 

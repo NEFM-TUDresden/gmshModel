@@ -137,6 +137,7 @@ class MeshVisualization():
             self.model.saveMesh(tmpFile)                                        # create temporary file
 
             self.mesh=pv.UnstructuredGrid(tmpFile)                              # load mesh from temporary file with pyvista
+            self.mesh.set_active_scalars("gmsh:physical")                       # set gmsh:physical to be the active scalar
             self.scalars = self.mesh.active_scalars_info                        # get field ID and name of active scalar field
 
             # add widgets and key events

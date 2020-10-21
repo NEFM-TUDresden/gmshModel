@@ -10,6 +10,7 @@ from gmshModel._version import __version__
 # import modules
 from . import (
     Geometry,
+    MeshExport,
     Model,
     Visualization,
 )

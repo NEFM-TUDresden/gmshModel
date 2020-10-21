@@ -16,6 +16,7 @@ from . import (
 
 # decide what happens for "from gmshModel import *"
 __all__=["Geometry",
+         "MeshExport",
          "Model",
          "Visualization",
          "__version__"]

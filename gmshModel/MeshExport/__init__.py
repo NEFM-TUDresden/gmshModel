@@ -3,6 +3,4 @@
 ################################################################################
 
 # import modules
-from .MeshExport import (
-    FeapExport
-)
+from .MeshExport import FeapExport

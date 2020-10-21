@@ -1,7 +1,10 @@
 import numpy as np
 
 def FeapExport(model):
-
+    """
+    Method providing a direct mesh export for FEAP using the mesh information
+    available from the model.
+    """
     # nodal transformation for connectivity needed for 2nd order tetrahedron
     # -> swap last two entries
     tet_2 = [0 , 1 , 2 , 3 , 4 , 5 , 6 , 7 , 9 , 8]

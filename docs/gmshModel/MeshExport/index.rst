@@ -10,4 +10,4 @@ implemented - other export formats can be added here, if required.
 .. toctree::
    :maxdepth: 1
 
-   MeshExport
+   FeapExport

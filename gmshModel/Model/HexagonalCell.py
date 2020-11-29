@@ -150,7 +150,7 @@ class HexagonalCell(GenericUnitCell):
 
         # determine size of one unit cell
         if inclusionType == "Sphere":                                           # unit cell is three-dimensional with spherical inclusion
-            unitSize=[distance, np.sqrt(3)*distance, np.sqrt(3)*distance]       # -> define normal cell size for a hexagonal unit cell
+            unitSize=[distance, np.sqrt(3)*distance, np.sqrt(8/3)*distance]     # -> define normal cell size for a hexagonal unit cell
         elif inclusionType == "Cylinder":                                       # unit cell is three-dimensional with cylindrical inclusion
             cylinderAxis = np.array(np.nonzero(inclusionAxis)).flatten()        # -> get index of cylinder axis
             planeAxes=np.setdiff1d(np.array([0,1,2]),cylinderAxis)              # -> get indices of remaining axes
@@ -198,8 +198,8 @@ class HexagonalCell(GenericUnitCell):
             # -> divide by N to account for mutliple cells
             offsets=np.array([[0, 0, 0],                                        # corner inclusions
                               [size[0]/2, size[1]/2, 0],                        # face-centered inclusions in bottom and top layers
-                              [size[0]/2, size[1]/(2*np.sqrt(3)), size[2]/2],   # inclusions of center layer with x=Lx/2
-                              [0, size[1]/2*(1+1/np.sqrt(3)), size[2]/2]])/N    # inclusions of center layer with x=0 and x=L
+                              [size[0]/2, size[1]/(4*np.sqrt(3)), size[2]/2],   # inclusions of center layer with x=Lx/2
+                              [0, size[1]/2*(1+1/(2*np.sqrt(3))), size[2]/2]])/N# inclusions of center layer with x=0 and x=L
 
         # determine inclusion center points
         C=np.empty(shape=(0,3))                                                 # initialize empty array for center points

@@ -60,9 +60,9 @@ initParameters={                                                                
     "domainGroup": "domain",                                                    # use "domain" as name for the domainGroup
     "inclusionGroup": "inclusions",                                             # use "inclusions" as name for the inclusionGroup
     "gmshConfigChanges": {"General.Terminal": 0,                                # deactivate console output by default (only activated for mesh generation)
-    											"Mesh.ElementOrder":2,																# set element order to 2nd
-                          "Mesh.CharacteristicLengthExtendFromBoundary": 0,     # do not calculate mesh sizes from the boundary by default (since mesh sizes are specified by fields)																		
-    											}
+                          "Mesh.ElementOrder":2,                                # set element order to 2
+                          "Mesh.CharacteristicLengthExtendFromBoundary": 0,     # do not calculate mesh sizes from the boundary by default (since mesh sizes are specified by fields)
+                          }
 }
 testRVE=RandomInclusionRVE(**initParameters)
 
@@ -118,7 +118,7 @@ testRVE.createMesh(**meshingParameters)
 # format - has to be passed. The package supports all mesh file formats that are
 # supported by meshio. If no filename is passed, meshes are stored to the current
 # directory using the unique model name and the default mesh file format (.msh)
-testRVE.saveMesh("randomInclusions3DSphere.msh")
+testRVE.saveMesh("randomInclusions3DSphere.feap")
 
 
 # Show resulting mesh

@@ -136,7 +136,7 @@ class GenericRVE(GenericModel):
         sides of the RVE boundary"""
         # calculate required information from the RVE data
         bboxRVE=np.r_[[self.origin], [self.origin+self.size]]                   # bounding box of the RVE: bboxRVE=[[minBBoxPoint],[maxBBoxPoint]]
-        tol=100*self.getGmshOption("Geometry.Tolerance")                        # tolerance for entity detection
+        tol=100*self.getGmshOption("Geometry.Tolerance")                        # tolerance for entity detection (factor 100 to find entities in wider bounding boxes)
 
         # calculate translation vector and affine transformation matrix
         transVec=np.zeros((3,1))                                                # initialize translation vector for the current pair of boundary entities

@@ -122,7 +122,8 @@ class GenericModel:
         # initialize Gmsh-Python-API
         self.gmshConfigChanges={                                                # default Gmsh configuration changes
             "General.Terminal": 0,                                              # deactivate console output by default (only activated for mesh generation)
-            "Mesh.CharacteristicLengthExtendFromBoundary": 0,                   # do not calculate mesh sizes from the boundary by default (since mesh sizes are specified by fields)
+            "Geometry.OCCBoundsUseStl": 1,                                      # use more accurate computation of bounding boxes (slower but advantegous for periodicity constraints)
+            "Geometry.Tolerance": 1e-12                                         # adjust geometric tolerance to be a little more precise then default (1e-8)
         }
         self.gmshAPI=self.initializeGmsh(gmshConfigChanges)                     # this assignment facilitates the usage of all methods provided by the gmsh.model class
 

@@ -70,7 +70,7 @@ Code
        "numberCells": [1,1,1],                                                     # generate 1 unit cell in every spatial direction
        "radius": 2.5,                                                              # set the inclusion radius to 2.5
        "inclusionType": "Sphere",                                                  # define inclusionType as "Sphere"
-       "size": [6, 6*3**(0.5), 6*3**(0.5)],                                        # set cell size instead of distance
+       "size": [6, 6*3**(0.5), 6*(8/3)**(0.5)],                                    # set cell size instead of distance
        "origin": [0, 0, 0],                                                        # set cell origin to [0,0,0]
        "periodicityFlags": [1, 1, 1],                                              # define all axis directions as periodic
        "domainGroup": "domain",                                                    # use "domain" as name for the domainGroup

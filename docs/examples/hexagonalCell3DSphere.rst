@@ -124,7 +124,7 @@ Code
    # format - has to be passed. The package supports all mesh file formats that are
    # supported by meshio. If no filename is passed, meshes are stored to the current
    # directory using the unique model name and the default mesh file format (.msh)
-   testCell.saveMesh("hexagonalCell3DSphere.vtu")
+   testCell.saveMesh("hexagonalCell3DSphere.feap")
 
 
    # Show resulting mesh

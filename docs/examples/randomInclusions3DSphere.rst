@@ -124,7 +124,7 @@ Code
    # supported by meshio. If no filename is passed, meshes are stored to the current
    # directory using the unique model name and the default mesh file format (.msh)
    #
-   testRVE.saveMesh("randomInclusions3DSphere.msh")
+   testRVE.saveMesh("randomInclusions3DSphere.feap")
 
 
    # Show resulting mesh

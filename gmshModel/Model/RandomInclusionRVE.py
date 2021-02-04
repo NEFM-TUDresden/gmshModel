@@ -295,7 +295,7 @@ class RandomInclusionRVE(InclusionRVE):
         # initialization
         totalInstancesSet=0                                                     # number of already set inclusion instances (inclusions and copies of them)
         incInfo=np.zeros((4*np.sum(nSets).astype(int),6))                       # incInfo=[ [incCoords], rInc, mindDistBnd, mindDistInc] -> assume every inclusion to cut potentially two boundaries (i.e. to have three copies) for initialization
-        placementInfo=np.zeros(np.shape(rSets))                                 # information about placed inclusions for the individual sets
+        self.placementInfo=np.zeros(np.shape(rSets))                            # information about placed inclusions for the individual sets
 
         # loop over all incSets
         relevantAxesFlags=np.zeros((3,))                                        # creaty auxiliary flag variable to indicate axes which are relevant for inclusion center calculation
@@ -348,8 +348,8 @@ class RandomInclusionRVE(InclusionRVE):
                     placedIncsForSet+=1
                     totalInstancesSet+=thisIncInstances
 
-                # save number of placed inclusions for the current set to setIncsInfo
-                placementInfo[iSet]=placedIncsForSet
+                # save number of placed inclusions for the current set to placementInfo
+                self.placementInfo[iSet]=placedIncsForSet
 
         # prepare incInfo for output (get relevant rows and cols)
         incInfo[:,0:3]=incInfo[:,0:3]+np.atleast_2d(self.origin)                # translate center coordinates to match with defined origin of the RVE domain

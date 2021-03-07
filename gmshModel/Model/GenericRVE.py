@@ -7,7 +7,8 @@
 # with periodicity constraints.
 #
 # Currently, the class is restricted to RVEs with rectangular (2D)/ box-shaped
-# (3D) domains (explicitly assumed within the setupPeriodicity() method).
+# (3D) domains (explicitly assumed within boundary and the setupPeriodicity()
+# method).
 
 ###########################
 # Load required libraries #
@@ -18,6 +19,7 @@ import copy as cp                                                               
 
 # self-defined class definitions and modules
 from .GenericModel import GenericModel                                          # generic model class definition (parent class)
+from ..Geometry import GeometricObjects as geomObj                              # geometric objects
 
 
 ###########################
@@ -27,22 +29,16 @@ class GenericRVE(GenericModel):
     """Generic class for RVEs created using the Gmsh-Python-API
 
     Based on the GenericModel class, this class provides extra attributes and
-    methods that all box-shaped RVEs should have: the definition of size, origin
-    and periodicityFlags as additional attributes facilitates an update of the
+    methods that all box-shaped RVEs should have: the definition of domain and
+    periodicityFlags as additional attributes facilitates an update of the
     parents class placeholder method setupPeriodicity().
 
-    Attributes:
-    -----------
-    dimension: int
-        dimension of the model instance
-
-    size: list/array
-        size of the box-shaped RVE model
-        -> size=[Lx, Ly, (Lz)]
-
-    origin: list/array
-        origin of the box-shaped RVE model
-        -> origin=[Ox, Oy, (Oz)]
+    Additional Attributes:
+    ----------------------
+    domain: object instance
+        geometric object which describes the RVE domain
+        -> 2D: Box object
+        -> 3D: Rectangle object
 
     periodicityFlags: list/array
         flags indicating the periodic axes of the box-shaped RVE model
@@ -52,7 +48,7 @@ class GenericRVE(GenericModel):
     #########################
     # Initialization method #
     #########################
-    def __init__(self,size=None,origin=[0,0,0],periodicityFlags=[1,1,1],gmshConfigChanges={}):
+    def __init__(self,size=None,origin=[0,0,0],periodicityFlags=[1,1,1],domainGroup="domain",gmshConfigChanges={}):
         """Initialization method for box-shaped RVE models
 
         Parameters:
@@ -68,6 +64,9 @@ class GenericRVE(GenericModel):
         periodicityFlags: list/array
             flags indicating the periodic axes of the box-shaped RVE model
             -> periodicityFlags=[0/1, 0/1, 0/1]
+
+        domainGroup: string
+            name of the group the RVE domain should belong to
 
         gmshConfigChanges: dict
             dictionary for user updates of the default Gmsh configuration
@@ -100,10 +99,14 @@ class GenericRVE(GenericModel):
         # initialize parent (GenericModel) class attributes and methods
         super().__init__(dimension=dimension,gmshConfigChanges=gmshConfigChanges)
 
+        # get RVE domain depending on dimension
+        if dimension == 3:                                                      # dimension is 3
+            self.domain=geomObj.Box(size,origin,domainGroup)                    # -> RVE domain must be a box
+        elif dimension == 2:                                                    # dimension is 2
+            self.domain=geomObj.Rectangle(size,origin,domainGroup)              # -> RVE domain must be a rectangle
+
         # initialize attributes that all instances of GenericRVE should have
-        self.origin=origin                                                      # initialize unset RVE origin
-        self.size=size                                                          # initialize unset RVE size
-        self.periodicityFlags=periodicityFlags                                  # initialize unset periodic axes flags for the RVE
+        self.periodicityFlags=periodicityFlags                                  # initialize periodic axes flags for the RVE
 
 
 
@@ -135,7 +138,7 @@ class GenericRVE(GenericModel):
         """Internal method to search for associated Gmsh entities on opposing
         sides of the RVE boundary"""
         # calculate required information from the RVE data
-        bboxRVE=np.r_[[self.origin], [self.origin+self.size]]                   # bounding box of the RVE: bboxRVE=[[minBBoxPoint],[maxBBoxPoint]]
+        bboxRVE=np.r_[[self.domain.origin], [self.domain.origin+self.domain.size]] # bounding box of the RVE: bboxRVE=[[minBBoxPoint],[maxBBoxPoint]]
         tol=100*self.getGmshOption("Geometry.Tolerance")                        # tolerance for entity detection (factor 100 to find entities in wider bounding boxes)
 
         # calculate translation vector and affine transformation matrix
@@ -151,7 +154,6 @@ class GenericRVE(GenericModel):
             bboxBnd=cp.deepcopy(bboxRVE)                                        # -> initialze bounding box for the current boundary as copy of bboxRVE
             bboxBnd[1-iSide,axis]=bboxRVE[iSide,axis]                           # -> modify the coordinate of the relevant dimension to match the boundary under consideration
             bboxBnd=bboxBnd+np.array([[-tol],[tol]])                            # -> add tolerances to the bounding box
-
 
             # find entities on boundary under consideration
             entityTags=self.getIDsFromTags(self.gmshAPI.getEntitiesInBoundingBox(*bboxBnd[0], *bboxBnd[1], self.dimension-1))
@@ -198,7 +200,7 @@ class GenericRVE(GenericModel):
         for jEnt in range(0,nEntities):
             bboxEnt=np.array(self.gmshAPI.getBoundingBox(dim,associatedEntities[1][jEnt])) # find bounding box of current entity
             bboxesDiff=bboxesPos-bboxEnt                                        # calculate difference to all precomputed bounding boxes on positive side
-            sortedIndices[jEnt]=np.argmin(np.linalg.norm(bboxesDiff,axis=1))       # determine index of entity with minimum distance of actual and precomputed bounding boxes
+            sortedIndices[jEnt]=np.argmin(np.linalg.norm(bboxesDiff,axis=1))    # determine index of entity with minimum distance of actual and precomputed bounding boxes
 
         # update sorting of entities on positive side
         associatedEntities[0]=associatedEntities[0][sortedIndices]

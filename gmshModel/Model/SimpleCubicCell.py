@@ -33,57 +33,9 @@ class SimpleCubicCell(GenericUnitCell):
     specified instead, the distance is calculated: this allows for unit cells
     with a cuboid particle distribution
 
-    Attributes:
-    -----------
-    dimension: int
-        dimension of the model instance
-
-    distance: float
-        distance of the inclusions within the unit cell (for automatic size calculation)
-
-    radius: float
-        radius of the unit cells inclusions
-
-    numberCells: list/array
-        array providing the number of cells in the individual axis directions
-        -> numberCells=[nx, ny, (nz)]
-
-    size: list/array
-        size of the simple cubic unit cell (allow box-shaped cells)
-        -> size=[Lx, Ly, (Lz)]
-
-    origin: list/array
-        origin of the simple cubic unit cell
-        -> origin=[Ox, Oy, (Oz)]
-
-    inclusionType: string
-        string defining the type of inclusion
-        -> iunclusionType= "Sphere"/"Cylinder"/"Circle"
-
-    inclusionAxis:list/array
-        array defining the inclusion axis (only relevant for inclusionType "Cylinder")
-        -> currently restricted to Cylinders parallel to one of the coordinate axes
-        -> inclusionAxes=[Ax, Ay, Az]
-
-    relevantAxes: list/array
-        array defining the relevant axes for distance calculations
-
-    periodicityFlags: list/array
-        flags indicating the periodic axes of the simple cubic unit cell
-        -> periodicityFlags=[0/1, 0/1, 0/1]
-
-    inclusionInfo: array
-        array containing relevant inclusion information (center, radius) for
-        distance calculations
-
-    domainGroup: string
-        name of the group the unit cells domain should belong to
-
-    inclusionGroup: string
-        name of the group the unit cells inclusions should belong to
-
-    gmshConfigChanges: dict
-        dictionary for user updates of the default Gmsh configuration
+    Additional Attributes:
+    ----------------------
+    none
     """
     #########################
     # Initialization method #
@@ -170,26 +122,31 @@ class SimpleCubicCell(GenericUnitCell):
         """Method to place inclusions for the simple cubic unit cell"""
 
         # get available information
-        origin=self.origin                                                      # origin of unit cell
-        size=self.size                                                          # (total) size of unit cell
+        origin=self.domain.origin                                               # origin of unit cell
+        size=self.domain.size                                                   # (total) size of unit cell
         N=cp.deepcopy(self.numberCells)                                         # number of cells
-        axesFlags=np.zeros((3,))                                                # creaty auxiliary flag variable to indicate axes which are relevant for inclusion center calculation
-        axesFlags[self.relevantAxes]=1                                          # set axesFlags to 1 for the relevant axes
+        relAxFlags=self.relevantAxesFlags                                       # axes which are relevant for inclusion center calculation
 
         # correct number of cells for non-spherical inclusions
         if self.inclusionType in ["Circle", "Cylinder"]:                        # inclusion type is "Cylinder" or "Cirlce"
             # ensure only 1 cell in the out-of-plane direction to avoid problems
             # with boolean operations, etc
-            outOfPlaneAxis=np.setdiff1d(np.array([0,1,2]),self.relevantAxes)
-            N[outOfPlaneAxis]=1
+            outOfPlaneAxis=np.arange(3)[relAxFlags==0]                          # get out of plane axis
+            N[outOfPlaneAxis]=1                                                 # ensure only 1 cell in out of plane axis direction
 
         # calculate required information
-        offset=size*axesFlags/(2*N)                                             # offset (per direction) of inclusion centers from cell boundaries
+        offset=size*relAxFlags/(2*N)                                            # offset (per direction) of inclusion centers from cell boundaries
         P0=origin+offset                                                        # coordinates of first inclusion
         P1=origin+size-offset                                                   # coordinates of last inclusion
 
         # get center coordinates of all inclusions
         C=np.mgrid[P0[0]:P1[0]:N[0]*1j,P0[1]:P1[1]:N[1]*1j,P0[2]:P1[2]:N[2]*1j].reshape(3,-1).T
 
-        # save relevant results in randomInclusions object
-        self.inclusionInfo=np.c_[C, self.radius*np.ones((np.shape(C)[0],1))]
+        # create inclusion objects and save them
+        for inc in np.shape(C)[0]:
+            if self.inclusionType == "Sphere" or self.inclusionType == "Circle":
+                incObj = self.generateInclusion(center=C[inc,:], radius=self.radius)
+            elif self.inclusionType == "Cylinder":
+                incObj = self.generateInclusion(base=C[inc,:], axis=self.inclusionAxis, radius=self.radius)
+            self.inclusions.append = incObj                                     # add inclusion object to list of unit cells inclusions
+            self.updateIncInfo(incObj,self.inclusionInfo)                       # add inclusion information to inclusionInfo dict

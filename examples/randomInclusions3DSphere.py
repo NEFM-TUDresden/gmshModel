@@ -76,7 +76,7 @@ testRVE=RandomInclusionRVE(**initParameters)
 # options can be changed by the user. To this end, the possible parameters are:
 #
 # placementOptions: dict (optional)
-#   user updates for the inclusion placement algorithm
+# user updates for the inclusion placement algorithm
 modelingParameters={                                                            # save all possible parameters in one dict to facilitate the method call
     "placementOptions": {"maxAttempts": 10000,                                  # maximum number of attempts to place one inclusion
                          "minRelDistBnd": 0.1,                                  # minimum relative (to inclusion radius) distance to the domain boundaries

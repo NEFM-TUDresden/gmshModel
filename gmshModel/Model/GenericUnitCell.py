@@ -4,6 +4,12 @@
 # This file provides a class definition for a generation of inclusion-based unit
 # cells. The class inherits from the InclusionRVE class and extends it in order
 # to specify the requirements of all derived unit cells child classes.
+#
+# In contrast to the parent InclusionRVE class, where - for cylinders - the
+# inclusionAxis variable is allowed to vary for the individual inclusions, only
+# cylinders that are parallel to each other and one of the coordinate axes are
+# allowed here.
+
 
 ###########################
 # Load required libraries #
@@ -32,11 +38,8 @@ class GenericUnitCell(InclusionRVE):
     unit cells with an inclusion distribution that is close to physical unit
     cells but gives more freedom in their generation.
 
-    Attributes:
-    -----------
-    dimension: int
-        dimension of the model instance
-
+    Additional Attributes:
+    ----------------------
     distance: float
         distance of the inclusions within the unit cell (for automatic size calculation)
 
@@ -46,48 +49,11 @@ class GenericUnitCell(InclusionRVE):
     numberCells: list/array
         array providing the number of cells in the individual axis directions
         -> numberCells=[nx, ny, (nz)]
-
-    size: list/array
-        size of the unit cell (allow box-shaped cells)
-        -> size=[Lx, Ly, (Lz)]
-
-    origin: list/array
-        origin of the unit cell
-        -> origin=[Ox, Oy, (Oz)]
-
-    inclusionType: string
-        string defining the type of inclusion
-        -> iunclusionType= "Sphere"/"Cylinder"/"Circle"
-
-    inclusionAxis:list/array
-        array defining the inclusion axis (only relevant for inclusionType "Cylinder")
-        -> currently restricted to Cylinders parallel to one of the coordinate axes
-        -> inclusionAxis=[Ax, Ay, Az]
-
-    relevantAxes: list/array
-        array defining the relevant axes for distance calculations
-
-    periodicityFlags: list/array
-        flags indicating the periodic axes of the unit cell
-        -> periodicityFlags=[0/1, 0/1, 0/1]
-
-    inclusionInfo: array
-        array containing relevant inclusion information (center, radius) for
-        distance calculations
-
-    domainGroup: string
-        name of the group the unit cells domain should belong to
-
-    inclusionGroup: string
-        name of the group the unit cells inclusions should belong to
-
-    gmshConfigChanges: dict
-        dictionary for user updates of the default Gmsh configuration
     """
     #########################
     # Initialization method #
     #########################
-    def __init__(self,distance=None,radius=None,numberCells=[1,1,1],size=None,inclusionType=None,inclusionAxis=None,origin=[0,0,0],periodicityFlags=[1,1,1],domainGroup="domain",inclusionGroup="inclusions",gmshConfigChanges={}):
+    def __init__(self,distance=None,radius=None,numberCells=[1,1,1],size=None,inclusionType=None,inclusionAxis=[0,0,1],origin=[0,0,0],periodicityFlags=[1,1,1],domainGroup="domain",inclusionGroup="inclusions",gmshConfigChanges={}):
         """Initialization method for GenericUnitCell object instances
 
         Parameters:
@@ -140,14 +106,6 @@ class GenericUnitCell(InclusionRVE):
         if distance is not None and size is not None:
             raise TypeError("Duplicate information for the unit cell detected. To prevent conflicting information, only one of the variables \"distance\" and \"size\" is supposed to be passed. Check your input.")
 
-        # additionally check if inclusionType is passed, since it is needed here
-        # (This is a duplicate check, since inclusionType will be checked again
-        #  within the parent classes __init__)
-        if inclusionType is None:
-            raise TypeError("No inclusion type passed. To generated an inclusion-based unit cell, the type of inclusions must be specified. Check your input.")
-        if inclusionType == "Cylinder" and inclusionAxis is None:
-            raise TypeError("No cylinder axis passed. For inclusions of type cylinder, the length and direction must be specified with the variable \"inclusionAxis\". Check your input")
-
         # plausibility checks for remaining input variables
         if radius is None:                                                      # check if radius has a value
             raise TypeError("Variable \"radius\" not set! For an inclusion-based unit cell, the radius must be defined. Check your input data.")
@@ -171,31 +129,13 @@ class GenericUnitCell(InclusionRVE):
             size=self._getCellSize(distance,inclusionType,inclusionAxis)
 
         # initialize parent classes attributes and methods
-        super().__init__(size=size,inclusionType=inclusionType,inclusionAxis=inclusionAxis,origin=origin,periodicityFlags=periodicityFlags,gmshConfigChanges=gmshConfigChanges)
+        super().__init__(size=size,inclusionType=inclusionType,origin=origin,periodicityFlags=periodicityFlags,gmshConfigChanges=gmshConfigChanges)
 
 
 
 ################################################################################
 #                 SPECIFIED/OVERWRITTEN PLACEHOLDER METHODS                    #
 ################################################################################
-
-    ############################################################################
-    # Method to define the required geometric objects for the model generation #
-    ############################################################################
-    def defineGeometricObjects(self):
-        """Overwritten method of the GenericModel class to define and create the
-        required geometric objects for the model generation
-        """
-
-        # generate geometry
-        self.addGeometricObject(self.domainType,group=self.domainGroup,origin=self.origin,size=self.size) # add domain object to calling RVE
-        self.placeInclusions()                                                  # call internal inclusion placement routine
-        for i in range(0,np.shape(self.inclusionInfo)[0]):                      # loop over all inclusions
-            if self.inclusionType in ["Sphere","Circle"]:
-                self.addGeometricObject(self.inclusionType,group=self.inclusionGroup,center=self.inclusionInfo[i,0:3],radius=self.inclusionInfo[i,3]) # add inclusions to calling RVE object
-            elif self.inclusionType == "Cylinder":
-                self.addGeometricObject(self.inclusionType,group=self.inclusionGroup,center=self.inclusionInfo[i,0:3],radius=self.inclusionInfo[i,3],axis=self.inclusionAxis*self.numberCells) # add inclusions to calling RVE object (multiply by number of cells to ensure correct cylinder length)
-
 
     ###################################################
     # Method for the definition of boolean operations #
@@ -267,11 +207,4 @@ class GenericUnitCell(InclusionRVE):
     def _getCellSize(self,distance,inclusionType,inclusionAxis):
         """Placeholder methof to determine the cell size of an inclusion-based
         unit cell"""
-        pass
-
-    ####################################################
-    # Method for the cell-specific inclusion placement #
-    ####################################################
-    def placeInclusions(self):
-        """Placeholder method to place inclusions for the inclusion-based unit cell"""
         pass

@@ -35,16 +35,10 @@ class HelicalChain(InclusionRVE):
     since it is the only reasonable choice) and the chain axis. One unit cell is
     supposed to contain one full helix.
 
-    Attributes:
-    -----------
-    dimension: int
-        dimension of the model instance
-
+    Additional Attributes:
+    ----------------------
     chainRadius: float
         radius of the helical chain
-
-    inclusionRadius: float
-        radius of the helical chain inclusions
 
     theta: float
         angle (radian) between two inclusions of the helical chain
@@ -52,43 +46,6 @@ class HelicalChain(InclusionRVE):
     chainDirection: list/array
         array defining the chain axis direction
         -> currently restricted to chains parallel to one of the coordinate axes
-
-    numberCells: list/array
-        array providing the number of cells in the individual axis directions
-        -> numberCells=[nx, ny, (nz)]
-
-    size: list/array
-        size of the helical chains surrounding unit cell (box-shaped cell)
-        -> if the angle alpha is passed, only the sizes perpendicular to the chain axis direction have to be passed
-        -> size=[Lx, Ly, (Lz)]
-
-    origin: list/array
-        origin of the unit cell
-        -> origin=[Ox, Oy, (Oz)]
-
-    inclusionType: string
-        string defining the type of inclusion
-        -> inclusionType= "Sphere"/"Circle"
-
-    relevantAxes: list/array
-        array defining the relevant axes for distance calculations
-
-    periodicityFlags: list/array
-        flags indicating the periodic axes of the unit cell
-        -> periodicityFlags=[0/1, 0/1, 0/1]
-
-    inclusionInfo: array
-        array containing relevant inclusion information (center, radius) for
-        distance calculations
-
-    domainGroup: string
-        name of the group the unit cells domain should belong to
-
-    inclusionGroup: string
-        name of the group the unit cells inclusions should belong to
-
-    gmshConfigChanges: dict
-        dictionary for user updates of the default Gmsh configuration
     """
     #########################
     # Initialization method #
@@ -187,9 +144,9 @@ class HelicalChain(InclusionRVE):
         chainDirInd=np.asarray(np.nonzero(chainDirection)).flatten()
         for axis in range(0,self.dimension):
             if axis != chainDirInd:
-                assert self.size[axis]/numberCells[axis]-2*(chainRadius+inclusionRadius) > 0, "Helical chain does not fit into unit cell. To really create a unit cell of a helical chain, the chains are not allowed to overlap. Check your input."
+                assert self.domain.size[axis]/numberCells[axis]-2*(chainRadius+inclusionRadius) > 0, "Helical chain does not fit into unit cell. To really create a unit cell of a helical chain, the chains are not allowed to overlap. Check your input."
             else:
-                assert self.size[axis]/numberCells[axis]-2*inclusionRadius > 0, "Unreasonable choice of unit cells size in chain direction. In order to create a unit cell of a helical chain, at least one inclusion has to fit in chain axis direction. Check yout input."
+                assert self.domain.size[axis]/numberCells[axis]-2*inclusionRadius > 0, "Unreasonable choice of unit cells size in chain direction. In order to create a unit cell of a helical chain, at least one inclusion has to fit in chain axis direction. Check yout input."
 
         # set attributes from input parameters
         self.chainRadius=chainRadius                                            # save chain radius
@@ -204,21 +161,6 @@ class HelicalChain(InclusionRVE):
 ################################################################################
 #                 SPECIFIED/OVERWRITTEN PLACEHOLDER METHODS                    #
 ################################################################################
-
-    ############################################################################
-    # Method to define the required geometric objects for the model generation #
-    ############################################################################
-    def defineGeometricObjects(self):
-        """Overwritten method of the GenericModel class to define and create the
-        required geometric objects for the model generation
-        """
-
-        # generate geometry
-        self.addGeometricObject(self.domainType,group=self.domainGroup,origin=self.origin,size=self.size) # add domain object to calling RVE
-        self.placeInclusions()                                                  # call internal inclusion placement routine
-        for i in range(0,np.shape(self.inclusionInfo)[0]):                      # loop over all inclusions
-            self.addGeometricObject(self.inclusionType,group=self.inclusionGroup,center=self.inclusionInfo[i,0:3],radius=self.inclusionInfo[i,3]) # add inclusions to calling RVE object
-
 
     ###################################################
     # Method for the definition of boolean operations #
@@ -279,7 +221,6 @@ class HelicalChain(InclusionRVE):
         }]
 
 
-
 ################################################################################
 #                            INCLUSION PLACEMENT                               #
 ################################################################################
@@ -296,8 +237,8 @@ class HelicalChain(InclusionRVE):
         chainRadius=self.chainRadius                                            # radius of the chain
         chainDir=self.chainDirection                                            # chain axis direction
         numCells=self.numberCells                                               # number of cells to create
-        size=self.size                                                          # size of the model
-        origin=self.origin                                                      # origin of the model
+        size=self.domain.size                                                   # size of the unit cell
+        origin=self.domain.origin                                               # origin of the unit cell
 
         # get indices of chain and perpendicular axes
         chainAxis=np.asarray(np.nonzero(chainDir)).flatten()                    # index of the chain axis
@@ -315,18 +256,20 @@ class HelicalChain(InclusionRVE):
         layerDist=size[chainAxis]/(incsPerChain-1)                              # get layer distance in chain axis direction
 
         # determine center points of all inclusions in all chains
-        incInfo=np.zeros((totalIncs,4))                                         # initialize inclusion info array (center points and radii)
+        C=np.zeros((totalIncs,3))                                               # initialize inclusion centers array
         currentInc=0                                                            # initialize counter for placed inclusions
         for iChain in range(0,numberChains):                                    # loop over all chains
             chainOrigin=origin+0.5*chainDist                                    # determine origin of the current chains axis
             chainOrigin[perpAxes]+=cellIndices[iChain,:]*chainDist[perpAxes]    # -> account for current chains/cells position
             helicalAngle=0                                                      # initialize helical angle
             for incInChain in range(0,incsPerChain):                            # loop over all inclusions of the current chain
-                incInfo[currentInc,perpAxes]=chainOrigin[perpAxes]+chainRadius*np.asarray([np.cos(helicalAngle), np.sin(helicalAngle)]) # set coordinates perpendicular to chain direction
-                incInfo[currentInc,chainAxis]=chainOrigin[chainAxis]+incInChain*layerDist # set height of the current inclusion
-                incInfo[currentInc,-1]=radius                                   # add radius
+                C[currentInc,perpAxes]=chainOrigin[perpAxes]+chainRadius*np.asarray([np.cos(helicalAngle), np.sin(helicalAngle)]) # set coordinates perpendicular to chain direction
+                C[currentInc,chainAxis]=chainOrigin[chainAxis]+incInChain*layerDist # set height of the current inclusion
                 helicalAngle+=theta                                             # update helical angle
                 currentInc+=1                                                   # update counter for placed inclusions
 
-        # save inclusion information
-        self.inclusionInfo=incInfo
+        # create inclusion objects and save them
+        for inc in np.shape(C)[0]:
+            incObj = self.generateInclusion(center=C[inc,:], radius=radius)
+            self.inclusions.append = incObj                                     # add inclusion object to list of unit cells inclusions
+            self.updateIncInfo(incObj,self.inclusionInfo)                       # add inclusion information to inclusionInfo dict

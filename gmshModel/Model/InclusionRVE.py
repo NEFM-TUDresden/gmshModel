@@ -8,7 +8,7 @@
 # Currently, the class is restricted to RVEs with rectangular (2D)/ box-shaped
 # (3D) domains (explicitly assumed within the setupPeriodicity() method) which
 # comprise inclusions that are all of the same type (explicitly assumed by using
-# one inclusionInformation array and one inclusionAxis variable).
+# one inclusionInformation array).
 ###########################
 # Load required libraries #
 ###########################
@@ -18,6 +18,7 @@ import copy as cp                                                               
 
 # self-defined class definitions and modules
 from .GenericRVE import GenericRVE                                              # generic RVE class definition (parent class)
+from ..Geometry import GeometricObjects as geomObj                              # defined geometric objects
 
 
 ###########################
@@ -31,46 +32,38 @@ class InclusionRVE(GenericRVE):
     of an inclusion information array and relevant inclusion axes allows to
     provide additional methods for distance and refinement field calculations.
 
-    Attributes:
-    -----------
-    dimension: int
-        dimension of the model instance
+    Additional Attributes:
+    ----------------------
+    inclusionAxis: array
+        array defining one global inclusion axis for RVEs with cylinders
+        -> can - at the moment - only be parallel to one of the coordinate axes
+        -> inclusionAxes=[Ax, Ay, Az]
 
-    size: list/array
-        size of the box-shaped RVE model
-        -> size=[Lx, Ly, (Lz)]
-
-    origin: list/array
-        origin of the box-shaped RVE model
-        -> origin=[Ox, Oy, (Oz)]
-
-    inclusionType: string
-        string defining the type of inclusion
-        -> iunclusionType= "Sphere"/"Cylinder"/"Circle"
-
-    inclusionAxis:list/array
-        array defining the inclusion axis (only relevant for inclusionType "Cylinder")
-        -> currently restricted to Cylinders parallel to one of the coordinate axes
-        -> inclusionAxis=[Ax, Ay, Az]
-
-    relevantAxes: list/array
-        array defining the relevant axes for distance calculations
-
-    periodicityFlags: list/array
-        flags indicating the periodic axes of the box-shaped RVE model
-        -> periodicityFlags=[0/1, 0/1, 0/1]
+    inclusionGroup: string
+        name of the group the inclusions should belong to
 
     inclusionInfo: array
         array containing relevant inclusion information (center, radius) for
         distance calculations
 
-    gmshConfigChanges: dict
-        dictionary for user updates of the default Gmsh configuration
+    inclusions: list
+        list of inclusion objects of the InclusionRVE
+
+    inclusionType: string
+        string defining the type of inclusion
+        -> inclusionType= "Sphere"/"Cylinder"/"Circle"
+
+    refinementOptions: dict
+        dict containing mesh refinement information
+
+    relevantAxesFlags: array
+        array with flags (0/1) to indicate axes that are relevant for distance
+        calculations and the inclusion placement
     """
     #########################
     # Initialization method #
     #########################
-    def __init__(self,size=None,inclusionType=None,inclusionAxis=None,origin=[0,0,0],periodicityFlags=[1,1,1],gmshConfigChanges={}):
+    def __init__(self,size=None,inclusionType=None,inclusionAxis=None,origin=[0,0,0],periodicityFlags=[1,1,1],domainGroup="domain",inclusionGroup="inclusions",gmshConfigChanges={}):
         """Initialization method for InclusionRVE objects
 
         Parameters:
@@ -79,55 +72,61 @@ class InclusionRVE(GenericRVE):
             size of the box-shaped RVE model
             -> size=[Lx, Ly, (Lz)]
 
+        inclusionType: string
+            string defining the type of inclusion
+            -> inclusionType= "Sphere"/"Cylinder"/"Circle"
+
+        inclusionAxis:list/array
+            array defining one global inclusion axis for RVEs with cylinders
+            -> inclusionAxes=[Ax, Ay, Az]
+
         origin: list/array
             origin of the box-shaped RVE model
             -> origin=[Ox, Oy, (Oz)]
 
-        inclusionType: string
-            string defining the type of inclusion
-            -> iunclusionType= "Sphere"/"Cylinder"/"Circle"
-
-        inclusionAxis:list/array
-            array defining the inclusion axis (only relevant for inclusionType "Cylinder")
-            -> currently restricted to Cylinders parallel to one of the coordinate axes
-            -> inclusionAxes=[Ax, Ay, Az]
-
         periodicityFlags: list/array
             flags indicating the periodic axes of the box-shaped RVE model
             -> periodicityFlags=[0/1, 0/1, 0/1]
+
+        domainGroup: string
+            name of the group the RVE domain should belong to
+
+        inclusionGroup: string
+            name of the group the inclusions should belong to
 
         gmshConfigChanges: dict
             dictionary for user updates of the default Gmsh configuration
         """
 
         # initialize parents classes attributes and methods
-        super().__init__(size=size,origin=origin,periodicityFlags=periodicityFlags,gmshConfigChanges=gmshConfigChanges)
+        super().__init__(size=size,origin=origin,periodicityFlags=periodicityFlags,domainGroup=domainGroup,gmshConfigChanges=gmshConfigChanges)
 
         # plausibility checks for additional input variables
-        if inclusionType is None:
+        if inclusionType is None:                                               # no inclusion type passed -> error
             raise TypeError("Variable \"inclusionType\" not set! For RVEs with inclusions, the type of inclusions must be defined. Check your input data.")
-        elif inclusionType == "Cylinder":
-            if inclusionAxis is None:
-                raise TypeError("Inclusion type \"Cylinder\" specified but variable \"inclusionAxis\" not set! For RVEs with cylindrical inclusions, the cylinder axis must be defined. Check your input data.")
-            elif len(inclusionAxis) != 3 or np.count_nonzero(inclusionAxis) != 1:
-                raise ValueError("Wrong amount of non-zero elements in \"inclusionAxis\"! For cylindrical inclusions, the variable \"inclusionAxis\" has to specify the length and direction of the cylinder axis which, at the moment, has to be parallel to one of the coordinate axes. Check your input.")
+        if inclusionType == "Cylinder":                                         # inclusion type is cylinder -> further checks
+            if inclusionAxis is not None:                                       # inclusion axis passed -> all cylinders will have the same axis; perform additional checks
+                if len(np.shape(inclusionAxis)) > 1:                            # check for right amount of array dimensions
+                    raise ValueError("Wrong amount of array dimensions for variable \"inclusionAxis\"! For RVEs with cylindrical inclusions, the variable \"inclusionAxis\" can only be one-dimensional. Check your input data.")
+                elif len(inclusionAxis) != 3 or np.count_nonzero(inclusionAxis) != 1: # cylinder axis not parallel to one of the coordinate axes -> error
+                    raise ValueError("Wrong amount of (non-zero) elements in \"inclusionAxis\"! For RVEs with cylindrical inclusions that are all parallel, the variable \"inclusionAxis\" has to specify the length and direction of the cylinder axis. This cylinder axis has to be parallel to one of the coordinate axes. Check your input.")
+                inclusionAxis=np.asarray(inclusionAxis)
 
-        # determine relevant axes for distance calculations
-        self.inclusionAxis=np.asarray(inclusionAxis)                            # save inclusion axis as numpy array to class object
-        axesIndices=np.arange(0,3)                                              # array with indices of all axes
-        if inclusionType == "Sphere":                                           # spherical inclusions
-            self.relevantAxes=axesIndices                                       # -> all axes are relevant for distance
-        elif inclusionType == "Cylinder":                                       # cylindrical inclusions with axis orientation parallel to one of the coordinate axes
-            self.relevantAxes=axesIndices[self.inclusionAxis[:]==0]             # -> relevant axes are the ones perpendicular to the cylinder axis
-        elif inclusionType == "Circle":                                         # circular/ disk-shaped inclusions
-            self.relevantAxes=axesIndices[[0,1]]                                # -> always assume placement in x-y-plane
+        # determine flags for relevant axes to facilitate placement and distance
+        # computations for parallel cylinders and circles
+        if inclusionType == "Cylinder" and inclusionAxis is not None:           # parallel cylinders
+            axes=np.arange(self.dimension)                                      # -> available axes
+            relevantAxesFlags=(inclusionAxis==0)*1                              # -> flags (0/1) indicating axes perpendicular to the cylinder axis
+        elif self.RVE.inclusionType == "Circle":                                # circles
+            relevantAxesFlags=(self.domain.size>0)*1                            # -> axes with non-zero extent are relevant
+        else:                                                                   # Spheres and non-parallel cylinders
+            relevantAxesFlags=np.ones(self.dimension)                           # -> all axes are relevant
 
-        # determine class names for domain and inclusions geometric objects
-        self.inclusionType=inclusionType
-        if self.dimension == 3:
-            self.domainType="Box"
-        elif self.dimension == 2:
-            self.domainType="Rectangle"
+        # save inclusion related information
+        self.inclusionAxis=inclusionAxis                                        # save global inclusion axis
+        self.inclusionType=inclusionType                                        # save inclusion type
+        self.inclusionGroup=inclusionGroup                                      # save inclusion group
+        self.relevantAxesFlags=relevantAxesFlags                                # save relevantAxesFlags
 
         # define default refinement information for setRefinementInformation()
         self.refinementOptions={
@@ -142,6 +141,7 @@ class InclusionRVE(GenericRVE):
         }
 
         # initialize required additional attributes for all inclusionRVEs
+        self.inclusions=[]                                                      # initialize empty list of inclusion objects
         self.inclusionInfo=[]                                                   # initialize unset inclusion information array
 
 
@@ -149,6 +149,25 @@ class InclusionRVE(GenericRVE):
 ################################################################################
 #                 SPECIFIED/OVERWRITTEN PLACEHOLDER METHODS                    #
 ################################################################################
+
+    ############################################################################
+    # Method to define the required geometric objects for the model generation #
+    ############################################################################
+    def defineGeometricObjects(self,**options):
+        """Overwritten method of the GenericModel class to define and create the
+        required geometric objects for the model generation
+
+        Parameters:
+        -----------
+        options: key-value pairs of options
+
+        """
+        # generate geometry
+        self.addGeometricObject(self.domain)                                    # add domain object to RVE
+        self.placeInclusions(**options)                                         # call inclusion placement routine
+        for incObj in self.inclusions:                                          # loop over all inclusions
+            self.addGeometricObject(incObj)                                     # add inclusions to calling RVE object
+
 
     ####################################################
     # Method for automated refinementfield calculation #
@@ -190,24 +209,152 @@ class InclusionRVE(GenericRVE):
 
 
 ################################################################################
-#          ADDITIONAL METHODS FOR REFINEMENT INFORMATION CALCULATION           #
+#                 ADDITIONAL METHODS FOR INCLUSION PLACEMENT                   #
 ################################################################################
 
-    #######################################
-    # Method to update refinement options #
-    #######################################
-    def updateRefinementOptions(self,optionsUpdate):
-        """Method to update refinement options
+    #############################################
+    # Method to generate a new inclusion object #
+    #############################################
+    def generateInclusion(self,**incData):
+        """Generate a new inclusion with given inclusion data"""
+
+        # distinguish different inclusion types
+        if self.inclusionType == "Sphere":                                      # inclusion type is Sphere
+            incObj = geomObj.Sphere(**incData)                                  # -> create new Sphere object
+        elif self.inclusionType == "Circle":                                    # inclusion type is Circle
+            incObj = geomObj.Circle(**incData)                                  # -> create new Circle object
+        elif self.inclusionType == "Cylinder":                                  # inclusion type is Cylinder
+            incObj = geomObj.Cylinder(**incData)                                # -> create new Cylinder object
+        else:                                                                   # inclusion type is different
+            raise NotImplementedError("Unknown inclusion type. Check your input")
+
+        # return inclusion object
+        return incObj
+
+
+    ######################################################################
+    # Method to determine the distance of an inclusion to the boundaries #
+    ######################################################################
+    def getDistanceBoundaries(self,incObj,boundaryData):
+        """Calculate the distance of an inclusion object to the domain boundaries
 
         Parameters:
         -----------
-        optionsUpdate: dict
-            dictionary containing user updates of the set refinement options
-        """
-        self.refinementOptions.update(optionsUpdate)                            # update refinement options
-        if self.refinementOptions["maxMeshSize"] is "auto":                     # check if "maxMeshSize" is set to "auto"
-            self.refinementOptions["maxMeshSize"]=self._calculateMaxMeshSize()  # -> calculate "maxMeshSize" with internal function
+        incObj: object instance
+            inclusion object to calculate boundary distance for
 
+        boundaryData: dict
+            dictionary containing relevant information of boundary entities
+        """
+        # use objects distance calculation capabilities
+        distance={}                                                             # initialize empty dictionary of distances to different boundary entity types
+        for entityType, entityData in boundaryData.items():                     # iterate over different boundary entity types
+            distance[entityType]=incObj.getDistance(entityType,entityData)      # calculate distance to current type
+
+        # return distance dictionary
+        return distance
+
+
+    ########################################################################
+    # Method to determine the distance of an inclusion to other inclusions #
+    ########################################################################
+    def getDistanceInclusions(self,thisIncObj,otherIncData):
+        """Calculate the distance of an inclusion object to other inclusions.
+
+        Parameters:
+        -----------
+        thisIncObj: object instance
+            inclusion object to calculate distances to other inclusions for
+
+        otherIncData: dictionary
+            relevant data of other inclusion objects
+            -> otherIncData={incType: incData}
+            -> spheres/circles: incData=[[centers], radii]
+            -> cylinders:       incData=[[base points], [axes], radii]
+        """
+        # use objects distance calculation capabilities
+        distance={}                                                             # initialize empty dictionary of distances to different inclusion entity types
+        for entityType, entityData in otherIncData.items():                     # iterate over different inclusion entity types
+            distance[entityType]=incObj.getDistance(entityType,entityData)      # calculate distance to current type
+
+        # return distance dictionary
+        return distance
+
+
+    #######################################################
+    # Method to determine periodic copies of an inclusion #
+    #######################################################
+    def getPeriodicCopies(self,incObj,distBnd,maxDist=0):
+        """Determine where periodic copies of the current inclusion are needed
+        and create the corresponding inclusion objects.
+
+        Parameters:
+        incObj: object instance
+            inclusion object to test for required periodic copies
+
+        distBnd: array
+            array containing the shortest distance of this inclusion to the
+            highest-dimensional boundary entities
+
+        maxDist: float
+            maximum allowed distance to create a periodic inclusion
+            -> if set, periodic copies will only be made if 0 < distBnd <= maxDist
+               since it is implicitly assumed, that bndDists < 0 have already
+               been handled
+        """
+        # get boundaries to create periodic inclusions for
+        if maxDist == 0:
+            relBnds = distbnd <= 0
+        else:
+            relBnds = distBnd > 0 and distBnd < maxDist
+
+        # determine required arrays for periodic copies
+        bndNumbers = np.arange(2*self.dimension)[relBnds]                       # numbers of intersected boundaries
+        bndNormal = bndNumbers%self.dimension                                   # normals of intersected boundaries -> offset axis for periodic copy
+        bndSide = np.floor(bndNumbers/self.dimension)                           # sides of intersected boundaries -> offset sign for periodic copy
+
+        # create periodic copies
+        incCopies=[incObj]                                                      # inititalize list of copies for this inclusion object
+        offsets=np.eye(3)*self.domain.size                                      # calculate offsets in the individual axis directions
+        for ax in bndNormal:                                                    # find all direction for which copies have to be generated
+            if self.periodicityFlags[ax]==1:                                    # only create periodic copy if current direction is marked as periodic
+                for inc in incCopies:                                           # iterate over all copies of this inclusion
+                    objCopy=inc.duplicate()                                     # duplicate the current inclusion
+                    objCopy.move((-1)**bndSide[ax]*offsets[ax])                 # move inclusion copy
+                    incCopies.append(objCopy)                                   # append copy to list of inclusion copies
+
+        # return list of inclusion object and copies
+        return incCopies
+
+
+    ####################################################
+    # Method for the cell-specific inclusion placement #
+    ####################################################
+    def placeInclusions(self,**options):
+        """Placeholder method to place inclusions for the inclusion-based RVE"""
+        pass
+
+
+    ########################################
+    # Method to update incInfo  dictionary #
+    ########################################
+    def updateIncInfo(self,incObjs,incInfo):
+        """Update incInfo dictionary with information of inclusion objects
+        in incObjs list."""
+        for incObj in incObjs:                                                  # iterate over all inclusion objects
+            objInfo=incObj.getInfo()                                            # get information for current object
+            if incObj.type in incInfo:                                          # there are already information for inclusions of this type
+                for i in len(incInfo[obj.type]):                                # -> iterate over all information arrays for this type of inclusion
+                    infoArray=incInfo[incObj.type][i]                           # -> get current information array
+                    infoArray=np.r_[infoArray, objInfo[i]]                      # -> append object information to array
+            else:                                                               # no information for this inclusion type, so far
+                incInfo[obj.type]=[*objInfo]                                    # -> save information of current inclusion object
+
+
+
+################################################################################
+#          ADDITIONAL METHODS FOR REFINEMENT INFORMATION CALCULATION           #
+################################################################################
 
     ################################################################
     # Method to get an extended inclusionInfo array for refinement #
@@ -231,69 +378,51 @@ class InclusionRVE(GenericRVE):
             to be "far" from the boundary if it is exceeded
         """
 
-        # get relevant data for calculations
-        incInfo=cp.deepcopy(self.inclusionInfo)                                 # get information of set inclusions (deepcopy to prevent changes of the model)
-        incInfo[:,0:3]=incInfo[:,0:3]-np.atleast_2d(self.origin)                # temporariliy eliminate origin offset for all inclusions to simplify calculations
-        bndPoints=np.asarray([[0, 0, 0], self.size])                            # temporariliy assume an RVE with origin at [0,0,0] to simplify calculations
+        # copy data of original inclusions
+        extIncList=[]                                                           # initialize empty extended list of inclusions
+        extIncInfo={}                                                           # initialize empty extended incInfo dictionary
+
+        # determine highest-dimensional boundary entity
+        if self.dimension == 2:                                                 # RVE is 2D
+            relBndEnt="Line"                                                    # -> relevant boundary entity for calculation periodic copies are lines
+        elif self.dimension == 3:                                               # RVE is 3D
+            relBndEnt="Plane"                                                   # -> relevant boundary entity for calculation periodic copies are planes
         axes=self.relevantAxes                                                  # get relevant axes for distance calculations
 
-        # initialize required arrays
-        extIncInfo=np.zeros((27*np.shape(incInfo)[0],np.shape(incInfo)[1]))     # initialize extended incInfo array (ensure that all inclusion information will fit; get rid of unused space at the end of the function)
-        totalIncInstances=0                                                     # initialize number of set inclusion instances
+        # iterate over all original inclusions
+        for incObj in self.inclusions:
 
-        # loop over all "original" inclusions
-        for iInc in range(0,np.shape(incInfo)[0]):
+            # get periodic copies of inclusion object
+            # -> only copy in directions, where 0 < distBnd <= radius*relDistBnd
+            # -> this avoid duplicate periodic copies
+            distBnd = self.getDistanceBoundaries(incObj,self.domain.boundary)
+            incObjs = self.getPeriodicCopies(incObj,distBnd[relBndEnt],maxDist=incObj.radius*relDistBnd)
 
-            # get current inclusion from original incInfo array and initialize number of instances
-            thisIncInfo=np.atleast_2d(incInfo[iInc,:])                          # information of original inclusion
-            copyDirs=np.zeros((1,3),dtype=bool)                                 # array to mark copies of the original inclusion in specific directions
-            thisIncInstances=1                                                  # number of instances for this inclusion
+            # append periodic copies to extIncList and save information in extIncInfo
+            extIncList.append(incObjs)
+            self.updateIncInfo(incObjs,extIncInfo)
 
-            # get distance of inclusion to boundaries
-            distBndsCenter=np.absolute(self._getDistanceVector(thisIncInfo[0,:],bndPoints,axes)) # calculate (per-direction) distance of inclusion center to domain boundaries
-            distBnds=distBndsCenter-thisIncInfo[0,3]                                             # get corresponding distance of inclusion boundary
-            closeBnds=np.array(np.where((distBnds<=relDistBnd*thisIncInfo[0,3]) & (distBnds>0))) # check which inclusions are close to which boundaries of the domain; omit inclusions with negative distances to the boundaries, since they are periodic copies of other inclusions and do not need to be checked separately
-
-            # loop over all "close" boundaries
-            for iBnd in range(0,np.shape(closeBnds)[1]):
-                validIncs=~copyDirs[:,axes[closeBnds[1,iBnd]]]                  # get valid inclusions to copy, i.e.: inclusions that have not been copied along this axis before
-                thisIncCopies=cp.deepcopy(thisIncInfo[validIncs,:])             # initialize current copy with current inclusion data (deepcopy)
-                isCopyInDir=cp.deepcopy(copyDirs[validIncs,:])                  # initialize indicator for copies in specific directions
-                thisIncCopies[:,axes[closeBnds[1,iBnd]]]+=(-1)**closeBnds[0,iBnd]*self.size[axes[closeBnds[1,iBnd]]] # modify inclusion centers of copies (only if they are not already a copy in this direction -> prevent superfluous copies)
-                isCopyInDir[:,axes[closeBnds[1,iBnd]]]=True                     # set current axis direction to True (indicate that this already is a copy in the specified direction)
-                thisIncInfo=np.r_[thisIncInfo,thisIncCopies]                    # append copied inclusions to current inclusion data
-                copyDirs=np.r_[copyDirs,isCopyInDir]                            # append markers to overall array
-
-            # update extended incInfo array
-            thisIncInstances=np.shape(thisIncInfo)[0]                           # number of instances for this inclusion
-            extIncInfo[totalIncInstances:totalIncInstances+thisIncInstances,:]=thisIncInfo # save information on current inclusion and its copies
-            totalIncInstances+=thisIncInstances                                 # updated number of total inclusion instances
-
-        # prepare output arrays
-        extIncInfo=extIncInfo[0:totalIncInstances,:]                            # get relevant colums of extIncinfo array
-        extIncInfo[:,0:3]+=np.atleast_2d(self.origin)                           # add origin to extIncInfo array coordinates
-        return extIncInfo
+        # return extended list of inclusions and their information
+        return extIncList, extIncInfo
 
 
     ###################################################################
     # Method to perform refinement of inclusions and their boundaries #
     ###################################################################
-    def inclusionRefinement(self,incInfo):
+    def inclusionRefinement(self,inclusionList):
         """Method to perform refinement of inclusions and their boundaries
 
         Within this method, the inclusions are refined using a function similar
         to the normal distribution. This method ensures that especially the
         inclusion boundaries are refined whereas the inclusion centers and the
-        surrounding matrix material generally remain coarse. The applied
+        surrounding material generally remain coarse. The applied refinement
         refinement function of type "gaussian" is described in the function
         definition of "_gaussianRefinement()".
 
         Parameters:
         -----------
-        incInfo: array
-            extended inclusionInfo array containing information on inclusions
-            within the RVE model as well as outside but close to the model
-            boundaries
+        inclusionList: list
+            list of inclusions to refine
         """
         # get required refinement options
         refinementOptions=self.refinementOptions
@@ -302,9 +431,11 @@ class InclusionRVE(GenericRVE):
         maxMeshSize=refinementOptions["maxMeshSize"]
 
         # set refinement fields in loop over all inclusions
-        for iInc in range(0,np.shape(incInfo)[0]):
-            meshSize=2*np.pi*incInfo[iInc,3]/elementsPerCircumference           # get mesh size by dividing inclusion circumference by elementsPerCircumference
-            refinementWidth=inclusionRefinementWidth*incInfo[iInc,3]            # determine refinementWidth
+        for inc in inclusionList:
+            meshSize=2*np.pi*inc.radius/elementsPerCircumference                # get mesh size by dividing inclusion circumference by elementsPerCircumference
+            refinementWidth=inclusionRefinementWidth*inc.radius                 # determine refinementWidth
+            x0=incObj.getInfo()[0]                                              # center/base point of the inclusion
+            C=incObj.getTransformationMatrix()
             sigma=refinementWidth/4                                             # determine standard deviation of gaussian function so that 95% of the area under the refinement function are within the given refinementWidth: sigma=refinementWidth/4
             self._setMathEvalField("gaussian",np.r_[incInfo[iInc,self.relevantAxes[:]],incInfo[iInc,-1],maxMeshSize,meshSize,sigma])
 
@@ -315,7 +446,7 @@ class InclusionRVE(GenericRVE):
     def interInclusionRefinement(self,incInfo):
         """Method to perform refinement between inclusions
 
-        Within this method, the matrix between close inclusions is refined using
+        Within this method, the gap between close inclusions is refined using
         a tanh-function. This method ensures that the space between inclusions
         comprises the user-defined amount of elements. The applied refinement
         function of type "tanh" is described in the function definition of
@@ -373,6 +504,22 @@ class InclusionRVE(GenericRVE):
                 self._setMathEvalField("tanh",np.r_[C.reshape(C.size),refineCenter,refineWidth,maxMeshSize,meshSize,5.3/(nElemsBetween*meshSize),aspectRatio])
 
 
+    #######################################
+    # Method to update refinement options #
+    #######################################
+    def updateRefinementOptions(self,optionsUpdate):
+        """Method to update refinement options
+
+        Parameters:
+        -----------
+        optionsUpdate: dict
+            dictionary containing user updates of the set refinement options
+        """
+        self.refinementOptions.update(optionsUpdate)                            # update refinement options
+        if self.refinementOptions["maxMeshSize"] is "auto":                     # check if "maxMeshSize" is set to "auto"
+            self.refinementOptions["maxMeshSize"]=self._calculateMaxMeshSize()  # -> calculate "maxMeshSize" with internal function
+
+
 
 ################################################################################
 #           ADDITIONAL PRIVATE/HIDDEN METHODS FOR INTERNAL USE ONLY            #
@@ -383,98 +530,10 @@ class InclusionRVE(GenericRVE):
     ####################################################################
     def _calculateMaxMeshSize(self):
         """Internal method to calculate the maximum mesh size"""
-        if self.size is None:                                                   # RVE size has not been set
+        if self.domain.size is None:                                            # RVE size has not been set
             return self.getGmshOption("Mesh.CharacteristicLengthMax")           # -> use Gmsh default setting of maximum mesh size
         else:                                                                   # RVE size is set
-            return np.amax(self.size)/10                                        # -> ensure at least 10 elements along the longest edge of the RVE
-
-
-    #######################################################################
-    # Method to get distance between a point and an array of other points #
-    #######################################################################
-    def _getDistanceVector(self,pointToCheck,pointsToCheckWith,axes=np.arange(0,3)):
-        """Internal method to get distances (per direction) between points
-
-        Parameters:
-        -----------
-        pointToCheck: array
-            coordinates of the reference point to calculate the distance for
-
-        pointsToCheckWith: array
-            coordinates of all points the distance of the reference point should
-            be calculated to
-
-        axes: array
-            axes to check the distance for
-        """
-        distances=pointsToCheckWith[:,axes]-pointToCheck[axes]                  # calculate distance vector in relevant axes directions
-        return distances                                                        # return distance vector
-
-
-    ##############################################################################
-    # Method to check collision of an inclusion and an array of other inclusions #
-    ##############################################################################
-    def _checkIncDistance(self,thisIncInfo,incInfo,axes=np.arange(0,3)):
-        """Internal method to check the distance between inclusions.
-
-        Parameters:
-        -----------
-        thisIncInfo: array
-            array containing information (center and radius) of the reference
-            inclusion
-
-        incInfo: array
-            array containing information (center and radius) of all inclusions
-            the distance should be checked for
-
-        axes: array
-            axes to check the distance for
-        """
-        distCenters=np.linalg.norm(self._getDistanceVector(thisIncInfo,incInfo,axes),axis=1)               # get distance of center points (norm)
-        if np.any(distCenters-incInfo[:,3]-thisIncInfo[3] <= np.amax(np.r_[incInfo[:,5],thisIncInfo[5]])):  # distance (boundary-boundary) to other inclusions is lower than allowed minumum
-            return False                                                        # -> do not accept current inclusion
-        else:                                                                   # distance is not lower than allowed minimum
-            return True                                                         # -> accept the current inclusion
-
-
-    #####################################################################
-    # Method to check collision of an inclusion with the RVE boundaries #
-    #####################################################################
-    def _checkBndDistance(self,thisIncInfo,axes=np.arange(0,3)):
-        """Internal method to check the distance of inclusions to the surrounding domain.
-
-        In this method, the distance of the current inclusion to the domain boundaries
-        is checked. For box-shaped domains, this distance calculation can be performed
-        by checking the inclusion distance (per direction) to the two points defining the
-        bounding box of the domain.
-
-        Parameters:
-        -----------
-        thisIncInfo: array
-            array containing information (center and radius) of the inclusion
-
-        axes: array
-            axes to check the distance for
-        """
-
-        # define points to check distance to (domain bounding-box points)
-        bndPoints=np.asarray([[0, 0, 0], self.size])                            # temporariliy assume an RVE with origin at [0,0,0] to simplify calculations
-
-        # get distance of center point to boundary points (absolute value for all relevant directions)
-        distBndCenter=np.absolute(self._getDistanceVector(thisIncInfo,bndPoints,axes))
-
-        # calculate distance of inclusion boundary to domain boundaries (signed value for all directions)
-        distBnd=distBndCenter-thisIncInfo[3]                                    # distance to planes defining the RVE boundary
-        distCorner=np.linalg.norm(np.amin(distBndCenter,axis=0))-thisIncInfo[3] # distance to closest corner of the RVE
-
-        # check if distance of inclusion to boundaries is too small
-        if np.any(np.absolute(distBnd) <= thisIncInfo[4]) or (np.absolute(distCorner) <= thisIncInfo[4]):
-            acceptInc=False
-        else:
-            acceptInc=True
-
-        # return relevant data
-        return acceptInc, distBnd
+            return np.amax(self.domain.size)/10                                 # -> ensure at least 10 elements along the longest edge of the RVE
 
 
     ############################################################################
@@ -542,26 +601,25 @@ class InclusionRVE(GenericRVE):
     ###########################################################################
     # Method to calculate "Gaussian" MathEval fields for inclusion refinement #
     ###########################################################################
-    def _gaussianRefinement(self,data):
+    def _gaussianRefinement(self,x0,r0,C,hMax,hMin,b):
         """Internal method to set "Gaussian" refinement fields
 
         This method defines refinement fields of the following type:
 
             Spheres:
-            h(x1,x2,x3)=h_max-(h_max-h_min)*exp( -1/2* (( sqrt( (x1-x1_0)^2 + (x2-x2_0)^2 + (x3-x3_0)^2 ) -r0)/(b/4))^2 )
+            h(x1,x2,x3)=h_max-(h_max-h_min)*exp( -1/2* (( sqrt( C_1k*(x_k-x0_k)^2 + C_2k*(x_k-x0_k)^2 + C_3k*(x_k-x0_k)^2 ) -r0)/(b/4))^2 )
 
-            Cylinders/Disks with relevant axes in the local x1-x2-system:
-            h(x1,x2)=h_max-(h_max-h_min)*exp( -1/2* (( sqrt( (x1-x1_0)^2 + (x2-x2_0)^2 ) -r0)/(b/4))^2 )
+            Cylinders/Disks with axis/normal in the local x3-direction:
+            h(x1,x2)=h_max-(h_max-h_min)*exp( -1/2* (( sqrt( C_1k*(x_k-x0_k)^2 + C_2k*(x_k-x0_k)^2 ) -r0)/(b/4))^2 )
 
         It represents a refinement which decreases the mesh size from h_max to
-        h_min if the distance r from the inclusion center (x1_0,x2_0,x3_0) is
+        h_min if the distance r from the inclusion center (x0_1,x0_2,x0_3) is
         close to the value r0. The course of the refinement function resembles a
         normal distribution density function with mean value r0 and standard
         deviation sigma. For convenience, the refinement width (relative to the
         inclusion radius) b is used: since the interval +/-2*sigma covers about
         95% of the values in a normal distribution density function, sigma is
         calculated by b/4.
-
 
         Parameters:
         -----------

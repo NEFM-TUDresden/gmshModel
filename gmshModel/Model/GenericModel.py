@@ -13,7 +13,6 @@
 ###########################
 # Standard Python libraries
 import os                                                                       # os for file handling (split extensions from file)
-import inspect                                                                  # inspect to search for classes in modules
 import datetime as dt                                                           # datetime for time stamps
 import copy as cp                                                               # copy for deepcopies of arrays
 import tempfile as tf                                                           # tempfile for generation of temprory files and folders
@@ -61,25 +60,35 @@ class GenericModel:
 
     Attributes:
     -----------
+    backgroundField: int
+        number of the field that has to be used as the background field/mesh
+        for the mesh generation
+
+    booleanOperations: list
+        list with dictionaries defining the individual boolean operations
+        to perform for the model generation
+
+    defaultFileExts: dict
+        dictionary providing default file extensions for different output formats
+
     dimension: int
         dimension of the model instance
-
-    modelName: string
-        name of the Gmsh model and default name for all resulting files
-
-    gmshConfigChanges: dict
-        dictionary for user updates of the default Gmsh configuration
 
     geometricObjects: list
         list containing the instances of geometric objects used for the
         model geometry creation
 
+    gmshConfigChanges: dict
+        dictionary for user updates of the default Gmsh configuration
+
+    gmshAPI: object instance
+        interface to the Gmsh-Python-API
+
     groups: dict
         dictionary with group information for the model entities
 
-    booleanOperations: list
-        list with dictionaries defining the individual boolean operations
-        to perform for the model generation
+    modelName: string
+        name of the Gmsh model and default name for all resulting files
 
     physicalGroups: list
         list with dictionary defining which Gmsh entities are defined as
@@ -88,10 +97,6 @@ class GenericModel:
     refinementFields: list
         list of dictionaries defining the refinement fields that have to
         be added to the Gmsh model
-
-    backgroundField: int
-        number of the field that has to be used as the background field/mesh
-        for the mesh generation
     """
 
     #########################
@@ -193,7 +198,7 @@ class GenericModel:
         self.definePhysicalGroups()                                             # placeholder method: has to be specified/overwritten for the individual models
         self.addPhysicalGroupsToGmshModel()                                     # use Gmsh-API to add defined groups to the Gmsh model
 
-        # set up periodicity constraints
+        # set up periodicity constraints, if needed
         self.setupPeriodicity()                                                 # placeholder method: has to be specified/overwritten for the individual models if necessary
 
 
@@ -594,22 +599,17 @@ class GenericModel:
     ##############################################################
     # Method to add a single geometric object to the Gmsh model #
     ##############################################################
-    def addGeometricObject(self,objClassString,**objData):
+    def addGeometricObject(self,obj):
         """Method to add one of the objects that are defined within the class
         geometricObjects and its child classes to the Gmsh model.
 
         Parameters:
         -----------
-        objClass: class
-            class the geometric object is defined in
-        objData: keyworded object data
-            enumeration of keyworded arguments needed for the creation of the
-            new geometric object of class objectClass
+        obj: object instance
+            instance of a defined geometric object
         """
-        objClass=self._getGeometricObjectClass(objClassString)
-        objInstance=objClass(**objData)
-        objGroup=objInstance.group
-        self.geometricObjects.append(objInstance)
+        objGroup=obj.group
+        self.geometricObjects.append(obj)
         self.groups.update({objGroup: []}) if objGroup not in self.groups else self.groups
 
 
@@ -629,8 +629,8 @@ class GenericModel:
         fileString: string
             string to analyze
         whatToSave: string
-            flag that indicates whether "geometry", "mesh" or "model" have to
-            be saved
+            flag that indicates whether "geometry", "mesh", "misc" or "model"
+            have to be saved
         """
 
         # check if no fileString was passed
@@ -681,23 +681,6 @@ class GenericModel:
             return self.gmshAPI.occ.intersect                                   # -> use built-in gmsh.model.occ.intersect method
         else:                                                                   # operation to be performed is something different
             raise ValueError("Unknown boolean operation {}".format(operation))  # -> raise error that type of boolean operation is not known
-
-
-    #########################################################
-    # Method to get defined geometric objects from a string #
-    #########################################################
-    def _getGeometricObjectClass(self,objString):
-        """Internal method to return the correct geometric object class from
-        an object class string
-
-        Parameters:
-        -----------
-        objString: string
-            required geometric object class (as a string)
-        """
-        for objKey, objClass in inspect.getmembers(geomObj,inspect.isclass):    # get all classes from the geometricObjects file
-            if objKey == objString:                                             # check if class key matches the object string that was passed
-                return objClass                                                 # return class
 
 
     ###########################################################

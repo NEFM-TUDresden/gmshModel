@@ -14,10 +14,11 @@
 # Standard Python libraries
 import numpy as np                                                              # numpy for fast array computations
 import copy as cp                                                               # copy  for deepcopies
+import inspect                                                                  # inspect to search for defined classes in modules
 
 # self defined class definitions and modules
 from .InclusionRVE import InclusionRVE                                          # generic RVE class definition (parent class)
-
+from ..Geometry import RandomPlacement                                          # defined algorithms for random placement
 
 ###################################
 # Define RandomInclusionRVE class #
@@ -30,93 +31,39 @@ class RandomInclusionRVE(InclusionRVE):
     its attributes and methods to handle the inclusion placement as well as the
     definition of required boolean operations and physical groups.
 
-    Attributes:
-    -----------
-    dimension: int
-        dimension of the model instance
-
-    inclusionSets: list/array
-        array providing the necessary information for sets of inclusions to be
-        placed
-        -> inclusionSets=[radius, amount] (for the individual sets of inclusions)
-
-    size: list/array
-        size of the box-shaped RVE model
-        -> size=[Lx, Ly, (Lz)]
-
-    origin: list/array
-        origin of the box-shaped RVE model
-        -> origin=[Ox, Oy, (Oz)]
-
-    inclusionType: string
-        string defining the type of inclusion
-        -> iunclusionType= "Sphere"/"Cylinder"/"Circle"
-
-    inclusionAxis:list/array
-        array defining the inclusion axis (only relevant for inclusionType "Cylinder")
-        -> currently restricted to Cylinders parallel to one of the coordinate axes
-        -> inclusionAxes=[Ax, Ay, Az]
-
-    relevantAxes: list/array
-        array defining the relevant axes for distance calculations
-
-    periodicityFlags: list/array
-        flags indicating the periodic axes of the box-shaped RVE model
-        -> periodicityFlags=[0/1, 0/1, 0/1]
-
-    inclusionInfo: array
-        array containing relevant inclusion information (center, radius) for
-        distance calculations
-
-    domainGroup: string
-        name of the group the RVE domain should belong to
-
-    inclusionGroup: string
-        name of the group the inclusions should belong to
-
-    gmshConfigChanges: dict
-        dictionary for user updates of the default Gmsh configuration
+    Additional Attributes:
+    ----------------------
+    placementAlgorithm: object instance
+        instance of the algorithm used for the inclusion placement
     """
     #########################
     # Initialization method #
     #########################
-    def __init__(self,inclusionSets=None,size=None,inclusionType=None,inclusionAxis=None,origin=[0,0,0],periodicityFlags=[1,1,1],domainGroup="domain",inclusionGroup="inclusions",gmshConfigChanges={}):
+    def __init__(self,size=None,inclusionType=None,inclusionAxis=None,origin=[0,0,0],periodicityFlags=[1,1,1],domainGroup="domain",inclusionGroup="inclusions",gmshConfigChanges={}):
         """Initialization method for RandomInclusionRVE object instances
 
         Parameters:
         -----------
-        inclusionSets: list/array
-            array providing the necessary information for sets of inclusions to be
-            placed
-            -> inclusionSets=[radius, amount] (for the individual sets of inclusions)
-
         size: list/array
             size of the box-shaped RVE model
             -> size=[Lx, Ly, (Lz)]
-
-        origin: list/array
-            origin of the box-shaped RVE model
-            -> origin=[Ox, Oy, (Oz)]
 
         inclusionType: string
             string defining the type of inclusion
             -> iunclusionType= "Sphere"/"Cylinder"/"Circle"
 
         inclusionAxis:list/array
-            array defining the inclusion axis (only relevant for inclusionType "Cylinder")
-            -> currently restricted to Cylinders parallel to one of the coordinate axes
+            array defining one global inclusion axis (only relevant for inclusionType "Cylinder")
             -> inclusionAxes=[Ax, Ay, Az]
+            -> if not passed globally, inclusionsSets has to contain a "length" information
 
-        relevantAxes: list/array
-            array defining the relevant axes for distance calculations
+        origin: list/array
+            origin of the box-shaped RVE model
+            -> origin=[Ox, Oy, (Oz)]
 
         periodicityFlags: list/array
             flags indicating the periodic axes of the box-shaped RVE model
             -> periodicityFlags=[0/1, 0/1, 0/1]
-
-        inclusionInfo: array
-            array containing relevant inclusion information (center, radius) for
-            distance calculations
 
         domainGroup: string
             name of the group the RVE domain should belong to
@@ -128,27 +75,7 @@ class RandomInclusionRVE(InclusionRVE):
             dictionary for user updates of the default Gmsh configuration
         """
         # initialize parents classes attributes and methods
-        super().__init__(size=size,inclusionType=inclusionType,inclusionAxis=inclusionAxis,origin=origin,periodicityFlags=periodicityFlags,gmshConfigChanges=gmshConfigChanges)
-
-        # plausibility checks for input variables
-        if inclusionSets is None:
-            raise TypeError("Variable \"inclusionSets\" not set! For RVEs with random inclusion distributions, the inclusionSets must be defined. Check your input data.")
-
-        # update inclusion sets to start placement with biggest inclusions
-        inclusionSets=np.atleast_2d(inclusionSets)                              # type conversion for inclusionSets to be matrix-like
-        inclusionSets=inclusionSets[inclusionSets[:,0].argsort(axis=0)[::-1]]   # sort inclusionSets (descending) to start algorithm with biggest inclusions
-        self.inclusionSets=inclusionSets                                        # save updated inclusionSets array to class object
-
-        # set attributes from input parameters
-        self.domainGroup=domainGroup                                            # set group name for the domain object
-        self.inclusionGroup=inclusionGroup                                      # set group name for the inclusion objects
-
-        # set default placement options
-        self.placementOptions={
-            "maxAttempts": 10000,                                               # maximum number of attempts to place one inclusion
-            "minRelDistBnd": 0.1,                                               # minimum relative (to inclusion radius) distance to the domain boundaries
-            "minRelDistInc": 0.1,                                               # minimum relative (to inclusion radius) distance to other inclusions
-        }
+        super().__init__(size=size,inclusionType=inclusionType,inclusionAxis=inclusionAxis,origin=origin,periodicityFlags=periodicityFlags,domainGroup=domainGroup,inclusionGroup=inclusionGroup,gmshConfigChanges=gmshConfigChanges)
 
 
 
@@ -156,29 +83,27 @@ class RandomInclusionRVE(InclusionRVE):
 #                 SPECIFIED/OVERWRITTEN PLACEHOLDER METHODS                    #
 ################################################################################
 
-    ############################################################################
-    # Method to define the required geometric objects for the model generation #
-    ############################################################################
-    def defineGeometricObjects(self,placementOptions={}):
-        """Overwritten method of the GenericModel class to define and create the
-        required geometric objects for the model generation
+    #############################################
+    # Method to generate a new inclusion object #
+    #############################################
+    def generateInclusion(self,radius,length=None):
+        """Generate a new inclusion with given radius and, for cylinders, fixed
+        axis or random axis of length l."""
 
-        Parameters:
-        -----------
-        placementOptions: dict
-            dictionary for user updates of the default placement options
-        """
-        # update placement options
-        placementOptions=self.updatePlacementOptions(placementOptions)
+        # distinguish different inclusion types
+        if self.inclusionType == "Sphere" or self.inclusionType == "Circle":    # inclusion type is Sphere or Circle
+            center = self.randomPoint()                                         # -> generate random center point
+            incObj =super().generateInclusion(center=center,radius=radius,group=self.inclusionGroup) # -> create new Sphere object
+        elif self.inclusionType == "Cylinder":                                  # inclusion type is Cylinder
+            base  = self.randomPoint                                            # -> create random base point
+            if length is None:                                                  # -> no length passed -> fixed axis for all cylinders
+                axis = self.inclusionAxis                                       # ->-> use fixed axis of RVE
+            else:                                                               # -> length of cylinder axis passed -> random axis
+                axis = self.randomAxis(length)                                  # ->-> create random axis of given length
+            incObj = super().generateInclusion(base=base,radius=radius,axis=axis,group=self.inclusionGroup) # -> create new Cylinder object
 
-        # generate geometry
-        self.addGeometricObject(self.domainType,group=self.domainGroup,origin=self.origin,size=self.size) # add domain object to calling RVE
-        self.placeInclusions(placementOptions)                                  # call internal inclusion placement routine
-        for i in range(0,np.shape(self.inclusionInfo)[0]):                      # loop over all inclusions
-            if self.inclusionType in ["Sphere","Circle"]:
-                self.addGeometricObject(self.inclusionType,group=self.inclusionGroup,center=self.inclusionInfo[i,0:3],radius=self.inclusionInfo[i,3]) # add inclusions to calling RVE object
-            elif self.inclusionType == "Cylinder":
-                self.addGeometricObject(self.inclusionType,group=self.inclusionGroup,center=self.inclusionInfo[i,0:3],radius=self.inclusionInfo[i,3],axis=self.inclusionAxis) # add inclusions to calling RVE object
+        # return inclusion object
+        return incObj
 
 
     ###################################################
@@ -246,117 +171,79 @@ class RandomInclusionRVE(InclusionRVE):
         }]
 
 
+    ##############################
+    # Method to place inclusions #
+    ##############################
+    def placeInclusions(self,inclusionSets=None,algorithm=RandomSequentialAdsorption,placementOptions={}):
+        """Place inclusions defined in inclusionSets with a defined algorithm and
+        corresponding placementOptions.
+
+        Parameters:
+        -----------
+        inclusionSets: list/array
+            array providing the necessary information for sets of inclusions to be
+            placed
+            -> inclusionSets=[radius, (length), amount] (for the individual sets of inclusions)
+            -> length is only relevant for randomly oriented cylinders
+
+        algorithm: string
+            string defining the placement algorithm to use for inclusion placement
+
+        placementOptions: dict
+            dictionary for user updates of the default placement options
+        """
+        # initialize algorithm from defined RandomPlacement algorithms
+        placementAlgorithm=self._getPlacementAlgorithm(algorithm,inclusionSets=inclusionSets,placementOptions=placementOptions)
+
+        # place inclusions with chosen placement algorithm
+        placementAlgorithm.placeInclusions()
+
+
 
 ################################################################################
 #               ADDITIONAL METHODS FOR THE INCLUSION PLACEMENT                 #
 ################################################################################
 
-    ##########################################
-    # Method to get update placement options #
-    ##########################################
-    def updatePlacementOptions(self,optionsUpdate):
-        """Method to updated the inclusion placement options
+    ############################################
+    # Method to determine random cylinder axis #
+    ############################################
+    def randomAxis(self,l,nAxes=1):
+        """Determine nAxes random axes of length l for cylindrical inclusions.
+        The calculated angles phi and theta describe rotations around the
+        original z- and generated y'-axes, i.e. they correspond to angles of a
+        spherical coordinate system with
+
+                phi in [-pi/2, pi/2]  ,
+                thetha in [-pi, pi]   .
 
         Parameters:
         -----------
-        optionsUpdate: dict
-            dictionary storing the updates for the currently set placement options
+        l: float
+            length of the random cylinder axes to generate
+
+        nAxes: int
+            number of random axes to generate
         """
-        self.placementOptions.update(optionsUpdate)
-        return self.placementOptions
+        # get phi and theta for all random axes
+        phi, theta=(np.array([0.5, 1])*np.random.uniform(-np.pi,np.pi,(nAxes,2))).T # generate 2 random angles for nAxes axes: phi in [-pi/2, pi/2]; theta in [-pi, pi]
+
+        # determine axis in spherical coordinates
+        return (np.array([np.cos(theta)*np.cos(phi), np.cos(theta)*np.sin(phi), np.sin(theta)])*l).T
 
 
-    #########################################
-    # Method for random inclusion placement #
-    #########################################
-    def placeInclusions(self,placementOptions):
-        """Method to place inclusions for the RVE geometry
-
-        Within this method, the inclusions for the user-defined inclusion sets
-        (sets of inclusion radii and amounts) are placed in a - up to now -
-        standard random-close-packing algorithm. This allows for moderate volume
-        fractions of inclusions with identical radii. For high volume fractions,
-        the algorithm needs to be refined. The applied method ensures periodicity
-        in the user-defined directions and allows to define minimum distances
-        between two inclusions as well as the inclusion surface and the surrounding
-        domain boundaries (to facilitate meshing).
+    ##########################################
+    # Method to determine random seed points #
+    ##########################################
+    def randomPoint(self,nPoints=1):
+        """Determine nPoints random points inside the RVE domain. For parallel
+        cylinders and circles, account for relevantAxes.
 
         Parameters:
         -----------
-        placementOptions: dict
-            dictionary with options for the inclusion placement
+        nPoints: int
+            number of random points to generate
         """
-        # get inlusion radii and amounts for the individual sets
-        rSets=np.asarray(self.inclusionSets[:,0])                               # radii of inclusion for the individual sets
-        nSets=self.inclusionSets[:,1]                                           # amount of inclusions for the individual sets
-        distBndSets=rSets*placementOptions["minRelDistBnd"]                     # distance of inclusions to the domain boundaries for the individual sets
-        distIncSets=rSets*placementOptions["minRelDistInc"]                     # distance of inclusions to other inclusions for the individual sets
-
-        # initialization
-        totalInstancesSet=0                                                     # number of already set inclusion instances (inclusions and copies of them)
-        incInfo=np.zeros((4*np.sum(nSets).astype(int),6))                       # incInfo=[ [incCoords], rInc, mindDistBnd, mindDistInc] -> assume every inclusion to cut potentially two boundaries (i.e. to have three copies) for initialization
-        self.placementInfo=np.zeros(np.shape(rSets))                            # information about placed inclusions for the individual sets
-
-        # loop over all incSets
-        relevantAxesFlags=np.zeros((3,))                                        # creaty auxiliary flag variable to indicate axes which are relevant for inclusion center calculation
-        relevantAxesFlags[self.relevantAxes]=1                                  # set relevantAxesFlags to 1 for the relevant axes
-        for iSet in range(0,np.shape(rSets)[0]):
-
-            # initialization:
-            nAttempts=0                                                         # attempts to place the current inclusion
-            placedIncsForSet=0                                                  # amount of placed inclusions for the current set
-
-            # try to place all inclusions for the current set
-            while placedIncsForSet < nSets[iSet] and nAttempts < placementOptions["maxAttempts"]:
-
-                # calculate random coordinates for current inclusion (ensure 2D array for proper handling)
-                thisIncInfo=np.atleast_2d(np.r_[np.random.rand(3)*self.size*relevantAxesFlags, rSets[iSet], distBndSets[iSet], distIncSets[iSet]])
-
-                # check inclusion distance to boundaries
-                acceptInc, distBnd = self._checkBndDistance(thisIncInfo[0,:],self.relevantAxes)
-                if acceptInc == False:                                          # start with next attempt, if inclusion is not accepted
-                    nAttempts+=1
-                    continue
-                else:                                                           # set number of required inclusion instances to 1, if inclusion is accepted
-                    thisIncInstances=1
-
-                # generate periodic copies, if necessary
-                if any(self.periodicityFlags) == True:
-                    thisIncInfo, thisIncInstances = self._periodicIncs(thisIncInfo,distBnd)
-
-                # check inclusion distance to inclusions placed so far
-                acceptInc=True                                                  # initially assume that current inclusion is accepted
-                if totalInstancesSet > 0:                                       # only check if at least one inclusion has been placed
-                    for i in range(0,thisIncInstances):                         # check i-th instance of current inclusion
-                        acceptIncInstance = self._checkIncDistance(thisIncInfo[i,:],incInfo[0:totalInstancesSet,:],self.relevantAxes) # check if i-th instance is accepted
-                        if acceptIncInstance == False:                          # do not check other instances, if this one is not accepted
-                            acceptInc=False                                     # do not accept current inclusion, if one of the instances is not accepted
-                            break
-
-                    # check if current inclusion is accepted or not
-                    if acceptInc == False:                                      # start with next attempt, if inclusion is not accepted
-                        nAttempts+=1
-                        if nAttempts == placementOptions["maxAttempts"]:        # user info, if not all inclusions of the current set could be placed
-                            print("Could not place all inclusions for the current set. For r={0:.2f}, {1:.0f}/{2:.0f} have been placed.".format(rSets[iSet],placedIncsForSet,nSets[iSet]))
-                        continue
-                    else:                                                       # update incInfo and number of set inclusions/inclusion instances
-                        incInfo[totalInstancesSet:totalInstancesSet+thisIncInstances,:]=thisIncInfo
-                        placedIncsForSet+=1
-                        totalInstancesSet+=thisIncInstances
-                else:                                                           # set first inclusion
-                    incInfo[totalInstancesSet:totalInstancesSet+thisIncInstances,:]=thisIncInfo
-                    placedIncsForSet+=1
-                    totalInstancesSet+=thisIncInstances
-
-                # save number of placed inclusions for the current set to placementInfo
-                self.placementInfo[iSet]=placedIncsForSet
-
-        # prepare incInfo for output (get relevant rows and cols)
-        incInfo[:,0:3]=incInfo[:,0:3]+np.atleast_2d(self.origin)                # translate center coordinates to match with defined origin of the RVE domain
-        incInfo=incInfo[0:totalInstancesSet,0:4]                                # incInfo=[M_x, M_y, M_z, R] with M: center points, R: radii
-
-        # save relevant results in randomInclusions object
-        self.inclusionInfo=incInfo
+        return np.random.rand(nPoints,3)*self.RVE.domain.size*self.relevantAxesFlags+self.RVE.domain.origin
 
 
     #######################################################
@@ -380,39 +267,27 @@ class RandomInclusionRVE(InclusionRVE):
 #           ADDITIONAL PRIVATE/HIDDEN METHODS FOR INTERNAL USE ONLY            #
 ################################################################################
 
-    ####################################################
-    # Method to generate periodic copies of inclusions #
-    ####################################################
-    def _periodicIncs(self,thisIncInfo,distBnd):
-        """Internal method to generate periodic copies for inclusions cutting
-        the domain boundaries
+    ######################################################################
+    # Method to initialize an object instance of the placement algorithm #
+    ######################################################################
+    def _getPlacementAlgorithm(self,algName,**algArgs):
+        """Internal method to initialize the placement algorithm from a given
+        algorithm name and related algorithm arguments.
 
         Parameters:
         -----------
-        thsiIncInfo: array
-            array containing information of the inclusion that cuts the boundary
+        algName: string
+            required placement algorithm class (as a string)
 
-        distBnd: array
-            distance of the inclusion to the RVE boundary
+        algArgs: key-value pairs of arguments
+            arguments required to initialize the placement algorithm
         """
-        # check if inclusion cuts the boundaries and get indices
-        #
-        # bndCuts variable:
-        #------------------
-        # 1st row of "distBnd < 0" shows cuts with negative x,y,z-surfaces (boolean)
-        # 2nd row of "distBnd < 0" shows cuts with positive x,y,z-surfaces (boolean)
-        # -> 1st row of "bndCuts" defines if negative (0) or positive (1) boundary are cut -> sign of necessary displacement of original inclusion
-        # -> 2nd row of "bndCuts" defines direction for which the cut has been found -> direction for which displacement has to be performed
-        bndCuts=np.array(np.where(distBnd < 0))
+        algOK=False                                                             # flag to indicate that passed algorithm string was OK
+        for algKey, algClass in inspect.getmembers(RandomPlacement,inspect.isclass): # get all classes from the RandomPlacement module
+            if algKey == algName:                                               # check if class key matches the object string that was passed
+                algObj = algClass(self,**algArgs)                               # get instance of algorithm class
+                algOK=True
+        if not algOK:
+            raise ValueError("Undefined placement algorithm \"{}\". Check your input.".format(algName))
 
-        # loop over all directions for which copies have to be generated
-        thisIncInstances=1                                                      # initialize number of required inclusion instances
-        for i in range(0,np.shape(bndCuts)[1]):                                 # find all direction for which copies have to be generated
-            if self.periodicityFlags[bndCuts[1,i]]==1:                               # only create periodic copy if current direction is marked as periodic
-                thisIncCopies=cp.deepcopy(thisIncInfo)                          # initialize current copy with current inclusion data (deepcopy)
-                thisIncCopies[:,bndCuts[1,i]]=thisIncCopies[:,bndCuts[1,i]]+(-1)**bndCuts[0,i]*self.size[bndCuts[1,i]] # modify inclusion centers of copies
-                thisIncInfo=np.r_[thisIncInfo,thisIncCopies]                    # append copied inclusions to current inclusion data
-                thisIncInstances=np.shape(thisIncInfo)[0]                       # update number of required inclusion instances
-
-        # return relevant data
-        return thisIncInfo, thisIncInstances
+        return algObj

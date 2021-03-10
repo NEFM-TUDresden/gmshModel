@@ -19,6 +19,7 @@ import copy as cp                                                               
 # self-defined class definitions and modules
 from .GenericRVE import GenericRVE                                              # generic RVE class definition (parent class)
 from ..Geometry import GeometricObjects as geomObj                              # defined geometric objects
+from ..Meshing import Refinement as ref                                         # define refinement fields
 
 
 ###########################
@@ -172,13 +173,13 @@ class InclusionRVE(GenericRVE):
     ####################################################
     # Method for automated refinementfield calculation #
     ####################################################
-    def defineRefinementFields(self,refinementOptions={}):
-        """Method to calculate refinement information for the RVE
+    def setupRefinementFields(self,refinementOptions={}):
+        """Method to calculate and set refinement information for the RVE
 
-        For inclusion-based RVEs, the inclusionInfo array can be used to
-        calculate refinement fields based on inclusion radii and distances.
-        These calculations are defined here so that every child class of
-        InclusionRVE can use them to define  refinement fields.
+        For inclusion-based RVEs, the inclusionInfo variable can be used to
+        calculate refinement fields based on the geometric properties of the
+        inclusions. These calculations are defined here so that every child
+        class of InclusionRVE can use them to calculate refinement fields.
 
         Parameters:
         -----------
@@ -189,13 +190,35 @@ class InclusionRVE(GenericRVE):
         # load default options and update them with passed user options
         self.updateRefinementOptions(refinementOptions)
 
+        # initialize an empty list of relevant fields for MinField calculation
+        relevantFieldTags=[]
+
         # restrict the maximum mesh size (set domain mesh size)
+        domainRefinement=self.getDomainRefinementField()                        # get refinement field from subfunction
+        relevantFieldTags.append(domainRefinement.tag)                          # append tag of refinement field to list of relevant fields
+
+        # get extended information for inclusion refinements
+        inclusionList, inclusionInfo = self.getInclusionInfoForRefinement()
+
+        # perform inclusion refinement, if activated
+        if self.refinementOptions["inclusionRefinement"] == True:               # inclusion refinement is activated
+            for incObj in inclusionList:                                        # -> iterate over all inclusions in extended list
+                incRefinement=self.getInclusionRefinementField(incObj)          # -> create inclusion refinement field
+                if incObj.type == "Cylinder":                                   # -> inclusion is a cylinder -> additional restriction fields
+                    incRestrictions=self.getCylinderRestrictionFields(incObj,incRefinement) # -> get restriction fields
+                    relevantFieldTags.append(incRestrictions[-1].tag)           # -> append tag of final field to list of relevant fields
+                else:                                                           # -> inclusion is not a cylinder
+                    relevantFieldTags.append(incRefinement.tag)                 # -> append tag of original refinement field to list of relevant fields
+
+        # perform refinement between close inclusions, if activated
+        if self.refinementOptions["interInclusionRefinement"] == True:
+
+
+
+
         self._setMathEvalField("const",self.refinementOptions["maxMeshSize"])
 
-        # perform inclusion refinements with corresponding methods
-        incInfo=self.getInclusionInfoForRefinement()                            # get extended inclusion information array with inclusions copied over close boundaries
-        if self.refinementOptions["inclusionRefinement"] == True:               # refinement of inclusions is active
-            self.inclusionRefinement(incInfo)                                   # -> perform refinement of inclusions and their boundaries (ensure set number of elements per circumference)
+
         if self.refinementOptions["interInclusionRefinement"] == True:          # refinement between different inclusions is active
             self.interInclusionRefinement(incInfo)                              # -> perform refinement between inclusions
 
@@ -356,6 +379,81 @@ class InclusionRVE(GenericRVE):
 #          ADDITIONAL METHODS FOR REFINEMENT INFORMATION CALCULATION           #
 ################################################################################
 
+    ############################################################################
+    # Method to calculate restrictive MathEval fields for cylinder refinements #
+    ############################################################################
+    def getCylinderRestrictionFields(self,incObj,fieldObj):
+        """Method to define a MathEval refinement field to restrict the
+        refinement of cylinders using a hyperbolic tangent function.
+
+        This method defines MathEval refinement fields for cylinders with
+        functions of the following type:
+
+            h(x_k)=(hMax+F))/2 +/- (hMax-F)/2*tanh( m*C_3k*( x_k-x0_k ) )  with  k in [0,1,2]
+
+        It represents a restriction of the refinement function F in the cylinder
+        axis direction to the length of the cylinder object. This allows to
+        prevent an over-refinement in the domain, when the cylinder is not
+        defined over its whole length.
+
+        Parameters:
+        -----------
+        incObj: object instance
+            cylinder object to restrict a refinement field for
+
+        fieldObj: object instance
+            refinement field object that is restricted
+        """
+        # get required information from refinement options
+        refOpts=self.refinementOptions                                          # shortcut for refinement options
+        relRefWidth=refOpts["inclusionRefinementWidth"]                         # relative (to radius) refinement width around spherical inclusions
+        hMax=refOpts["maxMeshSize"]                                             # maximum mesh size (far away from sphere boundary)
+
+        # get required information from cylinder object
+        offset=relRefWidth*incObj.radius                                        # offset for starting and end points of cylinder center line to account for refinement width
+        D=incObj.axis/np.linalg.norm(incObj.axis)                               # director of cylinder center line
+        x0=incObj.base-offset*D                                                 # starting point of cylinder center line with offset
+        C=incObj.getTransformationMatrix()[2].flatten()                         # transformation coefficients for cylinder axis direction
+        x1=incObj.base+incObj.axis+offset*D                                     # end point of cylinder center line with offset
+        slope=5.3/offset                                                        # slope of hyperbolic tangent function to manage transition
+
+        # define the refinement field that limits the original refinement at
+        # the "beginning" of the cylinder
+        minFunctionString="1/2*( (({6})+F{7}) - ( ({6})-F{7} )*Tanh( ({8})*( ({3})*(x-({0}) + ({4})*(y-({1}) + ({5})*(z-({2}) ) ) )".format(*x0,*C,hMax,fieldObj.tag,slope)
+        minRestriction=ref.MathEvalField(self,functionString=minFunctionString)
+        self.refinementFields.append(minRestriction)
+
+        # restrict the defined field at the "end" of the cylinder
+        maxFunctionString="1/2*( (({6})+F{7}) + ( ({6})-F{7} )*Tanh( ({8})*( ({3})*(x-({0}) + ({4})*(y-({1}) + ({5})*(z-({2}) ) ) )".format(*x1,*C,hMax,minRestriction.tag,slope)
+        maxRestriction=ref.MathEvalField(self,functionString=maxFunctionString)
+        self.refinementFields.append(maxRestriction)
+
+        # return both restriction fields
+        return [minRestriction, maxRestriction]
+
+
+    ####################################################################
+    # Method to calculate a constant MathEval field for the RVE domain #
+    ####################################################################
+    def getDomainRefinementField(self):
+        """Define a MathEval field to restrict the maximum mesh size within the
+        RVE."""
+        # get required information  from refinement options
+        hMax=self.refinementOptions["maxMeshSize"]
+
+        # define function string
+        refFunction="{0}".format(hMax)
+
+        # set up MathEval refinement field
+        refField=ref.MathEvalField(self,functionString=refFunction)             # create new instance of MathEvalField and add it to Gmsh model
+
+        # add refinement field to list of refinement fields of RVE object
+        self.refinementFields.append(refField)
+
+        # return field tag
+        return refField
+
+
     ################################################################
     # Method to get an extended inclusionInfo array for refinement #
     ################################################################
@@ -406,38 +504,69 @@ class InclusionRVE(GenericRVE):
         return extIncList, extIncInfo
 
 
-    ###################################################################
-    # Method to perform refinement of inclusions and their boundaries #
-    ###################################################################
-    def inclusionRefinement(self,inclusionList):
-        """Method to perform refinement of inclusions and their boundaries
+    ############################################################################
+    # Method to calculate "Gaussian" MathEval fields for inclusion refinements #
+    ############################################################################
+    def getInclusionRefinementField(self,incObj):
+        """Method to define a "Gaussian" MathEval refinement field for a
+        refinement of the inclusions.
 
-        Within this method, the inclusions are refined using a function similar
-        to the normal distribution. This method ensures that especially the
-        inclusion boundaries are refined whereas the inclusion centers and the
-        surrounding material generally remain coarse. The applied refinement
-        refinement function of type "gaussian" is described in the function
-        definition of "_gaussianRefinement()".
+        This method defines MathEval refinement fields with functions of the
+        following type:
+
+            Spheres:
+            h(x_k)=hMax-(hMax-hMin)*exp( -1/2* (( sqrt( (x_k-x0_k)^2 ) -r0)/(b/4))^2 )  with  k in [1,2,3]
+
+            Circles:
+            h(x_k)=hMax-(hMax-hMin)*exp( -1/2* (( sqrt( (x_k-x0_k)^2 ) -r0)/(b/4))^2 )  with  k in [1,2]
+
+            Cylinders with axes in the local x3'-direction:
+            h(x_k)=hMax-(hMax-hMin)*exp( -1/2* (( sqrt( C_1k*(x_k-x0_k)^2 + C_2k*(x_k-x0_k)^2 ) -r0)/(b/4))^2 )  with  k in [1,2,3]
+
+        It represents a refinement which decreases the mesh size from hMax to
+        hMin if the distance r from the inclusion center/base (x0_1,x0_2,x0_3) is
+        close to the value r0. The course of the refinement function resembles a
+        normal distribution density function with mean value r0 and standard
+        deviation sigma. For convenience, the refinement width (relative to the
+        inclusion radius) b is used: since the interval +/-2*sigma covers about
+        95% of the values in a normal distribution density function, sigma is
+        calculated by b/4.
 
         Parameters:
         -----------
-        inclusionList: list
-            list of inclusions to refine
+        incObj: inclusion object instance
+            inclusion object to define the refinement field for
         """
-        # get required refinement options
-        refinementOptions=self.refinementOptions
-        elementsPerCircumference=refinementOptions["elementsPerCircumference"]
-        inclusionRefinementWidth=refinementOptions["inclusionRefinementWidth"]
-        maxMeshSize=refinementOptions["maxMeshSize"]
+        # get required information from refinement options
+        refOpts=self.refinementOptions                                          # shortcut for refinement options
+        elemsPerCirc=refOpts["elementsPerCircumference"]                        # desired amount of elements per sphere circumference
+        relRefWidth=refOpts["inclusionRefinementWidth"]                         # relative (to radius) refinement width around spherical inclusions
+        hMax=refOpts["maxMeshSize"]                                             # maximum mesh size (far away from sphere boundary)
 
-        # set refinement fields in loop over all inclusions
-        for inc in inclusionList:
-            meshSize=2*np.pi*inc.radius/elementsPerCircumference                # get mesh size by dividing inclusion circumference by elementsPerCircumference
-            refinementWidth=inclusionRefinementWidth*inc.radius                 # determine refinementWidth
-            x0=incObj.getInfo()[0]                                              # center/base point of the inclusion
-            C=incObj.getTransformationMatrix()
-            sigma=refinementWidth/4                                             # determine standard deviation of gaussian function so that 95% of the area under the refinement function are within the given refinementWidth: sigma=refinementWidth/4
-            self._setMathEvalField("gaussian",np.r_[incInfo[iInc,self.relevantAxes[:]],incInfo[iInc,-1],maxMeshSize,meshSize,sigma])
+        # calculate meshing parameters using incObj information
+        hMin=2*np.pi*incObj.radius/elemsPerCirc
+        b=relRefWidth*incObj.radius
+
+        # setup MathEval refinement field functions depending on object type
+        if incObj.type == "Sphere":                                             # inclusion object of type "Sphere"
+            functionString="{4}-({4}-({5}))*Exp(-1/2*(((Sqrt((x-({0}))^2+(y-({1}))^2+(z-({2}))^2)-({3}))/({6}))^2)".format(*incObj.center,incObj.radius,hMax,hMin,b/4)
+        elif incObj.type == "Circle":                                           # inclusion object of type "Circle"
+            functionString="{4}-({4}-({5}))*Exp(-1/2*(((Sqrt((x-({0}))^2+(y-({1}))^2)^2)-({3}))/({6}))^2)".format(*incObj.center[0:2],incObj.radius,hMax,hMin,b/4)
+        elif incObj.type == "Cylinder":                                         # inclusion object of type "Cylinder"
+            C=incObj.getTransformationMatrix()                                  # -> get transformation matrix from global x_k to local x'_l system
+            Cperp=C[0:2].flatten()                                              # -> transformation coefficients for directions perpendicular to cylinder axis
+            functionString="{10}-({10}-({11}))*Exp(-1/2*(((Sqrt( ({3})*(x-({0}))^2+({4})*(y-({1}))^2+({5})*(z-({2}))^2 + ({6})*(x-({0}))^2+({7})*(y-({1}))^2+({8})*(z-({2}))^2) )-({9}))/({12}))^2)".format(*self.base,*Cperp,self.radius,hMax,hMin,b)
+
+        # create refinement field and return it
+        refField=ref.MathEvalField(self,functionString=functionString)
+        return refField
+
+
+    #######################################################################################
+    # Method to calculate "Tanh" MathEval fields for refinements between close inclusions #
+    #######################################################################################
+    def getMinDistRefinementFields(self,distVec):
+        pass
 
 
     ###################################################
@@ -566,74 +695,6 @@ class InclusionRVE(GenericRVE):
 
         # return transformation matrix
         return C
-
-
-    ############################################
-    # Method to set MathEval refinement fields #
-    ############################################
-    def _setMathEvalField(self,type,data):
-        """Internal method to set MathEval refinement fields
-
-        Within this method, MathEval refinement fields can be set according to
-        the specified type. An extension of the method is possible by simply
-        defining new subfunctions which handle the refinement.
-
-        Parameters:
-        -----------
-        type: string
-            type of refinement function that has to be applied
-
-        data: array
-            data to pass as parameters to the required refinement function
-        """
-        # get refinement function string depending on type of refinement
-        if type=="gaussian":                                                    # "Gaussian" refinement function
-            refineFunction=self._gaussianRefinement(data)                       # -> call corresponding method
-        elif type=="tanh":                                                      # "Tanh" refinement function
-            refineFunction=self._tanhRefinement(data)                           # -> call corresponding method
-        elif type=="const":                                                     # "Const" refinement function
-            refineFunction="{0}".format(data)                                   # -> set constant field
-
-        # update list of refinement fields
-        self.refinementFields.append({"fieldType": "MathEval", "fieldInfos": { "F": refineFunction}})
-
-
-    ###########################################################################
-    # Method to calculate "Gaussian" MathEval fields for inclusion refinement #
-    ###########################################################################
-    def _gaussianRefinement(self,x0,r0,C,hMax,hMin,b):
-        """Internal method to set "Gaussian" refinement fields
-
-        This method defines refinement fields of the following type:
-
-            Spheres:
-            h(x1,x2,x3)=h_max-(h_max-h_min)*exp( -1/2* (( sqrt( C_1k*(x_k-x0_k)^2 + C_2k*(x_k-x0_k)^2 + C_3k*(x_k-x0_k)^2 ) -r0)/(b/4))^2 )
-
-            Cylinders/Disks with axis/normal in the local x3-direction:
-            h(x1,x2)=h_max-(h_max-h_min)*exp( -1/2* (( sqrt( C_1k*(x_k-x0_k)^2 + C_2k*(x_k-x0_k)^2 ) -r0)/(b/4))^2 )
-
-        It represents a refinement which decreases the mesh size from h_max to
-        h_min if the distance r from the inclusion center (x0_1,x0_2,x0_3) is
-        close to the value r0. The course of the refinement function resembles a
-        normal distribution density function with mean value r0 and standard
-        deviation sigma. For convenience, the refinement width (relative to the
-        inclusion radius) b is used: since the interval +/-2*sigma covers about
-        95% of the values in a normal distribution density function, sigma is
-        calculated by b/4.
-
-        Parameters:
-        -----------
-        data: array
-            array containing all parameters for the refinement
-            -> data=[x1_0, x2_0, (x3_0), r0, h_max, h_min, b]
-        """
-        axesString=["x", "y", "z"]                                              # define axes string (needed for problems with only 2 relevant axes)
-        if len(self.relevantAxes)==2:                                           # problems with 2 relevant axes (Cylinders/Disks)
-            refineFunction="{5}-({5}-({6}))*Exp(-1/2*(((Sqrt(({0}-({2}))^2+({1}-({3}))^2)-({4}))/({7}))^2))".format(*[axesString[ax] for ax in self.relevantAxes[:]],*data)
-        elif len(self.relevantAxes)==3:                                         # problems with 3 relevant axes (Spheres)
-            refineFunction="{4}-({4}-({5}))*Exp(-1/2*(((Sqrt((x-({0}))^2+(y-({1}))^2+(z-({2}))^2)-({3}))/({6}))^2))".format(*data)
-
-        return refineFunction
 
 
     #############################################################################

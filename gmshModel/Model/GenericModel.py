@@ -95,8 +95,8 @@ class GenericModel:
         physical groups (e.g. different materials)
 
     refinementFields: list
-        list of dictionaries defining the refinement fields that have to
-        be added to the Gmsh model
+        list of refinement function objects defining the refinement fields that
+        for the Gmsh model
     """
 
     #########################
@@ -227,8 +227,7 @@ class GenericModel:
                                           "Mesh.MaxNumThreads3D": threads})
 
         # deine refinement information and add them to the Gmsh model
-        self.defineRefinementFields(refinementOptions=refinementOptions)        # placeholder method: has to be specified/overwritten for the individual models
-        self.addRefinementFieldsToGmshModel()                                   # use Gmsh-API to add defined fields to the Gmsh model
+        self.setupRefinementFields(refinementOptions=refinementOptions)         # placeholder method: has to be specified/overwritten for the individual models
 
         # set background field for meshing procedure (if possible)
         if not self.backgroundField is None:
@@ -409,9 +408,9 @@ class GenericModel:
 
 
     ###########################################
-    # Method to define refinement information #
+    # Method to set up refinement information #
     ###########################################
-    def defineRefinementFields(self):
+    def setupRefinementFields(self):
         """Placeholder method to define/compute refinement fields for the mesh
         generation. Has to be specified in child classes"""
         pass
@@ -565,30 +564,6 @@ class GenericModel:
             # set physical groups
             self.gmshAPI.addPhysicalGroup(grpDim,grpEntIDs,grpNumber)           # define the entity group as physical and set correct physical number
             self.gmshAPI.setPhysicalName(grpDim,grpNumber,grpName)              # set corresponding name of the physical group (equal to name of the group that is declared as physical for simplicity)
-
-
-    #################################################
-    # Method to add refinement fields to Gmsh model #
-    #################################################
-    def addRefinementFieldsToGmshModel(self):
-        """Method to add defined refinement fields to the Gmsh model"""
-
-        # loop over all refinement fields defined for the model
-        for refineField in self.refinementFields:
-
-            # get details of the refinement field to add
-            fieldType=refineField["fieldType"]                                  # get the type of refinement field
-            fieldInfos=refineField["fieldInfos"]                                # get information required for this type of refinement field
-
-            # set refinement field
-            fieldTag=self.gmshAPI.mesh.field.add(fieldType,tag=-1)              # add new refinement field and save its number
-            for optName, optVal in fieldInfos.items():                          # provide all necessary information for this field from fieldInfo dictionary
-                if isinstance(optVal,str):                                      # -> current option value is a string
-                    self.gmshAPI.mesh.field.setString(fieldTag,optName,optVal)  # ->-> use built-in setString method of gmsh.model.mesh.field
-                elif isinstance(optVal,int) or isinstance(optVal,float):        # -> current option value is a number
-                    self.gmshAPI.mesh.field.setNumber(fieldTag,optName,optVal)  # ->-> use built-in setNumber method of gmsh.model.mesh.field
-                elif isinstance(optVal,list) or isinstance(optVal,np.ndarray):  # -> current option value is a list or numpy array
-                    self.gmshAPI.mesh.field.setNumbers(fieldTag,optName,optVal) # ->-> use built-in setNumbers method of gmsh.model.mesh.field
 
 
 

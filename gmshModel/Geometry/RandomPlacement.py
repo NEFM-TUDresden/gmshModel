@@ -184,7 +184,7 @@ class RandomSequentialAdsorption(RandomAlgorithm):
         # assess boundary distances
         acceptInc = True                                                        # initialize flag for acceptance of inclusion to True
         for entittyType, entityDists in distBnd.items():                        # iterate over all boundary entity types
-            if np.any(np.absolute(entityDists) < minDistBnd):                   # check if absolute distance to current boundary entity type is below minimum distance
+            if np.any(np.linalg.norm(entityDists,axis=1) < minDistBnd):         # check if absolute distance to current boundary entity type is below minimum distance
                 acceptInc = False                                               # -> reject inclusion
                 break                                                           # -> stop iteration
 
@@ -192,9 +192,9 @@ class RandomSequentialAdsorption(RandomAlgorithm):
         return acceptInc
 
 
-    #############################################################
-    # Method to check distance of inclusions toother inclusions #
-    #############################################################
+    ##############################################################
+    # Method to check distance of inclusions to other inclusions #
+    ##############################################################
     def checkDistanceInclusions(self,incObj,distInc):
         """Method to decide whether an inclusion object is accepted or rejected
         depending on its distance to other inclusions.
@@ -215,7 +215,7 @@ class RandomSequentialAdsorption(RandomAlgorithm):
         # assess inclusion distances
         acceptInc = True                                                        # initialize flag for acceptance of inclusion to True
         for incType, incDists in distInc.items():                               # iterate over all inclusion object types
-            if np.any(np.absolute(incDists) < minDistInc):                      # check if absolute distance to objects of current inclusion type is below minimum distance
+            if np.any(np.linalg.norm(incDists,axis=1) < minDistInc):            # check if absolute distance to objects of current inclusion type is below minimum distance
                 acceptInc = False                                               # -> reject inclusion
                 break                                                           # -> stop iteration
 

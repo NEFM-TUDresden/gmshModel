@@ -133,7 +133,9 @@ class RandomInclusionRVE(InclusionRVE):
         # plausibility checks for input variables
         if inclusionSets is None:
             raise TypeError("Variable \"inclusionSets\" not set! For RVEs with random inclusion distributions, the inclusionSets must be defined. Check your input data.")
-
+        if inclusionType != "Circle" and size[2] == 0.0: 
+            raise TypeError("2D model but with 3D inclusion type! Check your input data.")
+            
         # update inclusion sets to start placement with biggest inclusions
         inclusionSets=np.atleast_2d(inclusionSets)                              # type conversion for inclusionSets to be matrix-like
         inclusionSets=inclusionSets[inclusionSets[:,0].argsort(axis=0)[::-1]]   # sort inclusionSets (descending) to start algorithm with biggest inclusions

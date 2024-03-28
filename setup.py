@@ -18,6 +18,7 @@ with open("README.rst", "r") as fileHandle:                                     
 # set install_requires
 installRequires=["numpy",
                  "gmsh",
+                 "h5py",
                  "meshio>=4,<=5.1.2",
                  "pyvista>=0.24.1"]
 

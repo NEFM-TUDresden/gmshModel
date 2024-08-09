@@ -370,7 +370,7 @@ class InclusionRVE(GenericRVE):
                 C=self._getTransformationMatrix(distIncs[iRefine,:],axes)      # get transformation matrix to rotated system between inclusions under consideration
 
                 # set refinement field
-                self._setMathEvalField("tanh",np.r_[C.reshape(C.size),refineCenter,refineWidth,maxMeshSize,meshSize,5.3/(nElemsBetween*meshSize),aspectRatio])
+                self._setMathEvalField("tanh",np.r_[C.reshape(C.size),refineCenter,refineWidth,maxMeshSize,meshSize,5.3/(transitionElements*meshSize),aspectRatio])
 
 
 

@@ -20,13 +20,13 @@ sys.path.insert(0, os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 
 project = 'gmshModel'
-copyright = '2020, Philipp Metsch'
+copyright = '2024, Philipp Metsch'
 author = 'Philipp Metsch'
 
 # The short X.Y version
 version = ''
 # The full version, including alpha/beta/rc tags
-release = '1.0.3'
+release = '1.0.19'
 
 
 # -- General configuration ---------------------------------------------------

@@ -18,8 +18,7 @@ with open("README.rst", "r") as fileHandle:                                     
 # set install_requires
 installRequires=["numpy",
                  "gmsh",
-                 "h5py",
-                 "meshio>=4,<=5.1.2",
+                 "meshio[all]>=4,<=5.1.2",
                  "pyvista>=0.24.1"]
 
 
@@ -48,7 +47,6 @@ setuptools.setup(
                  "Programming Language :: Python :: 3.8",
                  "Programming Language :: Python :: 3.9",
                  "Programming Language :: Python :: 3.10",
-                 "Programming Language :: Python :: 3.11",
                  "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
                  "Topic :: Scientific/Engineering",
                  "Topic :: Utilities"],

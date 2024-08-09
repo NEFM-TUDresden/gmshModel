@@ -335,8 +335,16 @@ class GenericModel:
         Objects that have been saved to a binary file using the pickle module
         can be reloaded here.
         """
-        with open("fileName","rb") as file:                                     # load file
-            return pickle.load(file)                                            # load saved file with pickle module
+        with open(fileName,"rb") as file:                                       # load file
+            modelInstance = pickle.load(file)                                   # load saved file with pickle module
+        
+        # Use saved geometry information to rebuild the model
+        modelInstance.initializeGmsh(modelInstance.gmshConfigChanges)           # initialize Gmsh API
+        modelInstance.addGeometricObjectsToGmshModel()                          # use Gmsh-API to add geometric information to the Gmsh 
+        modelInstance.performBooleanOperationsForGmshModel()                    # use Gmsh-API to perform defined operations
+        modelInstance.addPhysicalGroupsToGmshModel()                            # use Gmsh-API to add defined groups to the Gmsh model
+        modelInstance.setupPeriodicity()                                        # set up periodicity constraints
+        return modelInstance                                            
 
 
 

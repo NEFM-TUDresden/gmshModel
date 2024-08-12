@@ -317,7 +317,7 @@ class GenericModel:
         to a binary file.
         """
         # get file parts of passed file string (return defaultsd if nothing is passed)
-        fileDir,fileName,fileExt=self.__getFileParts(file,"Model")
+        fileDir,fileName,fileExt=self._getFileParts(file,"Model")
 
         # save file
         os.makedirs(fileDir,exist_ok=True)                                      # ensure that the file directory exists

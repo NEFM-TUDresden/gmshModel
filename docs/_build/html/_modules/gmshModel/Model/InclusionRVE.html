@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gmshModel.Model.InclusionRVE &mdash; gmshModel 1.0.19 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=b095c1a6"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            gmshModel
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingStarted/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingStarted/visualization.html">Using the visualization features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../gmshModel/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">gmshModel</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gmshModel.Model.InclusionRVE</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gmshModel.Model.InclusionRVE</h1><div class="highlight"><pre>
+<span></span><span class="c1">################################################################################</span>
+<span class="c1">#     CLASS FOR INCLUSION RVE MESHES GENERATED USING THE GMSH-PYTHON-API       #</span>
+<span class="c1">################################################################################</span>
+<span class="c1"># This file provides a class definition for a generation of RVEs with inclusions</span>
+<span class="c1"># using Python and Gmsh. The class inherits from the GenericRVE class and extends</span>
+<span class="c1"># it in order order to handle distance and refinement calculations</span>
+<span class="c1">#</span>
+<span class="c1"># Currently, the class is restricted to RVEs with rectangular (2D)/ box-shaped</span>
+<span class="c1"># (3D) domains (explicitly assumed within the setupPeriodicity() method) which</span>
+<span class="c1"># comprise inclusions that are all of the same type (explicitly assumed by using</span>
+<span class="c1"># one inclusionInformation array and one inclusionAxis variable).</span>
+<span class="c1">###########################</span>
+<span class="c1"># Load required libraries #</span>
+<span class="c1">###########################</span>
+<span class="c1"># Standard Python libraries</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>                                                              <span class="c1"># numpy for array computations</span>
+<span class="kn">import</span> <span class="nn">copy</span> <span class="k">as</span> <span class="nn">cp</span>                                                               <span class="c1"># copy for deepcopies of arrays</span>
+
+<span class="c1"># self-defined class definitions and modules</span>
+<span class="kn">from</span> <span class="nn">.GenericRVE</span> <span class="kn">import</span> <span class="n">GenericRVE</span>                                              <span class="c1"># generic RVE class definition (parent class)</span>
+
+
+<span class="c1">###########################</span>
+<span class="c1"># Define GenericRVE class #</span>
+<span class="c1">###########################</span>
+<div class="viewcode-block" id="InclusionRVE">
+<a class="viewcode-back" href="../../../gmshModel/Model/InclusionRVE.html#gmshModel.Model.InclusionRVE.InclusionRVE">[docs]</a>
+<span class="k">class</span> <span class="nc">InclusionRVE</span><span class="p">(</span><span class="n">GenericRVE</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generic class for RVEs with inclusions created using the Gmsh-Python-API</span>
+
+<span class="sd">    Based on the GenericRVE class, this class provides extra attributes and</span>
+<span class="sd">    methods that all box-shaped RVEs with inclusions should have: the definition</span>
+<span class="sd">    of an inclusion information array and relevant inclusion axes allows to</span>
+<span class="sd">    provide additional methods for distance and refinement field calculations.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">    -----------</span>
+<span class="sd">    dimension: int</span>
+<span class="sd">        dimension of the model instance</span>
+
+<span class="sd">    size: list/array</span>
+<span class="sd">        size of the box-shaped RVE model</span>
+<span class="sd">        -&gt; size=[Lx, Ly, (Lz)]</span>
+
+<span class="sd">    origin: list/array</span>
+<span class="sd">        origin of the box-shaped RVE model</span>
+<span class="sd">        -&gt; origin=[Ox, Oy, (Oz)]</span>
+
+<span class="sd">    inclusionType: string</span>
+<span class="sd">        string defining the type of inclusion</span>
+<span class="sd">        -&gt; iunclusionType= &quot;Sphere&quot;/&quot;Cylinder&quot;/&quot;Circle&quot;</span>
+
+<span class="sd">    inclusionAxis:list/array</span>
+<span class="sd">        array defining the inclusion axis (only relevant for inclusionType &quot;Cylinder&quot;)</span>
+<span class="sd">        -&gt; currently restricted to Cylinders parallel to one of the coordinate axes</span>
+<span class="sd">        -&gt; inclusionAxis=[Ax, Ay, Az]</span>
+
+<span class="sd">    relevantAxes: list/array</span>
+<span class="sd">        array defining the relevant axes for distance calculations</span>
+
+<span class="sd">    periodicityFlags: list/array</span>
+<span class="sd">        flags indicating the periodic axes of the box-shaped RVE model</span>
+<span class="sd">        -&gt; periodicityFlags=[0/1, 0/1, 0/1]</span>
+
+<span class="sd">    inclusionInfo: array</span>
+<span class="sd">        array containing relevant inclusion information (center, radius) for</span>
+<span class="sd">        distance calculations</span>
+
+<span class="sd">    gmshConfigChanges: dict</span>
+<span class="sd">        dictionary for user updates of the default Gmsh configuration</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#########################</span>
+    <span class="c1"># Initialization method #</span>
+    <span class="c1">#########################</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">inclusionType</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">inclusionAxis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">origin</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span><span class="n">periodicityFlags</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">gmshConfigChanges</span><span class="o">=</span><span class="p">{}):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialization method for InclusionRVE objects</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        size: list/array</span>
+<span class="sd">            size of the box-shaped RVE model</span>
+<span class="sd">            -&gt; size=[Lx, Ly, (Lz)]</span>
+
+<span class="sd">        origin: list/array</span>
+<span class="sd">            origin of the box-shaped RVE model</span>
+<span class="sd">            -&gt; origin=[Ox, Oy, (Oz)]</span>
+
+<span class="sd">        inclusionType: string</span>
+<span class="sd">            string defining the type of inclusion</span>
+<span class="sd">            -&gt; iunclusionType= &quot;Sphere&quot;/&quot;Cylinder&quot;/&quot;Circle&quot;</span>
+
+<span class="sd">        inclusionAxis:list/array</span>
+<span class="sd">            array defining the inclusion axis (only relevant for inclusionType &quot;Cylinder&quot;)</span>
+<span class="sd">            -&gt; currently restricted to Cylinders parallel to one of the coordinate axes</span>
+<span class="sd">            -&gt; inclusionAxes=[Ax, Ay, Az]</span>
+
+<span class="sd">        periodicityFlags: list/array</span>
+<span class="sd">            flags indicating the periodic axes of the box-shaped RVE model</span>
+<span class="sd">            -&gt; periodicityFlags=[0/1, 0/1, 0/1]</span>
+
+<span class="sd">        gmshConfigChanges: dict</span>
+<span class="sd">            dictionary for user updates of the default Gmsh configuration</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># initialize parents classes attributes and methods</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span><span class="n">origin</span><span class="o">=</span><span class="n">origin</span><span class="p">,</span><span class="n">periodicityFlags</span><span class="o">=</span><span class="n">periodicityFlags</span><span class="p">,</span><span class="n">gmshConfigChanges</span><span class="o">=</span><span class="n">gmshConfigChanges</span><span class="p">)</span>
+
+        <span class="c1"># plausibility checks for additional input variables</span>
+        <span class="k">if</span> <span class="n">inclusionType</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Variable </span><span class="se">\&quot;</span><span class="s2">inclusionType</span><span class="se">\&quot;</span><span class="s2"> not set! For RVEs with inclusions, the type of inclusions must be defined. Check your input data.&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">inclusionType</span> <span class="o">==</span> <span class="s2">&quot;Cylinder&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">inclusionAxis</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Inclusion type </span><span class="se">\&quot;</span><span class="s2">Cylinder</span><span class="se">\&quot;</span><span class="s2"> specified but variable </span><span class="se">\&quot;</span><span class="s2">inclusionAxis</span><span class="se">\&quot;</span><span class="s2"> not set! For RVEs with cylindrical inclusions, the cylinder axis must be defined. Check your input data.&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">inclusionAxis</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">inclusionAxis</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Wrong amount of non-zero elements in </span><span class="se">\&quot;</span><span class="s2">inclusionAxis</span><span class="se">\&quot;</span><span class="s2">! For cylindrical inclusions, the variable </span><span class="se">\&quot;</span><span class="s2">inclusionAxis</span><span class="se">\&quot;</span><span class="s2"> has to specify the length and direction of the cylinder axis which, at the moment, has to be parallel to one of the coordinate axes. Check your input.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># determine relevant axes for distance calculations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inclusionAxis</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">inclusionAxis</span><span class="p">)</span>                            <span class="c1"># save inclusion axis as numpy array to class object</span>
+        <span class="n">axesIndices</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>                                              <span class="c1"># array with indices of all axes</span>
+        <span class="k">if</span> <span class="n">inclusionType</span> <span class="o">==</span> <span class="s2">&quot;Sphere&quot;</span><span class="p">:</span>                                           <span class="c1"># spherical inclusions</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">relevantAxes</span><span class="o">=</span><span class="n">axesIndices</span>                                       <span class="c1"># -&gt; all axes are relevant for distance</span>
+        <span class="k">elif</span> <span class="n">inclusionType</span> <span class="o">==</span> <span class="s2">&quot;Cylinder&quot;</span><span class="p">:</span>                                       <span class="c1"># cylindrical inclusions with axis orientation parallel to one of the coordinate axes</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">relevantAxes</span><span class="o">=</span><span class="n">axesIndices</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">inclusionAxis</span><span class="p">[:]</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span>             <span class="c1"># -&gt; relevant axes are the ones perpendicular to the cylinder axis</span>
+        <span class="k">elif</span> <span class="n">inclusionType</span> <span class="o">==</span> <span class="s2">&quot;Circle&quot;</span><span class="p">:</span>                                         <span class="c1"># circular/ disk-shaped inclusions</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">relevantAxes</span><span class="o">=</span><span class="n">axesIndices</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]]</span>                                <span class="c1"># -&gt; always assume placement in x-y-plane</span>
+
+        <span class="c1"># determine class names for domain and inclusions geometric objects</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inclusionType</span><span class="o">=</span><span class="n">inclusionType</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">domainType</span><span class="o">=</span><span class="s2">&quot;Box&quot;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">domainType</span><span class="o">=</span><span class="s2">&quot;Rectangle&quot;</span>
+
+        <span class="c1"># define default refinement information for setRefinementInformation()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">refinementOptions</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;maxMeshSize&quot;</span><span class="p">:</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>                                              <span class="c1"># automatically calculate maximum mesh size with built-in method</span>
+            <span class="s2">&quot;inclusionRefinement&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>                                        <span class="c1"># flag to indicate active refinement of inclusions</span>
+            <span class="s2">&quot;interInclusionRefinement&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>                                   <span class="c1"># flag to indicate active refinement of space between inclusions (inter-inclusion refinement)</span>
+            <span class="s2">&quot;elementsPerCircumference&quot;</span><span class="p">:</span> <span class="mi">18</span><span class="p">,</span>                                     <span class="c1"># use 18 elements per inclusion circumference for inclusion refinement</span>
+            <span class="s2">&quot;elementsBetweenInclusions&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>                                     <span class="c1"># ensure 3 elements between close inclusions for inter-inclusion refinement</span>
+            <span class="s2">&quot;inclusionRefinementWidth&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>                                      <span class="c1"># use a relative (to inclusion radius) refinement width of 1 for inclusion refinement</span>
+            <span class="s2">&quot;transitionElements&quot;</span><span class="p">:</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>                                       <span class="c1"># automatically calculate number of transitioning elements (elements in which tanh function jumps from h_min to h_max) for inter-inclusion refinement</span>
+            <span class="s2">&quot;aspectRatio&quot;</span><span class="p">:</span> <span class="mf">1.5</span>                                                  <span class="c1"># aspect ratio for inter-inclusion refinement: ratio of refinement in inclusion distance and perpendicular directions</span>
+        <span class="p">}</span>
+
+        <span class="c1"># initialize required additional attributes for all inclusionRVEs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inclusionInfo</span><span class="o">=</span><span class="p">[]</span>                                                   <span class="c1"># initialize unset inclusion information array</span>
+
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">#                 SPECIFIED/OVERWRITTEN PLACEHOLDER METHODS                    #</span>
+<span class="c1">################################################################################</span>
+
+    <span class="c1">####################################################</span>
+    <span class="c1"># Method for automated refinementfield calculation #</span>
+    <span class="c1">####################################################</span>
+<div class="viewcode-block" id="InclusionRVE.defineRefinementFields">
+<a class="viewcode-back" href="../../../gmshModel/Model/InclusionRVE.html#gmshModel.Model.InclusionRVE.InclusionRVE.defineRefinementFields">[docs]</a>
+    <span class="k">def</span> <span class="nf">defineRefinementFields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">refinementOptions</span><span class="o">=</span><span class="p">{}):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to calculate refinement information for the RVE</span>
+
+<span class="sd">        For inclusion-based RVEs, the inclusionInfo array can be used to</span>
+<span class="sd">        calculate refinement fields based on inclusion radii and distances.</span>
+<span class="sd">        These calculations are defined here so that every child class of</span>
+<span class="sd">        InclusionRVE can use them to define  refinement fields.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        refinementOptions: dict</span>
+<span class="sd">            user-defined updates for the default refinement options</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># load default options and update them with passed user options</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateRefinementOptions</span><span class="p">(</span><span class="n">refinementOptions</span><span class="p">)</span>
+
+        <span class="c1"># restrict the maximum mesh size (set domain mesh size)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setMathEvalField</span><span class="p">(</span><span class="s2">&quot;const&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">refinementOptions</span><span class="p">[</span><span class="s2">&quot;maxMeshSize&quot;</span><span class="p">])</span>
+
+        <span class="c1"># perform inclusion refinements with corresponding methods</span>
+        <span class="n">incInfo</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getInclusionInfoForRefinement</span><span class="p">()</span>                            <span class="c1"># get extended inclusion information array with inclusions copied over close boundaries</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">refinementOptions</span><span class="p">[</span><span class="s2">&quot;inclusionRefinement&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>               <span class="c1"># refinement of inclusions is active</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inclusionRefinement</span><span class="p">(</span><span class="n">incInfo</span><span class="p">)</span>                                   <span class="c1"># -&gt; perform refinement of inclusions and their boundaries (ensure set number of elements per circumference)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">refinementOptions</span><span class="p">[</span><span class="s2">&quot;interInclusionRefinement&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>          <span class="c1"># refinement between different inclusions is active</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">interInclusionRefinement</span><span class="p">(</span><span class="n">incInfo</span><span class="p">)</span>                              <span class="c1"># -&gt; perform refinement between inclusions</span>
+
+        <span class="c1"># merge all fields within one &quot;Min&quot;-Field</span>
+        <span class="n">relevantFields</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refinementFields</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>                <span class="c1"># start with &quot;1&quot; since Gmsh starts counting with 1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">refinementFields</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;fieldType&quot;</span><span class="p">:</span> <span class="s2">&quot;Min&quot;</span><span class="p">,</span> <span class="s2">&quot;fieldInfos&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;FieldsList&quot;</span><span class="p">:</span> <span class="n">relevantFields</span><span class="p">}})</span>
+
+        <span class="c1"># set &quot;Min&quot;-Field as background field in Gmsh</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">backgroundField</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">relevantFields</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span></div>
+
+
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">#          ADDITIONAL METHODS FOR REFINEMENT INFORMATION CALCULATION           #</span>
+<span class="c1">################################################################################</span>
+
+    <span class="c1">#######################################</span>
+    <span class="c1"># Method to update refinement options #</span>
+    <span class="c1">#######################################</span>
+<div class="viewcode-block" id="InclusionRVE.updateRefinementOptions">
+<a class="viewcode-back" href="../../../gmshModel/Model/InclusionRVE.html#gmshModel.Model.InclusionRVE.InclusionRVE.updateRefinementOptions">[docs]</a>
+    <span class="k">def</span> <span class="nf">updateRefinementOptions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">optionsUpdate</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to update refinement options</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        optionsUpdate: dict</span>
+<span class="sd">            dictionary containing user updates of the set refinement options</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">refinementOptions</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">optionsUpdate</span><span class="p">)</span>                            <span class="c1"># update refinement options</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">refinementOptions</span><span class="p">[</span><span class="s2">&quot;maxMeshSize&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>                     <span class="c1"># check if &quot;maxMeshSize&quot; is set to &quot;auto&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">refinementOptions</span><span class="p">[</span><span class="s2">&quot;maxMeshSize&quot;</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_calculateMaxMeshSize</span><span class="p">()</span>  <span class="c1"># -&gt; calculate &quot;maxMeshSize&quot; with internal function</span></div>
+
+
+
+    <span class="c1">################################################################</span>
+    <span class="c1"># Method to get an extended inclusionInfo array for refinement #</span>
+    <span class="c1">################################################################</span>
+<div class="viewcode-block" id="InclusionRVE.getInclusionInfoForRefinement">
+<a class="viewcode-back" href="../../../gmshModel/Model/InclusionRVE.html#gmshModel.Model.InclusionRVE.InclusionRVE.getInclusionInfoForRefinement">[docs]</a>
+    <span class="k">def</span> <span class="nf">getInclusionInfoForRefinement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">relDistBnd</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to calculate an &quot;extended&quot; inclusionInfo for the refinement</span>
+<span class="sd">        methods</span>
+
+<span class="sd">        In order to ensure a periodicity of not only the geometry but also the</span>
+<span class="sd">        mesh, the fields defined in the refinement methods, have to be periodic,</span>
+<span class="sd">        i.e. present on both sides of periodic boundaries. Within this method,</span>
+<span class="sd">        inclusions that are close to the domain boundaries are copied and stored</span>
+<span class="sd">        in an &quot;extended&quot; inclusionInfo array that is only used within the</span>
+<span class="sd">        refinement methods. This ensures that refinement fields that are found</span>
+<span class="sd">        on one boundary will also be present on its periodic counterpart.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        relDistBnd: int/float</span>
+<span class="sd">            distance (relative to inclusion radius) for which inclusion is considered</span>
+<span class="sd">            to be &quot;far&quot; from the boundary if it is exceeded</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># get relevant data for calculations</span>
+        <span class="n">incInfo</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inclusionInfo</span><span class="p">)</span>                                 <span class="c1"># get information of set inclusions (deepcopy to prevent changes of the model)</span>
+        <span class="n">incInfo</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span><span class="o">=</span><span class="n">incInfo</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">origin</span><span class="p">)</span>                <span class="c1"># temporariliy eliminate origin offset for all inclusions to simplify calculations</span>
+        <span class="n">bndPoints</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">])</span>                            <span class="c1"># temporariliy assume an RVE with origin at [0,0,0] to simplify calculations</span>
+        <span class="n">axes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">relevantAxes</span>                                                  <span class="c1"># get relevant axes for distance calculations</span>
+
+        <span class="c1"># initialize required arrays</span>
+        <span class="n">extIncInfo</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">27</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">incInfo</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">incInfo</span><span class="p">)[</span><span class="mi">1</span><span class="p">]))</span>     <span class="c1"># initialize extended incInfo array (ensure that all inclusion information will fit; get rid of unused space at the end of the function)</span>
+        <span class="n">totalIncInstances</span><span class="o">=</span><span class="mi">0</span>                                                     <span class="c1"># initialize number of set inclusion instances</span>
+
+        <span class="c1"># loop over all &quot;original&quot; inclusions</span>
+        <span class="k">for</span> <span class="n">iInc</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">incInfo</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>
+
+            <span class="c1"># get current inclusion from original incInfo array and initialize number of instances</span>
+            <span class="n">thisIncInfo</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">incInfo</span><span class="p">[</span><span class="n">iInc</span><span class="p">,:])</span>                          <span class="c1"># information of original inclusion</span>
+            <span class="n">copyDirs</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>                                 <span class="c1"># array to mark copies of the original inclusion in specific directions</span>
+            <span class="n">thisIncInstances</span><span class="o">=</span><span class="mi">1</span>                                                  <span class="c1"># number of instances for this inclusion</span>
+
+            <span class="c1"># get distance of inclusion to boundaries</span>
+            <span class="n">distBndsCenter</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getDistanceVector</span><span class="p">(</span><span class="n">thisIncInfo</span><span class="p">[</span><span class="mi">0</span><span class="p">,:],</span><span class="n">bndPoints</span><span class="p">,</span><span class="n">axes</span><span class="p">))</span> <span class="c1"># calculate (per-direction) distance of inclusion center to domain boundaries</span>
+            <span class="n">distBnds</span><span class="o">=</span><span class="n">distBndsCenter</span><span class="o">-</span><span class="n">thisIncInfo</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>                                             <span class="c1"># get corresponding distance of inclusion boundary</span>
+            <span class="n">closeBnds</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">distBnds</span><span class="o">&lt;=</span><span class="n">relDistBnd</span><span class="o">*</span><span class="n">thisIncInfo</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">distBnds</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)))</span> <span class="c1"># check which inclusions are close to which boundaries of the domain; omit inclusions with negative distances to the boundaries, since they are periodic copies of other inclusions and do not need to be checked separately</span>
+
+            <span class="c1"># loop over all &quot;close&quot; boundaries</span>
+            <span class="k">for</span> <span class="n">iBnd</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">closeBnds</span><span class="p">)[</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="n">validIncs</span><span class="o">=~</span><span class="n">copyDirs</span><span class="p">[:,</span><span class="n">axes</span><span class="p">[</span><span class="n">closeBnds</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="n">iBnd</span><span class="p">]]]</span>                  <span class="c1"># get valid inclusions to copy, i.e.: inclusions that have not been copied along this axis before</span>
+                <span class="n">thisIncCopies</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">thisIncInfo</span><span class="p">[</span><span class="n">validIncs</span><span class="p">,:])</span>             <span class="c1"># initialize current copy with current inclusion data (deepcopy)</span>
+                <span class="n">isCopyInDir</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">copyDirs</span><span class="p">[</span><span class="n">validIncs</span><span class="p">,:])</span>                  <span class="c1"># initialize indicator for copies in specific directions</span>
+                <span class="n">thisIncCopies</span><span class="p">[:,</span><span class="n">axes</span><span class="p">[</span><span class="n">closeBnds</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="n">iBnd</span><span class="p">]]]</span><span class="o">+=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="n">closeBnds</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">iBnd</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="n">axes</span><span class="p">[</span><span class="n">closeBnds</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="n">iBnd</span><span class="p">]]]</span> <span class="c1"># modify inclusion centers of copies (only if they are not already a copy in this direction -&gt; prevent superfluous copies)</span>
+                <span class="n">isCopyInDir</span><span class="p">[:,</span><span class="n">axes</span><span class="p">[</span><span class="n">closeBnds</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="n">iBnd</span><span class="p">]]]</span><span class="o">=</span><span class="kc">True</span>                     <span class="c1"># set current axis direction to True (indicate that this already is a copy in the specified direction)</span>
+                <span class="n">thisIncInfo</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">thisIncInfo</span><span class="p">,</span><span class="n">thisIncCopies</span><span class="p">]</span>                    <span class="c1"># append copied inclusions to current inclusion data</span>
+                <span class="n">copyDirs</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">copyDirs</span><span class="p">,</span><span class="n">isCopyInDir</span><span class="p">]</span>                            <span class="c1"># append markers to overall array</span>
+
+            <span class="c1"># update extended incInfo array</span>
+            <span class="n">thisIncInstances</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">thisIncInfo</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>                           <span class="c1"># number of instances for this inclusion</span>
+            <span class="n">extIncInfo</span><span class="p">[</span><span class="n">totalIncInstances</span><span class="p">:</span><span class="n">totalIncInstances</span><span class="o">+</span><span class="n">thisIncInstances</span><span class="p">,:]</span><span class="o">=</span><span class="n">thisIncInfo</span> <span class="c1"># save information on current inclusion and its copies</span>
+            <span class="n">totalIncInstances</span><span class="o">+=</span><span class="n">thisIncInstances</span>                                 <span class="c1"># updated number of total inclusion instances</span>
+
+        <span class="c1"># prepare output arrays</span>
+        <span class="n">extIncInfo</span><span class="o">=</span><span class="n">extIncInfo</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">totalIncInstances</span><span class="p">,:]</span>                            <span class="c1"># get relevant colums of extIncinfo array</span>
+        <span class="n">extIncInfo</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span><span class="o">+=</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">origin</span><span class="p">)</span>                           <span class="c1"># add origin to extIncInfo array coordinates</span>
+        <span class="k">return</span> <span class="n">extIncInfo</span></div>
+
+
+
+    <span class="c1">###################################################################</span>
+    <span class="c1"># Method to perform refinement of inclusions and their boundaries #</span>
+    <span class="c1">###################################################################</span>
+<div class="viewcode-block" id="InclusionRVE.inclusionRefinement">
+<a class="viewcode-back" href="../../../gmshModel/Model/InclusionRVE.html#gmshModel.Model.InclusionRVE.InclusionRVE.inclusionRefinement">[docs]</a>
+    <span class="k">def</span> <span class="nf">inclusionRefinement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">incInfo</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to perform refinement of inclusions and their boundaries</span>
+
+<span class="sd">        Within this method, the inclusions are refined using a function similar</span>
+<span class="sd">        to the normal distribution. This method ensures that especially the</span>
+<span class="sd">        inclusion boundaries are refined whereas the inclusion centers and the</span>
+<span class="sd">        surrounding matrix material generally remain coarse. The applied</span>
+<span class="sd">        refinement function of type &quot;gaussian&quot; is described in the function</span>
+<span class="sd">        definition of &quot;_gaussianRefinement()&quot;.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        incInfo: array</span>
+<span class="sd">            extended inclusionInfo array containing information on inclusions</span>
+<span class="sd">            within the RVE model as well as outside but close to the model</span>
+<span class="sd">            boundaries</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># get required refinement options</span>
+        <span class="n">refinementOptions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">refinementOptions</span>
+        <span class="n">elementsPerCircumference</span><span class="o">=</span><span class="n">refinementOptions</span><span class="p">[</span><span class="s2">&quot;elementsPerCircumference&quot;</span><span class="p">]</span>
+        <span class="n">inclusionRefinementWidth</span><span class="o">=</span><span class="n">refinementOptions</span><span class="p">[</span><span class="s2">&quot;inclusionRefinementWidth&quot;</span><span class="p">]</span>
+        <span class="n">maxMeshSize</span><span class="o">=</span><span class="n">refinementOptions</span><span class="p">[</span><span class="s2">&quot;maxMeshSize&quot;</span><span class="p">]</span>
+
+        <span class="c1"># set refinement fields in loop over all inclusions</span>
+        <span class="k">for</span> <span class="n">iInc</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">incInfo</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">meshSize</span><span class="o">=</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">incInfo</span><span class="p">[</span><span class="n">iInc</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span><span class="o">/</span><span class="n">elementsPerCircumference</span>           <span class="c1"># get mesh size by dividing inclusion circumference by elementsPerCircumference</span>
+            <span class="n">refinementWidth</span><span class="o">=</span><span class="n">inclusionRefinementWidth</span><span class="o">*</span><span class="n">incInfo</span><span class="p">[</span><span class="n">iInc</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>            <span class="c1"># determine refinementWidth</span>
+            <span class="n">sigma</span><span class="o">=</span><span class="n">refinementWidth</span><span class="o">/</span><span class="mi">4</span>                                             <span class="c1"># determine standard deviation of gaussian function so that 95% of the area under the refinement function are within the given refinementWidth: sigma=refinementWidth/4</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_setMathEvalField</span><span class="p">(</span><span class="s2">&quot;gaussian&quot;</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">incInfo</span><span class="p">[</span><span class="n">iInc</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">relevantAxes</span><span class="p">[:]],</span><span class="n">incInfo</span><span class="p">[</span><span class="n">iInc</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="n">maxMeshSize</span><span class="p">,</span><span class="n">meshSize</span><span class="p">,</span><span class="n">sigma</span><span class="p">])</span></div>
+
+
+
+    <span class="c1">###################################################</span>
+    <span class="c1"># Method to perform refinement between inclusions #</span>
+    <span class="c1">###################################################</span>
+<div class="viewcode-block" id="InclusionRVE.interInclusionRefinement">
+<a class="viewcode-back" href="../../../gmshModel/Model/InclusionRVE.html#gmshModel.Model.InclusionRVE.InclusionRVE.interInclusionRefinement">[docs]</a>
+    <span class="k">def</span> <span class="nf">interInclusionRefinement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">incInfo</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to perform refinement between inclusions</span>
+
+<span class="sd">        Within this method, the matrix between close inclusions is refined using</span>
+<span class="sd">        a tanh-function. This method ensures that the space between inclusions</span>
+<span class="sd">        comprises the user-defined amount of elements. The applied refinement</span>
+<span class="sd">        function of type &quot;tanh&quot; is described in the function definition of</span>
+<span class="sd">        &quot;_tanhRefinement()&quot;.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        incInfo: array</span>
+<span class="sd">            extended inclusionInfo array containing information on inclusions</span>
+<span class="sd">            within the RVE model as well as outside but close to the model</span>
+<span class="sd">            boundaries</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># get required refinement options</span>
+        <span class="n">refinementOptions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">refinementOptions</span>
+        <span class="n">nElemsBetween</span><span class="o">=</span><span class="n">refinementOptions</span><span class="p">[</span><span class="s2">&quot;elementsBetweenInclusions&quot;</span><span class="p">]</span>            <span class="c1"># number of elements between inclusion combinations that are considered &quot;close&quot;</span>
+        <span class="n">transitionElements</span><span class="o">=</span><span class="n">refinementOptions</span><span class="p">[</span><span class="s2">&quot;transitionElements&quot;</span><span class="p">]</span>              <span class="c1"># number of transitioning elements for the continuous jump to go from h_min to h_max</span>
+        <span class="n">aspectRatio</span><span class="o">=</span><span class="n">refinementOptions</span><span class="p">[</span><span class="s2">&quot;aspectRatio&quot;</span><span class="p">]</span>                            <span class="c1"># aspect ratio of inclusion distance and perpendicular directions</span>
+        <span class="n">maxMeshSize</span><span class="o">=</span><span class="n">refinementOptions</span><span class="p">[</span><span class="s2">&quot;maxMeshSize&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">transitionElements</span><span class="o">==</span><span class="s2">&quot;auto&quot;</span><span class="p">:</span>                                          <span class="c1"># number of transitioning elements is set to &quot;auto&quot;</span>
+            <span class="n">transitionElements</span><span class="o">=</span><span class="n">nElemsBetween</span>                                    <span class="c1"># -&gt; use number of elements between inclusions as default/automatically calculated value</span>
+        <span class="k">if</span> <span class="n">refinementOptions</span><span class="p">[</span><span class="s2">&quot;inclusionRefinement&quot;</span><span class="p">]</span><span class="o">==</span><span class="kc">True</span><span class="p">:</span>                      <span class="c1"># refinement of inclusions is active and has already been performed</span>
+            <span class="n">minMeshSizes</span><span class="o">=</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">incInfo</span><span class="p">[:,[</span><span class="mi">3</span><span class="p">]]</span><span class="o">/</span><span class="n">refinementOptions</span><span class="p">[</span><span class="s2">&quot;elementsPerCircumference&quot;</span><span class="p">]</span> <span class="c1"># -&gt; calculate minimum mesh sizes for the individual inclusions</span>
+        <span class="k">else</span><span class="p">:</span>                                                                   <span class="c1"># refinement of inclusions is not active</span>
+            <span class="n">minMeshSizes</span><span class="o">=</span><span class="n">refinementOptions</span><span class="p">[</span><span class="s2">&quot;maxMeshSize&quot;</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">incInfo</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span><span class="mi">1</span><span class="p">))</span> <span class="c1"># -&gt; set minimum mesh size for each inclusion to maxMeshSize</span>
+
+        <span class="c1"># get relevant axes for distance calculations</span>
+        <span class="n">axes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">relevantAxes</span>
+
+        <span class="c1"># loop over all inclusions</span>
+        <span class="k">for</span> <span class="n">iInc</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">incInfo</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>
+
+            <span class="n">thisInc</span><span class="o">=</span><span class="n">incInfo</span><span class="p">[</span><span class="n">iInc</span><span class="p">,:]</span>                                             <span class="c1"># inclusion information for the inclusion under consideration</span>
+            <span class="n">otherIncs</span><span class="o">=</span><span class="n">incInfo</span><span class="p">[</span><span class="n">iInc</span><span class="o">+</span><span class="mi">1</span><span class="p">:,:]</span>                                        <span class="c1"># inclusion information of other inclusions (prevent double placement of refinement information by only considering inclusion combinations that have not been considered so far)</span>
+
+            <span class="c1"># check distance to all remaining other inclusions</span>
+            <span class="n">distIncs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getDistanceVector</span><span class="p">(</span><span class="n">thisInc</span><span class="p">,</span><span class="n">otherIncs</span><span class="p">,</span><span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">)</span>       <span class="c1"># get center-center distance vectors (per direction) to other inclusions</span>
+            <span class="n">normDistIncs</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">distIncs</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>          <span class="c1"># get norm of center-center distance vectors</span>
+            <span class="n">normDistIncBnds</span><span class="o">=</span><span class="n">normDistIncs</span><span class="o">-</span><span class="n">otherIncs</span><span class="p">[:,[</span><span class="mi">3</span><span class="p">]]</span><span class="o">-</span><span class="n">thisInc</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>            <span class="c1"># get norm of boundary-boundary distance vectors</span>
+
+            <span class="c1"># decide which inclusion combinations have to be refined</span>
+            <span class="c1"># -&gt; Here, the maximum of the minimum mesh densities of the current</span>
+            <span class="c1"># -&gt; inclusion combinations is used to check whether - with this</span>
+            <span class="c1"># -&gt; mesh density (plus safety coefficient) - the required amount</span>
+            <span class="c1"># -&gt; of elements between the inclusions can be ensured</span>
+            <span class="n">incsForRefinement</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span> <span class="p">(</span><span class="n">normDistIncBnds</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">&lt;=</span><span class="mf">1.1</span><span class="o">*</span><span class="n">nElemsBetween</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">minMeshSizes</span><span class="p">[</span><span class="n">iInc</span><span class="p">,[</span><span class="mi">0</span><span class="p">]],</span><span class="n">minMeshSizes</span><span class="p">[</span><span class="n">iInc</span><span class="o">+</span><span class="mi">1</span><span class="p">:,[</span><span class="mi">0</span><span class="p">]])</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">normDistIncBnds</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">))</span>
+
+            <span class="c1"># loop over all inclusion combinations that have to be refined</span>
+            <span class="k">for</span> <span class="n">iRefine</span> <span class="ow">in</span> <span class="n">incsForRefinement</span><span class="o">.</span><span class="n">flatten</span><span class="p">():</span>
+                <span class="n">refineCenter</span><span class="o">=</span><span class="n">thisInc</span><span class="p">[</span><span class="n">axes</span><span class="p">]</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">distIncs</span><span class="p">[</span><span class="n">iRefine</span><span class="p">,:]</span>              <span class="c1"># get center of refinement (half the distance between the inclusions)</span>
+                <span class="n">meshSize</span><span class="o">=</span><span class="n">normDistIncBnds</span><span class="p">[</span><span class="n">iRefine</span><span class="p">]</span><span class="o">/</span><span class="n">nElemsBetween</span>                 <span class="c1"># get required mesh size (distance diveded by required amount of elements)</span>
+                <span class="n">refineWidth</span><span class="o">=</span><span class="n">normDistIncBnds</span><span class="p">[</span><span class="n">iRefine</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="n">transitionElements</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="n">meshSize</span> <span class="c1"># get refinement width, i.e. offset of tanh-function to jump from minimum to maximum value (allow coarsening within &quot;transitionElems&quot; elements)</span>
+                <span class="n">C</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getTransformationMatrix</span><span class="p">(</span><span class="n">distIncs</span><span class="p">[</span><span class="n">iRefine</span><span class="p">,:],</span><span class="n">axes</span><span class="p">)</span>      <span class="c1"># get transformation matrix to rotated system between inclusions under consideration</span>
+
+                <span class="c1"># set refinement field</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_setMathEvalField</span><span class="p">(</span><span class="s2">&quot;tanh&quot;</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">C</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">size</span><span class="p">),</span><span class="n">refineCenter</span><span class="p">,</span><span class="n">refineWidth</span><span class="p">,</span><span class="n">maxMeshSize</span><span class="p">,</span><span class="n">meshSize</span><span class="p">,</span><span class="mf">5.3</span><span class="o">/</span><span class="p">(</span><span class="n">transitionElements</span><span class="o">*</span><span class="n">meshSize</span><span class="p">),</span><span class="n">aspectRatio</span><span class="p">])</span></div>
+
+
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">#           ADDITIONAL PRIVATE/HIDDEN METHODS FOR INTERNAL USE ONLY            #</span>
+<span class="c1">################################################################################</span>
+
+    <span class="c1">####################################################################</span>
+    <span class="c1"># Method to automatically calculate a reasonable maximum mesh size #</span>
+    <span class="c1">####################################################################</span>
+    <span class="k">def</span> <span class="nf">_calculateMaxMeshSize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Internal method to calculate the maximum mesh size&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>                                                   <span class="c1"># RVE size has not been set</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getGmshOption</span><span class="p">(</span><span class="s2">&quot;Mesh.CharacteristicLengthMax&quot;</span><span class="p">)</span>           <span class="c1"># -&gt; use Gmsh default setting of maximum mesh size</span>
+        <span class="k">else</span><span class="p">:</span>                                                                   <span class="c1"># RVE size is set</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">)</span><span class="o">/</span><span class="mi">10</span>                                        <span class="c1"># -&gt; ensure at least 10 elements along the longest edge of the RVE</span>
+
+
+    <span class="c1">#######################################################################</span>
+    <span class="c1"># Method to get distance between a point and an array of other points #</span>
+    <span class="c1">#######################################################################</span>
+    <span class="k">def</span> <span class="nf">_getDistanceVector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">pointToCheck</span><span class="p">,</span><span class="n">pointsToCheckWith</span><span class="p">,</span><span class="n">axes</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">)):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Internal method to get distances (per direction) between points</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        pointToCheck: array</span>
+<span class="sd">            coordinates of the reference point to calculate the distance for</span>
+
+<span class="sd">        pointsToCheckWith: array</span>
+<span class="sd">            coordinates of all points the distance of the reference point should</span>
+<span class="sd">            be calculated to</span>
+
+<span class="sd">        axes: array</span>
+<span class="sd">            axes to check the distance for</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">distances</span><span class="o">=</span><span class="n">pointsToCheckWith</span><span class="p">[:,</span><span class="n">axes</span><span class="p">]</span><span class="o">-</span><span class="n">pointToCheck</span><span class="p">[</span><span class="n">axes</span><span class="p">]</span>                  <span class="c1"># calculate distance vector in relevant axes directions</span>
+        <span class="k">return</span> <span class="n">distances</span>                                                        <span class="c1"># return distance vector</span>
+
+
+    <span class="c1">##############################################################################</span>
+    <span class="c1"># Method to check collision of an inclusion and an array of other inclusions #</span>
+    <span class="c1">##############################################################################</span>
+    <span class="k">def</span> <span class="nf">_checkIncDistance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">thisIncInfo</span><span class="p">,</span><span class="n">incInfo</span><span class="p">,</span><span class="n">axes</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">)):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Internal method to check the distance between inclusions.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        thisIncInfo: array</span>
+<span class="sd">            array containing information (center and radius) of the reference</span>
+<span class="sd">            inclusion</span>
+
+<span class="sd">        incInfo: array</span>
+<span class="sd">            array containing information (center and radius) of all inclusions</span>
+<span class="sd">            the distance should be checked for</span>
+
+<span class="sd">        axes: array</span>
+<span class="sd">            axes to check the distance for</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">distCenters</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getDistanceVector</span><span class="p">(</span><span class="n">thisIncInfo</span><span class="p">,</span><span class="n">incInfo</span><span class="p">,</span><span class="n">axes</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>               <span class="c1"># get distance of center points (norm)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">distCenters</span><span class="o">-</span><span class="n">incInfo</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]</span><span class="o">-</span><span class="n">thisIncInfo</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">incInfo</span><span class="p">[:,</span><span class="mi">5</span><span class="p">],</span><span class="n">thisIncInfo</span><span class="p">[</span><span class="mi">5</span><span class="p">]])):</span>  <span class="c1"># distance (boundary-boundary) to other inclusions is lower than allowed minumum</span>
+            <span class="k">return</span> <span class="kc">False</span>                                                        <span class="c1"># -&gt; do not accept current inclusion</span>
+        <span class="k">else</span><span class="p">:</span>                                                                   <span class="c1"># distance is not lower than allowed minimum</span>
+            <span class="k">return</span> <span class="kc">True</span>                                                         <span class="c1"># -&gt; accept the current inclusion</span>
+
+
+    <span class="c1">#####################################################################</span>
+    <span class="c1"># Method to check collision of an inclusion with the RVE boundaries #</span>
+    <span class="c1">#####################################################################</span>
+    <span class="k">def</span> <span class="nf">_checkBndDistance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">thisIncInfo</span><span class="p">,</span><span class="n">axes</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">)):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Internal method to check the distance of inclusions to the surrounding domain.</span>
+
+<span class="sd">        In this method, the distance of the current inclusion to the domain boundaries</span>
+<span class="sd">        is checked. For box-shaped domains, this distance calculation can be performed</span>
+<span class="sd">        by checking the inclusion distance (per direction) to the two points defining the</span>
+<span class="sd">        bounding box of the domain.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        thisIncInfo: array</span>
+<span class="sd">            array containing information (center and radius) of the inclusion</span>
+
+<span class="sd">        axes: array</span>
+<span class="sd">            axes to check the distance for</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># define points to check distance to (domain bounding-box points)</span>
+        <span class="n">bndPoints</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">])</span>                            <span class="c1"># temporariliy assume an RVE with origin at [0,0,0] to simplify calculations</span>
+
+        <span class="c1"># get distance of center point to boundary points (absolute value for all relevant directions)</span>
+        <span class="n">distBndCenter</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getDistanceVector</span><span class="p">(</span><span class="n">thisIncInfo</span><span class="p">,</span><span class="n">bndPoints</span><span class="p">,</span><span class="n">axes</span><span class="p">))</span>
+
+        <span class="c1"># calculate distance of inclusion boundary to domain boundaries (signed value for all directions)</span>
+        <span class="n">distBnd</span><span class="o">=</span><span class="n">distBndCenter</span><span class="o">-</span><span class="n">thisIncInfo</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>                                    <span class="c1"># distance to planes defining the RVE boundary</span>
+        <span class="n">distCorner</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">distBndCenter</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span><span class="o">-</span><span class="n">thisIncInfo</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="c1"># distance to closest corner of the RVE</span>
+
+        <span class="c1"># check if distance of inclusion to boundaries is too small</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">distBnd</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">thisIncInfo</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">distCorner</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">thisIncInfo</span><span class="p">[</span><span class="mi">4</span><span class="p">]):</span>
+            <span class="n">acceptInc</span><span class="o">=</span><span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">acceptInc</span><span class="o">=</span><span class="kc">True</span>
+
+        <span class="c1"># return relevant data</span>
+        <span class="k">return</span> <span class="n">acceptInc</span><span class="p">,</span> <span class="n">distBnd</span>
+
+
+    <span class="c1">############################################################################</span>
+    <span class="c1"># Method to get transformation matrix into local system between inclusions #</span>
+    <span class="c1">############################################################################</span>
+    <span class="k">def</span> <span class="nf">_getTransformationMatrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">axes</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Internal method to calculate transformation from global x-y-z coordinate</span>
+<span class="sd">        system to rotated local system between two inclusions</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        d: array</span>
+<span class="sd">            distance vector between the two inclusions</span>
+
+<span class="sd">        axes: array</span>
+<span class="sd">            axes to check the distance for</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># distinguish 2- and 3-dimensional problems</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>                                                        <span class="c1"># 2D cylindrical transformation -&gt; rotate system in relevant plane without touching 3rd axis</span>
+            <span class="n">phi</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>                                           <span class="c1"># get angle in relevant plane</span>
+            <span class="n">C</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">)],[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">)]])</span><span class="c1"># get transformation matrix according to cylindrical coordinate transformation</span>
+
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">)</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>                                                      <span class="c1"># 3D spherical transformation -&gt; rotate in 2 direction and place rotate x-axis in inclusion distance direction</span>
+            <span class="n">phi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>                                        <span class="c1"># get angle of projected distance vector in original x-y-plane</span>
+            <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span> <span class="n">d</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>                <span class="c1"># get 2nd inclination angle towards original x-y-plane</span>
+            <span class="n">C</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)],</span> <span class="c1"># get transformation matrix according to spherical coordinate transformation</span>
+                        <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)],</span>
+                        <span class="p">[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span> <span class="mi">0</span><span class="p">]])</span>
+
+        <span class="c1"># return transformation matrix</span>
+        <span class="k">return</span> <span class="n">C</span>
+
+
+    <span class="c1">############################################</span>
+    <span class="c1"># Method to set MathEval refinement fields #</span>
+    <span class="c1">############################################</span>
+    <span class="k">def</span> <span class="nf">_setMathEvalField</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="nb">type</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Internal method to set MathEval refinement fields</span>
+
+<span class="sd">        Within this method, MathEval refinement fields can be set according to</span>
+<span class="sd">        the specified type. An extension of the method is possible by simply</span>
+<span class="sd">        defining new subfunctions which handle the refinement.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        type: string</span>
+<span class="sd">            type of refinement function that has to be applied</span>
+
+<span class="sd">        data: array</span>
+<span class="sd">            data to pass as parameters to the required refinement function</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># get refinement function string depending on type of refinement</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="o">==</span><span class="s2">&quot;gaussian&quot;</span><span class="p">:</span>                                                    <span class="c1"># &quot;Gaussian&quot; refinement function</span>
+            <span class="n">refineFunction</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_gaussianRefinement</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>                       <span class="c1"># -&gt; call corresponding method</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="o">==</span><span class="s2">&quot;tanh&quot;</span><span class="p">:</span>                                                      <span class="c1"># &quot;Tanh&quot; refinement function</span>
+            <span class="n">refineFunction</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_tanhRefinement</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>                           <span class="c1"># -&gt; call corresponding method</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="o">==</span><span class="s2">&quot;const&quot;</span><span class="p">:</span>                                                     <span class="c1"># &quot;Const&quot; refinement function</span>
+            <span class="n">refineFunction</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>                                   <span class="c1"># -&gt; set constant field</span>
+
+        <span class="c1"># update list of refinement fields</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">refinementFields</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;fieldType&quot;</span><span class="p">:</span> <span class="s2">&quot;MathEval&quot;</span><span class="p">,</span> <span class="s2">&quot;fieldInfos&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="s2">&quot;F&quot;</span><span class="p">:</span> <span class="n">refineFunction</span><span class="p">}})</span>
+
+
+    <span class="c1">###########################################################################</span>
+    <span class="c1"># Method to calculate &quot;Gaussian&quot; MathEval fields for inclusion refinement #</span>
+    <span class="c1">###########################################################################</span>
+    <span class="k">def</span> <span class="nf">_gaussianRefinement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Internal method to set &quot;Gaussian&quot; refinement fields</span>
+
+<span class="sd">        This method defines refinement fields of the following type:</span>
+
+<span class="sd">            Spheres:</span>
+<span class="sd">            h(x1,x2,x3)=h_max-(h_max-h_min)*exp( -1/2* (( sqrt( (x1-x1_0)^2 + (x2-x2_0)^2 + (x3-x3_0)^2 ) -r0)/(b/4))^2 )</span>
+
+<span class="sd">            Cylinders/Disks with relevant axes in the local x1-x2-system:</span>
+<span class="sd">            h(x1,x2)=h_max-(h_max-h_min)*exp( -1/2* (( sqrt( (x1-x1_0)^2 + (x2-x2_0)^2 ) -r0)/(b/4))^2 )</span>
+
+<span class="sd">        It represents a refinement which decreases the mesh size from h_max to</span>
+<span class="sd">        h_min if the distance r from the inclusion center (x1_0,x2_0,x3_0) is</span>
+<span class="sd">        close to the value r0. The course of the refinement function resembles a</span>
+<span class="sd">        normal distribution density function with mean value r0 and standard</span>
+<span class="sd">        deviation sigma. For convenience, the refinement width (relative to the</span>
+<span class="sd">        inclusion radius) b is used: since the interval +/-2*sigma covers about</span>
+<span class="sd">        95% of the values in a normal distribution density function, sigma is</span>
+<span class="sd">        calculated by b/4.</span>
+
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        data: array</span>
+<span class="sd">            array containing all parameters for the refinement</span>
+<span class="sd">            -&gt; data=[x1_0, x2_0, (x3_0), r0, h_max, h_min, b]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">axesString</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">]</span>                                              <span class="c1"># define axes string (needed for problems with only 2 relevant axes)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">relevantAxes</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>                                           <span class="c1"># problems with 2 relevant axes (Cylinders/Disks)</span>
+            <span class="n">refineFunction</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{5}</span><span class="s2">-(</span><span class="si">{5}</span><span class="s2">-(</span><span class="si">{6}</span><span class="s2">))*Exp(-1/2*(((Sqrt((</span><span class="si">{0}</span><span class="s2">-(</span><span class="si">{2}</span><span class="s2">))^2+(</span><span class="si">{1}</span><span class="s2">-(</span><span class="si">{3}</span><span class="s2">))^2)-(</span><span class="si">{4}</span><span class="s2">))/(</span><span class="si">{7}</span><span class="s2">))^2))&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">axesString</span><span class="p">[</span><span class="n">ax</span><span class="p">]</span> <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">relevantAxes</span><span class="p">[:]],</span><span class="o">*</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">relevantAxes</span><span class="p">)</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>                                         <span class="c1"># problems with 3 relevant axes (Spheres)</span>
+            <span class="n">refineFunction</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{4}</span><span class="s2">-(</span><span class="si">{4}</span><span class="s2">-(</span><span class="si">{5}</span><span class="s2">))*Exp(-1/2*(((Sqrt((x-(</span><span class="si">{0}</span><span class="s2">))^2+(y-(</span><span class="si">{1}</span><span class="s2">))^2+(z-(</span><span class="si">{2}</span><span class="s2">))^2)-(</span><span class="si">{3}</span><span class="s2">))/(</span><span class="si">{6}</span><span class="s2">))^2))&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">refineFunction</span>
+
+
+    <span class="c1">#############################################################################</span>
+    <span class="c1"># Method to calculate &quot;Tanh&quot; MathEval fields for inter-inclusion refinement #</span>
+    <span class="c1">#############################################################################</span>
+    <span class="k">def</span> <span class="nf">_tanhRefinement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Internal method to set &quot;Tanh&quot; refinement fields</span>
+
+<span class="sd">        This method defines refinement functions of the following type:</span>
+
+<span class="sd">            Spheres:</span>
+<span class="sd">            h(x1,x2,x3)=(h_max+h_min)/2 + (h_max-h_min)/2* tanh( m*( ( sqrt( ( C_1k*(xk-x_k0) )^2 ) + aspect^2*( C_2k*(xk-x_k0) )^2 + epsilon^2*( C_3k*(xk-x_k0) )^2 ) -r0) )</span>
+
+<span class="sd">            Cylinders/Disks:</span>
+<span class="sd">            h(x1,x2)=(h_max+h_min)/2 + (h_max-h_min)/2* tanh( m*( ( sqrt( ( C_1k*(xk-x_k0) )^2 ) + aspect^2*( C_2k*(xk-x_k0) )^2 ) -r0) )</span>
+
+<span class="sd">        It represents a refinement within the matrix between close inclusions</span>
+<span class="sd">        which tries to ensure the requested amount of elements and performs a</span>
+<span class="sd">        &quot;continuous&quot; jump from h_min to h_max, when the distance from the origin</span>
+<span class="sd">        (x1_0,x2_0,x3_0) reaches the value r0. To allow for different refinement</span>
+<span class="sd">        widths in the inclusion distance and perpendicular directions, the local</span>
+<span class="sd">        x1&#39;-x2&#39;-x3&#39;-system is formulated in terms of the global x1-x2-x3 system</span>
+<span class="sd">        by means of the transformation matrix C_kl. The local x1-axis always points</span>
+<span class="sd">        in the inclusion distance direction - the downrating of the perpendicular</span>
+<span class="sd">        axis is performed using the variable aspect. Finally, the width of the</span>
+<span class="sd">        &quot;jump&quot; is controlled via the initial slope m.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        data: array</span>
+<span class="sd">            array containing all parameters for the refinement</span>
+<span class="sd">            -&gt; data=[C_11, C_12, (C_13), C_21, C_22, (C_23), (C_31), (C_32), (C_33), x1_0, x2_0, (x3_0), r0, h_max, h_min, m, aspect]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">relevantAxes</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+            <span class="n">axesString</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">]</span>
+            <span class="n">refineFunction</span><span class="o">=</span><span class="s2">&quot;(</span><span class="si">{9}</span><span class="s2">+(</span><span class="si">{10}</span><span class="s2">))/2+(</span><span class="si">{9}</span><span class="s2">-(</span><span class="si">{10}</span><span class="s2">))/2*Tanh((Sqrt(((</span><span class="si">{2}</span><span class="s2">)*(</span><span class="si">{0}</span><span class="s2">-(</span><span class="si">{6}</span><span class="s2">))+(</span><span class="si">{3}</span><span class="s2">)*(</span><span class="si">{1}</span><span class="s2">-(</span><span class="si">{7}</span><span class="s2">)))^2+(</span><span class="si">{12}</span><span class="s2">)^2*((</span><span class="si">{4}</span><span class="s2">)*(</span><span class="si">{0}</span><span class="s2">-(</span><span class="si">{6}</span><span class="s2">))+(</span><span class="si">{5}</span><span class="s2">)*(</span><span class="si">{1}</span><span class="s2">-(</span><span class="si">{7}</span><span class="s2">)))^2)-(</span><span class="si">{8}</span><span class="s2">))*(</span><span class="si">{11}</span><span class="s2">))&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">axesString</span><span class="p">[</span><span class="n">ax</span><span class="p">]</span> <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">relevantAxes</span><span class="p">[:]],</span><span class="o">*</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">relevantAxes</span><span class="p">)</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>
+            <span class="n">refineFunction</span><span class="o">=</span><span class="s2">&quot;(</span><span class="si">{13}</span><span class="s2">+(</span><span class="si">{14}</span><span class="s2">))/2+(</span><span class="si">{13}</span><span class="s2">-(</span><span class="si">{14}</span><span class="s2">))/2*Tanh((Sqrt(((</span><span class="si">{0}</span><span class="s2">)*(x-(</span><span class="si">{9}</span><span class="s2">))+(</span><span class="si">{1}</span><span class="s2">)*(y-(</span><span class="si">{10}</span><span class="s2">))+(</span><span class="si">{2}</span><span class="s2">)*(z-(</span><span class="si">{11}</span><span class="s2">)))^2+(</span><span class="si">{16}</span><span class="s2">)^2*((</span><span class="si">{3}</span><span class="s2">)*(x-(</span><span class="si">{9}</span><span class="s2">))+(</span><span class="si">{4}</span><span class="s2">)*(y-(</span><span class="si">{10}</span><span class="s2">))+(</span><span class="si">{5}</span><span class="s2">)*(z-(</span><span class="si">{11}</span><span class="s2">)))^2+(</span><span class="si">{16}</span><span class="s2">)^2*((</span><span class="si">{6}</span><span class="s2">)*(x-(</span><span class="si">{9}</span><span class="s2">))+(</span><span class="si">{7}</span><span class="s2">)*(y-(</span><span class="si">{10}</span><span class="s2">))+(</span><span class="si">{8}</span><span class="s2">)*(z-(</span><span class="si">{11}</span><span class="s2">)))^2)-(</span><span class="si">{12}</span><span class="s2">))*(</span><span class="si">{15}</span><span class="s2">))&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">refineFunction</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Philipp Metsch.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

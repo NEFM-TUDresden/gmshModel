@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GeometricObjects &mdash; gmshModel 1.0.19 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=b095c1a6"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="DistanceCalculations" href="DistanceCalculations.html" />
+    <link rel="prev" title="Geometry" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            gmshModel
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingStarted/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingStarted/visualization.html">Using the visualization features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../Model/index.html">Model</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Geometry</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">GeometricObjects</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#class-definitions">Class Definitions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="DistanceCalculations.html">DistanceCalculations</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../Visualization/index.html">Visualization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../MeshExport/index.html">MeshExport</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">gmshModel</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Geometry</a></li>
+      <li class="breadcrumb-item active">GeometricObjects</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/gmshModel/Geometry/GeometricObjects.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="geometricobjects">
+<h1>GeometricObjects<a class="headerlink" href="#geometricobjects" title="Link to this heading"></a></h1>
+<p>Within GeometricObjects classes for different geometric objects used in the
+GmshModel are defined. The geometric objects are used within the geometry
+generation to create Gmsh model from basic geometry entities.</p>
+<section id="class-definitions">
+<h2>Class Definitions<a class="headerlink" href="#class-definitions" title="Link to this heading"></a></h2>
+<p class="rubric">GeometricObject</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="gmshModel.Geometry.GeometricObjects.GeometricObject">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gmshModel.Geometry.GeometricObjects.</span></span><span class="sig-name descname"><span class="pre">GeometricObject</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimension</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/gmshModel/Geometry/GeometricObjects.html#GeometricObject"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gmshModel.Geometry.GeometricObjects.GeometricObject" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Definition of a generic geometric object</p>
+<p>This class is the parent class of all geometric objects and provides general
+information that all objects should have</p>
+<section id="attributes">
+<h3>Attributes:<a class="headerlink" href="#attributes" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>dimension: int</dt><dd><p>dimension of the RVE</p>
+</dd>
+<dt>group: string</dt><dd><p>string defining which group the geometric object belongs to</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="gmshModel.Geometry.GeometricObjects.GeometricObject.addToGmshModel">
+<span class="sig-name descname"><span class="pre">addToGmshModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gmshModel</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/gmshModel/Geometry/GeometricObjects.html#GeometricObject.addToGmshModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gmshModel.Geometry.GeometricObjects.GeometricObject.addToGmshModel" title="Link to this definition"></a></dt>
+<dd><p>Add a representation of the geometric object to the Gmsh model</p>
+<section id="parameters">
+<h4>Parameters:<a class="headerlink" href="#parameters" title="Link to this heading"></a></h4>
+<dl class="simple">
+<dt>gmshModel: class object</dt><dd><p>model class of the Gmsh-Python-API that holds the Gmsh-specific
+current model information</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<p class="rubric">Box</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="gmshModel.Geometry.GeometricObjects.Box">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gmshModel.Geometry.GeometricObjects.</span></span><span class="sig-name descname"><span class="pre">Box</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/gmshModel/Geometry/GeometricObjects.html#Box"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gmshModel.Geometry.GeometricObjects.Box" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#gmshModel.Geometry.GeometricObjects.GeometricObject" title="gmshModel.Geometry.GeometricObjects.GeometricObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">GeometricObject</span></code></a></p>
+<p>Definition of a Box object</p>
+<p>This class is a child class of geometricObject and provides additional
+information for objetcs of type Box</p>
+<section id="id1">
+<h3>Attributes:<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>dimension: int</dt><dd><p>dimension of the box object</p>
+</dd>
+<dt>origin: array/list</dt><dd><p>origin of the domain object -&gt; origin=[Ox, Oy, (Oz)]</p>
+</dd>
+<dt>size: array/list</dt><dd><p>size of the domain object -&gt; size=[Lx, Ly, (Lz)]</p>
+</dd>
+<dt>group: string</dt><dd><p>group the box object belongs to</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<p class="rubric">Rectangle</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="gmshModel.Geometry.GeometricObjects.Rectangle">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gmshModel.Geometry.GeometricObjects.</span></span><span class="sig-name descname"><span class="pre">Rectangle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/gmshModel/Geometry/GeometricObjects.html#Rectangle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gmshModel.Geometry.GeometricObjects.Rectangle" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#gmshModel.Geometry.GeometricObjects.GeometricObject" title="gmshModel.Geometry.GeometricObjects.GeometricObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">GeometricObject</span></code></a></p>
+<p>Definition of a Rectangle object</p>
+<p>This class is a child class of geometricObject and provides additional
+information for objetcs of type Rectangle</p>
+<section id="id2">
+<h3>Attributes:<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>dimension: int</dt><dd><p>dimension of the box object</p>
+</dd>
+<dt>origin: array/list</dt><dd><p>origin of the domain object -&gt; origin=[Ox, Oy, (Oz)]</p>
+</dd>
+<dt>size: array/list</dt><dd><p>size of the domain object -&gt; size=[Lx, Ly, (Lz)]</p>
+</dd>
+<dt>group: string</dt><dd><p>group the box object belongs to</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<p class="rubric">Sphere</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="gmshModel.Geometry.GeometricObjects.Sphere">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gmshModel.Geometry.GeometricObjects.</span></span><span class="sig-name descname"><span class="pre">Sphere</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">center</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/gmshModel/Geometry/GeometricObjects.html#Sphere"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gmshModel.Geometry.GeometricObjects.Sphere" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#gmshModel.Geometry.GeometricObjects.GeometricObject" title="gmshModel.Geometry.GeometricObjects.GeometricObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">GeometricObject</span></code></a></p>
+<p>Definition of a Sphere object</p>
+<p>This class is a child class of geometricObject and provides additional
+information for objetcs of type Sphere</p>
+<section id="id3">
+<h3>Attributes:<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>center: array/list</dt><dd><p>array that defines the center of the Sphere object
+-&gt; center=[Cx, Cy, (Cz)]</p>
+</dd>
+<dt>radius: float</dt><dd><p>radius of the Sphere object</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<p class="rubric">Cylinder</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="gmshModel.Geometry.GeometricObjects.Cylinder">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gmshModel.Geometry.GeometricObjects.</span></span><span class="sig-name descname"><span class="pre">Cylinder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">center</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/gmshModel/Geometry/GeometricObjects.html#Cylinder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gmshModel.Geometry.GeometricObjects.Cylinder" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#gmshModel.Geometry.GeometricObjects.GeometricObject" title="gmshModel.Geometry.GeometricObjects.GeometricObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">GeometricObject</span></code></a></p>
+<p>Definition of a Cylinder object</p>
+<p>This class is a child class of geometricObject and provides additional
+information for objetcs of type Cylinder</p>
+<section id="id4">
+<h3>Attributes:<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>center: array/list</dt><dd><p>array that defines the center of the Cylinder object
+-&gt; center=[Cx, Cy, Cz]</p>
+</dd>
+<dt>axis: array/list</dt><dd><p>array that defines the axis (direction and length) of the Cylinder object
+-&gt; axis=[Ax, Ay, Az]</p>
+</dd>
+<dt>radius: float</dt><dd><p>radius of the Cylinder object</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<p class="rubric">Circle</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="gmshModel.Geometry.GeometricObjects.Circle">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gmshModel.Geometry.GeometricObjects.</span></span><span class="sig-name descname"><span class="pre">Circle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">center</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/gmshModel/Geometry/GeometricObjects.html#Circle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gmshModel.Geometry.GeometricObjects.Circle" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#gmshModel.Geometry.GeometricObjects.GeometricObject" title="gmshModel.Geometry.GeometricObjects.GeometricObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">GeometricObject</span></code></a></p>
+<p>Definition of an Circle object</p>
+<p>This class is a child class of geometricObject and provides additional
+information for objetcs of type Circle</p>
+<section id="id5">
+<h3>Attributes:<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>center: array/list</dt><dd><p>array that defines the center of the Circle object
+-&gt; center=[Cx, Cy, (Cz)]</p>
+</dd>
+<dt>radius: float</dt><dd><p>radius of the Circle object</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Geometry" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="DistanceCalculations.html" class="btn btn-neutral float-right" title="DistanceCalculations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Philipp Metsch.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

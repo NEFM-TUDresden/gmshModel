@@ -252,7 +252,7 @@ class InclusionRVE(GenericRVE):
             # get distance of inclusion to boundaries
             distBndsCenter=np.absolute(self._getDistanceVector(thisIncInfo[0,:],bndPoints,axes)) # calculate (per-direction) distance of inclusion center to domain boundaries
             distBnds=distBndsCenter-thisIncInfo[0,3]                                             # get corresponding distance of inclusion boundary
-            closeBnds=np.array(np.where((np.absolute(distBnds)<=relDistBnd*thisIncInfo[0,3]))) # check which inclusions are close to which boundaries of the domain
+            closeBnds = np.array(np.where((distBnds<=relDistBnd*thisIncInfo[0,3]) & (distBndsCenter>0))) # check which inclusions are close to which boundaries of the domain; omit inclusions with negative center distances to the boundaries, since they are periodic copies of other inclusions and do not need to be checked separately
 
             # loop over all "close" boundaries
             for iBnd in range(0,np.shape(closeBnds)[1]):
@@ -360,7 +360,7 @@ class InclusionRVE(GenericRVE):
             # -> inclusion combinations is used to check whether - with this
             # -> mesh density (plus safety coefficient) - the required amount
             # -> of elements between the inclusions can be ensured
-            incsForRefinement=np.array(np.where( (normDistIncBnds.flatten()<=1.25*nElemsBetween*np.maximum(minMeshSizes[iInc,[0]],minMeshSizes[iInc+1:,[0]]).flatten()) & (normDistIncBnds.flatten() > 0) ))
+            incsForRefinement=np.array(np.where( (normDistIncBnds.flatten()<=1.5*nElemsBetween*np.maximum(minMeshSizes[iInc,[0]],minMeshSizes[iInc+1:,[0]]).flatten()) & (normDistIncBnds.flatten() > 0) ))
 
             # loop over all inclusion combinations that have to be refined
             for iRefine in incsForRefinement.flatten():

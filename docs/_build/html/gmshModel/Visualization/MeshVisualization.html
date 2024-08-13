@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MeshVisualization &mdash; gmshModel 1.0.19 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=b095c1a6"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="MeshExport" href="../MeshExport/index.html" />
+    <link rel="prev" title="GeometryVisualization" href="GeometryVisualization.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            gmshModel
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingStarted/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingStarted/visualization.html">Using the visualization features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../Model/index.html">Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Geometry/index.html">Geometry</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Visualization</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="GeometryVisualization.html">GeometryVisualization</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">MeshVisualization</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#class-definition">Class Definition</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../MeshExport/index.html">MeshExport</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">gmshModel</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Visualization</a></li>
+      <li class="breadcrumb-item active">MeshVisualization</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/gmshModel/Visualization/MeshVisualization.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="meshvisualization">
+<h1>MeshVisualization<a class="headerlink" href="#meshvisualization" title="Link to this heading"></a></h1>
+<p>The MeshVisualization provides the class definition for the mesh visualization of a Gmsh
+model. It is based on the pyvista and vtk libraries und implements additional
+features for the mesh visualization.</p>
+<section id="class-definition">
+<h2>Class Definition<a class="headerlink" href="#class-definition" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="gmshModel.Visualization.MeshVisualization.MeshVisualization">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gmshModel.Visualization.MeshVisualization.</span></span><span class="sig-name descname"><span class="pre">MeshVisualization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/gmshModel/Visualization/MeshVisualization.html#MeshVisualization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gmshModel.Visualization.MeshVisualization.MeshVisualization" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Class for Gmsh model mesh visualization</p>
+<p>This class visualizes the mesh of a given GmshModel using the pyvista and
+vtk libraries. It provides a simple method to visualize the model geometry
+by storing the mesh into a temporary “.vtu” file which is read by pyvista.
+With additional slider widgets for a threshold algorithm based on physical
+groups of the Gmsh model and a box widget to facilitate an extraction of
+areas within the mesh, the visualization tool allows to get an impression
+of the generated mesh.</p>
+<section id="attributes">
+<h3>Attributes:<a class="headerlink" href="#attributes" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>model: GmshModel object instance</dt><dd><p>model instance for which the geometry has to be displayed</p>
+</dd>
+<dt>defaultSettings: dict</dt><dd><p>dictionary holding the default widget visualization options to allow
+restoring those options</p>
+</dd>
+<dt>currentSettings: dict</dt><dd><p>dictionary holding the current widget visualization options</p>
+</dd>
+<dt>plotterObj: pyvista plotter object instance</dt><dd><p>current plotter/renderer object</p>
+</dd>
+<dt>mesh: mesh object instance</dt><dd><p>object holding the current mesh information</p>
+</dd>
+<dt>thresholdAlgorithm: vtk Threshold Algorithm instance</dt><dd><p>object instance with information for the applied vtkThreshold algorithm</p>
+</dd>
+<dt>thresholdAlgorithm: vtk Extraction Algorithm instance</dt><dd><p>object instance with information for the applied vtkExtractGeometry
+algorithm</p>
+</dd>
+<dt>extractionBox: vtkBox object instance</dt><dd><p>object instance storing information of the extraction box</p>
+</dd>
+<dt>extractionBoxBounds: pyvista PolyData object instance</dt><dd><p>object instance storing information about the extraction box boundaries</p>
+</dd>
+<dt>active widgets: list</dt><dd><p>list of active widgets within the rendering object</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="gmshModel.Visualization.MeshVisualization.MeshVisualization.addBoxWidget">
+<span class="sig-name descname"><span class="pre">addBoxWidget</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/gmshModel/Visualization/MeshVisualization.html#MeshVisualization.addBoxWidget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gmshModel.Visualization.MeshVisualization.MeshVisualization.addBoxWidget" title="Link to this definition"></a></dt>
+<dd><p>Method to configure a box widget and add it to the rendering scene</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gmshModel.Visualization.MeshVisualization.MeshVisualization.addKeyPressEvents">
+<span class="sig-name descname"><span class="pre">addKeyPressEvents</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/gmshModel/Visualization/MeshVisualization.html#MeshVisualization.addKeyPressEvents"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gmshModel.Visualization.MeshVisualization.MeshVisualization.addKeyPressEvents" title="Link to this definition"></a></dt>
+<dd><p>Method to add all user-defined key-press events</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gmshModel.Visualization.MeshVisualization.MeshVisualization.addSliderWidgets">
+<span class="sig-name descname"><span class="pre">addSliderWidgets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/gmshModel/Visualization/MeshVisualization.html#MeshVisualization.addSliderWidgets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gmshModel.Visualization.MeshVisualization.MeshVisualization.addSliderWidgets" title="Link to this definition"></a></dt>
+<dd><p>Method to configure a slider widget and add it to the rendering scene</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gmshModel.Visualization.MeshVisualization.MeshVisualization.filterPipeline">
+<span class="sig-name descname"><span class="pre">filterPipeline</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/gmshModel/Visualization/MeshVisualization.html#MeshVisualization.filterPipeline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gmshModel.Visualization.MeshVisualization.MeshVisualization.filterPipeline" title="Link to this definition"></a></dt>
+<dd><p>Filter pipeline method for mesh visualization</p>
+<p>For every confirmed change of the widget settings, the mesh has to be
+updated. To this end, the filter pipeline consisting of the implemented
+threshold and extraction algorithms has to be executed. It is done
+within this method.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gmshModel.Visualization.MeshVisualization.MeshVisualization.restoreDefaultSettings">
+<span class="sig-name descname"><span class="pre">restoreDefaultSettings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/gmshModel/Visualization/MeshVisualization.html#MeshVisualization.restoreDefaultSettings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gmshModel.Visualization.MeshVisualization.MeshVisualization.restoreDefaultSettings" title="Link to this definition"></a></dt>
+<dd><p>Method to restore default visualization options</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gmshModel.Visualization.MeshVisualization.MeshVisualization.setupExtractionAlgorithm">
+<span class="sig-name descname"><span class="pre">setupExtractionAlgorithm</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/gmshModel/Visualization/MeshVisualization.html#MeshVisualization.setupExtractionAlgorithm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gmshModel.Visualization.MeshVisualization.MeshVisualization.setupExtractionAlgorithm" title="Link to this definition"></a></dt>
+<dd><p>Extraction algorithm method for mesh visualization</p>
+<p>This method implements the extraction algorithm used within the filter
+pipeline. Based on the settings of the box widget, the mesh elements
+within the extraction box bounds are extracted.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gmshModel.Visualization.MeshVisualization.MeshVisualization.setupThresholdAlgorithm">
+<span class="sig-name descname"><span class="pre">setupThresholdAlgorithm</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/gmshModel/Visualization/MeshVisualization.html#MeshVisualization.setupThresholdAlgorithm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gmshModel.Visualization.MeshVisualization.MeshVisualization.setupThresholdAlgorithm" title="Link to this definition"></a></dt>
+<dd><p>Threshold algorithm method for mesh visualization</p>
+<p>This method implements the threshold algorithm used within the filter
+pipeline. Based on the settings of the slider widgets, the visibility
+of physical groups is enabled oder disabled.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gmshModel.Visualization.MeshVisualization.MeshVisualization.showCommandLineHelp">
+<span class="sig-name descname"><span class="pre">showCommandLineHelp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/gmshModel/Visualization/MeshVisualization.html#MeshVisualization.showCommandLineHelp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gmshModel.Visualization.MeshVisualization.MeshVisualization.showCommandLineHelp" title="Link to this definition"></a></dt>
+<dd><p>Internal method to show command line help after the rendering window
+is displayed</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gmshModel.Visualization.MeshVisualization.MeshVisualization.toggleMenu">
+<span class="sig-name descname"><span class="pre">toggleMenu</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/gmshModel/Visualization/MeshVisualization.html#MeshVisualization.toggleMenu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gmshModel.Visualization.MeshVisualization.MeshVisualization.toggleMenu" title="Link to this definition"></a></dt>
+<dd><p>Method to toggle the menu/widget visibility</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gmshModel.Visualization.MeshVisualization.MeshVisualization.visualizeMesh">
+<span class="sig-name descname"><span class="pre">visualizeMesh</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/gmshModel/Visualization/MeshVisualization.html#MeshVisualization.visualizeMesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gmshModel.Visualization.MeshVisualization.MeshVisualization.visualizeMesh" title="Link to this definition"></a></dt>
+<dd><p>Main method for the mesh visualization</p>
+<p>Within this method, the mesh data of the model is stored into a temporary
+“.vtu”-file which is read pyvista. After setting up widgets and additional
+key-press-events, the mesh is visualized.</p>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="GeometryVisualization.html" class="btn btn-neutral float-left" title="GeometryVisualization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../MeshExport/index.html" class="btn btn-neutral float-right" title="MeshExport" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Philipp Metsch.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

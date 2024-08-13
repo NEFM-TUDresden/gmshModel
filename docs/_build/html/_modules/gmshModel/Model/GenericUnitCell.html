@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gmshModel.Model.GenericUnitCell &mdash; gmshModel 1.0.19 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=b095c1a6"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            gmshModel
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingStarted/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingStarted/visualization.html">Using the visualization features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../gmshModel/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">gmshModel</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gmshModel.Model.GenericUnitCell</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gmshModel.Model.GenericUnitCell</h1><div class="highlight"><pre>
+<span></span><span class="c1">################################################################################</span>
+<span class="c1">#CLASS FOR INCLUSION-BASED UNIT CELL MESHES GENERATED USING THE GMSH-PYTHON-API#</span>
+<span class="c1">################################################################################</span>
+<span class="c1"># This file provides a class definition for a generation of inclusion-based unit</span>
+<span class="c1"># cells. The class inherits from the InclusionRVE class and extends it in order</span>
+<span class="c1"># to specify the requirements of all derived unit cells child classes.</span>
+
+<span class="c1">###########################</span>
+<span class="c1"># Load required libraries #</span>
+<span class="c1">###########################</span>
+<span class="c1"># Standard Python libraries</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>                                                              <span class="c1"># numpy for fast array computations</span>
+<span class="kn">import</span> <span class="nn">copy</span> <span class="k">as</span> <span class="nn">cp</span>                                                               <span class="c1"># copy  for deepcopies</span>
+
+<span class="c1"># self defined class definitions and modules</span>
+<span class="kn">from</span> <span class="nn">.InclusionRVE</span> <span class="kn">import</span> <span class="n">InclusionRVE</span>                                          <span class="c1"># generic RVE class definition (parent class)</span>
+
+
+<span class="c1">################################</span>
+<span class="c1"># Define GenericUnitCell class #</span>
+<span class="c1">################################</span>
+<div class="viewcode-block" id="GenericUnitCell">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericUnitCell.html#gmshModel.Model.GenericUnitCell.GenericUnitCell">[docs]</a>
+<span class="k">class</span> <span class="nc">GenericUnitCell</span><span class="p">(</span><span class="n">InclusionRVE</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class definition for unit cells</span>
+
+<span class="sd">    This class provides required information for inclusion-based unit cells. It</span>
+<span class="sd">    inherits from the InclusionRVE class and extends its attributes and methods</span>
+<span class="sd">    to handle the boolean operations and the definition of physical groups.</span>
+
+<span class="sd">    All unit cell allow to create &quot;real&quot; unit cells by passing the inclusion</span>
+<span class="sd">    distance to the classes initialization method. If the cells size is</span>
+<span class="sd">    specified instead, the distance is calculated automatically: this allows for</span>
+<span class="sd">    unit cells with an inclusion distribution that is close to physical unit</span>
+<span class="sd">    cells but gives more freedom in their generation.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">    -----------</span>
+<span class="sd">    dimension: int</span>
+<span class="sd">        dimension of the model instance</span>
+
+<span class="sd">    distance: float</span>
+<span class="sd">        distance of the inclusions within the unit cell (for automatic size calculation)</span>
+
+<span class="sd">    radius: float</span>
+<span class="sd">        radius of the unit cells inclusions</span>
+
+<span class="sd">    numberCells: list/array</span>
+<span class="sd">        array providing the number of cells in the individual axis directions</span>
+<span class="sd">        -&gt; numberCells=[nx, ny, (nz)]</span>
+
+<span class="sd">    size: list/array</span>
+<span class="sd">        size of the unit cell (allow box-shaped cells)</span>
+<span class="sd">        -&gt; size=[Lx, Ly, (Lz)]</span>
+
+<span class="sd">    origin: list/array</span>
+<span class="sd">        origin of the unit cell</span>
+<span class="sd">        -&gt; origin=[Ox, Oy, (Oz)]</span>
+
+<span class="sd">    inclusionType: string</span>
+<span class="sd">        string defining the type of inclusion</span>
+<span class="sd">        -&gt; iunclusionType= &quot;Sphere&quot;/&quot;Cylinder&quot;/&quot;Circle&quot;</span>
+
+<span class="sd">    inclusionAxis:list/array</span>
+<span class="sd">        array defining the inclusion axis (only relevant for inclusionType &quot;Cylinder&quot;)</span>
+<span class="sd">        -&gt; currently restricted to Cylinders parallel to one of the coordinate axes</span>
+<span class="sd">        -&gt; inclusionAxis=[Ax, Ay, Az]</span>
+
+<span class="sd">    relevantAxes: list/array</span>
+<span class="sd">        array defining the relevant axes for distance calculations</span>
+
+<span class="sd">    periodicityFlags: list/array</span>
+<span class="sd">        flags indicating the periodic axes of the unit cell</span>
+<span class="sd">        -&gt; periodicityFlags=[0/1, 0/1, 0/1]</span>
+
+<span class="sd">    inclusionInfo: array</span>
+<span class="sd">        array containing relevant inclusion information (center, radius) for</span>
+<span class="sd">        distance calculations</span>
+
+<span class="sd">    domainGroup: string</span>
+<span class="sd">        name of the group the unit cells domain should belong to</span>
+
+<span class="sd">    inclusionGroup: string</span>
+<span class="sd">        name of the group the unit cells inclusions should belong to</span>
+
+<span class="sd">    gmshConfigChanges: dict</span>
+<span class="sd">        dictionary for user updates of the default Gmsh configuration</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#########################</span>
+    <span class="c1"># Initialization method #</span>
+    <span class="c1">#########################</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">distance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">radius</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">numberCells</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">inclusionType</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">inclusionAxis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">origin</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span><span class="n">periodicityFlags</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">domainGroup</span><span class="o">=</span><span class="s2">&quot;domain&quot;</span><span class="p">,</span><span class="n">inclusionGroup</span><span class="o">=</span><span class="s2">&quot;inclusions&quot;</span><span class="p">,</span><span class="n">gmshConfigChanges</span><span class="o">=</span><span class="p">{}):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialization method for GenericUnitCell object instances</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        distance: float</span>
+<span class="sd">            distance of the inclusions within the unit cell</span>
+<span class="sd">            -&gt; for automatic size calculation</span>
+
+<span class="sd">        radius: float</span>
+<span class="sd">            radius of the unit cells inclusions</span>
+
+<span class="sd">        numberCells: list/array</span>
+<span class="sd">            array providing the number of cells in the individual axis directions</span>
+<span class="sd">            -&gt; numberCells=[nx, ny, (nz)]</span>
+
+<span class="sd">        size: list/array</span>
+<span class="sd">            size of the unit cell (allow box-shaped cells)</span>
+<span class="sd">            -&gt; for automatic distance calculation</span>
+<span class="sd">            -&gt; size=[Lx, Ly, (Lz)]</span>
+
+<span class="sd">        origin: list/array</span>
+<span class="sd">            origin of the unit cell</span>
+<span class="sd">            -&gt; origin=[Ox, Oy, (Oz)]</span>
+
+<span class="sd">        inclusionType: string</span>
+<span class="sd">            string defining the type of inclusion</span>
+<span class="sd">            -&gt; iunclusionType= &quot;Sphere&quot;/&quot;Cylinder&quot;/&quot;Circle&quot;</span>
+
+<span class="sd">        inclusionAxis:list/array</span>
+<span class="sd">            array defining the inclusion axis (only relevant for inclusionType &quot;Cylinder&quot;)</span>
+<span class="sd">            -&gt; currently restricted to Cylinders parallel to one of the coordinate axes</span>
+<span class="sd">            -&gt; inclusionAxis=[Ax, Ay, Az]</span>
+
+<span class="sd">        periodicityFlags: list/array</span>
+<span class="sd">            flags indicating the periodic axes of the unit cell</span>
+<span class="sd">            -&gt; periodicityFlags=[0/1, 0/1, 0/1]</span>
+
+<span class="sd">        domainGroup: string</span>
+<span class="sd">            name of the group the unit cells domain should belong to</span>
+
+<span class="sd">        inclusionGroup: string</span>
+<span class="sd">            name of the group the unit cells inclusions should belong to</span>
+
+<span class="sd">        gmshConfigChanges: dict</span>
+<span class="sd">            dictionary for user updates of the default Gmsh configuration</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># check if size or distance are passed, throw exception if none or both are passed</span>
+        <span class="k">if</span> <span class="n">distance</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Neither the unit cells size, nor the inclusion distance are passed. One of both arguments has to be specified to allow for a proper inclusion placement. Check your input.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">distance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Duplicate information for the unit cell detected. To prevent conflicting information, only one of the variables </span><span class="se">\&quot;</span><span class="s2">distance</span><span class="se">\&quot;</span><span class="s2"> and </span><span class="se">\&quot;</span><span class="s2">size</span><span class="se">\&quot;</span><span class="s2"> is supposed to be passed. Check your input.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># additionally check if inclusionType is passed, since it is needed here</span>
+        <span class="c1"># (This is a duplicate check, since inclusionType will be checked again</span>
+        <span class="c1">#  within the parent classes __init__)</span>
+        <span class="k">if</span> <span class="n">inclusionType</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;No inclusion type passed. To generated an inclusion-based unit cell, the type of inclusions must be specified. Check your input.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">inclusionType</span> <span class="o">==</span> <span class="s2">&quot;Cylinder&quot;</span> <span class="ow">and</span> <span class="n">inclusionAxis</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;No cylinder axis passed. For inclusions of type cylinder, the length and direction must be specified with the variable </span><span class="se">\&quot;</span><span class="s2">inclusionAxis</span><span class="se">\&quot;</span><span class="s2">. Check your input&quot;</span><span class="p">)</span>
+
+        <span class="c1"># plausibility checks for remaining input variables</span>
+        <span class="k">if</span> <span class="n">radius</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>                                                      <span class="c1"># check if radius has a value</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Variable </span><span class="se">\&quot;</span><span class="s2">radius</span><span class="se">\&quot;</span><span class="s2"> not set! For an inclusion-based unit cell, the radius must be defined. Check your input data.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">numberCells</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>                                                 <span class="c1"># check if numberCells has a value</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Variable </span><span class="se">\&quot;</span><span class="s2">numberCells</span><span class="se">\&quot;</span><span class="s2"> not set! Check your input data.&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">numberCells</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>                                    <span class="c1"># check for right amount of array dimensions</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Wrong amount of array dimensions for variable </span><span class="se">\&quot;</span><span class="s2">numberCells</span><span class="se">\&quot;</span><span class="s2">! For an inclusion-based unit cell, the variable </span><span class="se">\&quot;</span><span class="s2">numberCells</span><span class="se">\&quot;</span><span class="s2"> can only be one-dimensional. Check your input data.&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">numberCells</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]:</span>                                     <span class="c1"># check for right amount of values</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Wrong number of values for variable </span><span class="se">\&quot;</span><span class="s2">numberCells</span><span class="se">\&quot;</span><span class="s2">! For an inclusion-based unit cell, the variable </span><span class="se">\&quot;</span><span class="s2">numberCells</span><span class="se">\&quot;</span><span class="s2"> has to have 2 or 3 values. Check your input data.&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">numberCells</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">):</span>                                <span class="c1"># check that only non-zero numberCells are given</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Detected non-zero number of cells in variable </span><span class="se">\&quot;</span><span class="s2">numberCells</span><span class="se">\&quot;</span><span class="s2">! In an inclusion-based unit cell, the number of cells in all axis directions must be non-zero. Check your input data.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># set attributes from input parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="o">=</span><span class="n">radius</span>                                                      <span class="c1"># save inclusion radius</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numberCells</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">numberCells</span><span class="p">)</span>                                <span class="c1"># save number of cells per axis direction</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">domainGroup</span><span class="o">=</span><span class="n">domainGroup</span>                                            <span class="c1"># set group name for the domain object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inclusionGroup</span><span class="o">=</span><span class="n">inclusionGroup</span>                                      <span class="c1"># set group name for the inclusion objects</span>
+
+        <span class="c1"># determine size, if inclusion distance is given</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getCellSize</span><span class="p">(</span><span class="n">distance</span><span class="p">,</span><span class="n">inclusionType</span><span class="p">,</span><span class="n">inclusionAxis</span><span class="p">)</span>
+
+        <span class="c1"># initialize parent classes attributes and methods</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span><span class="n">inclusionType</span><span class="o">=</span><span class="n">inclusionType</span><span class="p">,</span><span class="n">inclusionAxis</span><span class="o">=</span><span class="n">inclusionAxis</span><span class="p">,</span><span class="n">origin</span><span class="o">=</span><span class="n">origin</span><span class="p">,</span><span class="n">periodicityFlags</span><span class="o">=</span><span class="n">periodicityFlags</span><span class="p">,</span><span class="n">gmshConfigChanges</span><span class="o">=</span><span class="n">gmshConfigChanges</span><span class="p">)</span>
+
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">#                 SPECIFIED/OVERWRITTEN PLACEHOLDER METHODS                    #</span>
+<span class="c1">################################################################################</span>
+
+    <span class="c1">############################################################################</span>
+    <span class="c1"># Method to define the required geometric objects for the model generation #</span>
+    <span class="c1">############################################################################</span>
+<div class="viewcode-block" id="GenericUnitCell.defineGeometricObjects">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericUnitCell.html#gmshModel.Model.GenericUnitCell.GenericUnitCell.defineGeometricObjects">[docs]</a>
+    <span class="k">def</span> <span class="nf">defineGeometricObjects</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Overwritten method of the GenericModel class to define and create the</span>
+<span class="sd">        required geometric objects for the model generation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># generate geometry</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addGeometricObject</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">domainType</span><span class="p">,</span><span class="n">group</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">domainGroup</span><span class="p">,</span><span class="n">origin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">origin</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">)</span> <span class="c1"># add domain object to calling RVE</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">placeInclusions</span><span class="p">()</span>                                                  <span class="c1"># call internal inclusion placement routine</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inclusionInfo</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>                      <span class="c1"># loop over all inclusions</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inclusionType</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;Sphere&quot;</span><span class="p">,</span><span class="s2">&quot;Circle&quot;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">addGeometricObject</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inclusionType</span><span class="p">,</span><span class="n">group</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inclusionGroup</span><span class="p">,</span><span class="n">center</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inclusionInfo</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span><span class="n">radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inclusionInfo</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span> <span class="c1"># add inclusions to calling RVE object</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">inclusionType</span> <span class="o">==</span> <span class="s2">&quot;Cylinder&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">addGeometricObject</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inclusionType</span><span class="p">,</span><span class="n">group</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inclusionGroup</span><span class="p">,</span><span class="n">center</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inclusionInfo</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span><span class="n">radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inclusionInfo</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inclusionAxis</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">numberCells</span><span class="p">)</span> <span class="c1"># add inclusions to calling RVE object (multiply by number of cells to ensure correct cylinder length)</span></div>
+
+
+
+    <span class="c1">###################################################</span>
+    <span class="c1"># Method for the definition of boolean operations #</span>
+    <span class="c1">###################################################</span>
+<div class="viewcode-block" id="GenericUnitCell.defineBooleanOperations">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericUnitCell.html#gmshModel.Model.GenericUnitCell.GenericUnitCell.defineBooleanOperations">[docs]</a>
+    <span class="k">def</span> <span class="nf">defineBooleanOperations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Overwritten method of the GenericModel class to define the required</span>
+<span class="sd">        boolean operations for the model generation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">booleanOperations</span><span class="o">=</span><span class="p">[{</span>                                               <span class="c1"># first boolean operation (intersect domain group and inclusions group to get rid of parts that exceed the domain boundary)</span>
+            <span class="s2">&quot;operation&quot;</span><span class="p">:</span> <span class="s2">&quot;intersect&quot;</span><span class="p">,</span>                                           <span class="c1"># -&gt; intersection of &quot;domain&quot; and &quot;inclusions&quot;</span>
+            <span class="s2">&quot;object&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">domainGroup</span><span class="p">,</span>                                         <span class="c1"># -&gt; use &quot;domain&quot; group as object</span>
+            <span class="s2">&quot;tool&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">inclusionGroup</span><span class="p">,</span>                                        <span class="c1"># -&gt; use &quot;inclusions&quot; group as tool</span>
+            <span class="s2">&quot;removeObject&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>                                              <span class="c1"># -&gt; keep the object (&quot;domain&quot;) after the boolean operation for further use</span>
+            <span class="s2">&quot;removeTool&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>                                                 <span class="c1"># -&gt; remove the tool (&quot;inclusions&quot;) after the boolean operation</span>
+            <span class="s2">&quot;resultingGroup&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">inclusionGroup</span>                               <span class="c1"># -&gt; assign the result of the boolean operation to the &quot;inclusions&quot; group (i.e. overwrite the group) for further use</span>
+        <span class="p">},</span>
+        <span class="p">{</span>                                                                       <span class="c1"># second boolean operation (cut domain with resulting inclusions to create holes within the domain where the inclusions are placed)</span>
+            <span class="s2">&quot;operation&quot;</span><span class="p">:</span> <span class="s2">&quot;cut&quot;</span><span class="p">,</span>                                                 <span class="c1"># -&gt; cut &quot;inclusions&quot; (updated group) from &quot;domain&quot;</span>
+            <span class="s2">&quot;object&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">domainGroup</span><span class="p">,</span>                                         <span class="c1"># -&gt; use &quot;domain&quot; group as object</span>
+            <span class="s2">&quot;tool&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">inclusionGroup</span><span class="p">,</span>                                        <span class="c1"># -&gt; use &quot;inclusions&quot; group as tool</span>
+            <span class="s2">&quot;removeObject&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>                                               <span class="c1"># -&gt; remove the object (&quot;domain&quot;) after the boolean operation</span>
+            <span class="s2">&quot;removeTool&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>                                                <span class="c1"># -&gt; keep the tool (&quot;inclusions&quot;) after the boolean operation for further use</span>
+            <span class="s2">&quot;resultingGroup&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">domainGroup</span>                                  <span class="c1"># -&gt; assign the result of the boolean operation to the &quot;domain&quot; group (i.e. overwrite the group)</span>
+        <span class="p">}]</span></div>
+
+
+
+    <span class="c1">################################################</span>
+    <span class="c1"># Method for the definition of physical groups #</span>
+    <span class="c1">################################################</span>
+<div class="viewcode-block" id="GenericUnitCell.definePhysicalGroups">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericUnitCell.html#gmshModel.Model.GenericUnitCell.GenericUnitCell.definePhysicalGroups">[docs]</a>
+    <span class="k">def</span> <span class="nf">definePhysicalGroups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">args</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Overwritten method of the GenericModel class to define the</span>
+<span class="sd">        required physical groups for the model mesh generation</span>
+
+<span class="sd">        In order to be able to assign different material properties to different</span>
+<span class="sd">        regions in the generated mesh, physical groups are used in Gmsh to</span>
+<span class="sd">        combine different regions into one group. The additional definition of</span>
+<span class="sd">        a boundary group allows to identify the boundary of the mesh without</span>
+<span class="sd">        searching for elements on the boundary within the solver.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># append boundary group to save boundary information in the mesh, too</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;boundary&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">getBoundaryEntities</span><span class="p">()})</span>
+
+        <span class="c1"># define physical groups</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">physicalGroups</span><span class="o">=</span><span class="p">[{</span>
+            <span class="s2">&quot;dimension&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="p">,</span>                                        <span class="c1"># define dimension of the physical group</span>
+            <span class="s2">&quot;group&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">domainGroup</span><span class="p">,</span>                                          <span class="c1"># define name of the physical group</span>
+            <span class="s2">&quot;physicalNumber&quot;</span><span class="p">:</span> <span class="mi">1</span>                                                 <span class="c1"># set physical number of the physical group</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;dimension&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="p">,</span>                                        <span class="c1"># define dimension of the physical group</span>
+            <span class="s2">&quot;group&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">inclusionGroup</span><span class="p">,</span>                                       <span class="c1"># define name of the physical group</span>
+            <span class="s2">&quot;physicalNumber&quot;</span><span class="p">:</span> <span class="mi">2</span>                                                 <span class="c1"># set physical number of the physical group</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;dimension&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span>                                      <span class="c1"># define dimension of the physical group</span>
+            <span class="s2">&quot;group&quot;</span><span class="p">:</span> <span class="s2">&quot;boundary&quot;</span><span class="p">,</span>                                                <span class="c1"># define name of the physical group</span>
+            <span class="s2">&quot;physicalNumber&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>                                                <span class="c1"># set physical number of the physical group</span>
+        <span class="p">}]</span></div>
+
+
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">#             PLACEHOLDER METHODS TO BE SPECIFIED IN CHILD CLASSES             #</span>
+<span class="c1">################################################################################</span>
+
+    <span class="c1">##########################################################</span>
+    <span class="c1"># Internal method for the cell-specific size calculation #</span>
+    <span class="c1">##########################################################</span>
+    <span class="k">def</span> <span class="nf">_getCellSize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">distance</span><span class="p">,</span><span class="n">inclusionType</span><span class="p">,</span><span class="n">inclusionAxis</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Placeholder methof to determine the cell size of an inclusion-based</span>
+<span class="sd">        unit cell&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="c1">####################################################</span>
+    <span class="c1"># Method for the cell-specific inclusion placement #</span>
+    <span class="c1">####################################################</span>
+<div class="viewcode-block" id="GenericUnitCell.placeInclusions">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericUnitCell.html#gmshModel.Model.GenericUnitCell.GenericUnitCell.placeInclusions">[docs]</a>
+    <span class="k">def</span> <span class="nf">placeInclusions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Placeholder method to place inclusions for the inclusion-based unit cell&quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Philipp Metsch.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

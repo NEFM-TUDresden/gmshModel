@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HelicalChain &mdash; gmshModel 1.0.19 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=b095c1a6"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Geometry" href="../Geometry/index.html" />
+    <link rel="prev" title="HexagonalCell" href="HexagonalCell.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            gmshModel
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingStarted/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingStarted/visualization.html">Using the visualization features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Model</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="GenericModel.html">GenericModel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GenericRVE.html">GenericRVE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="InclusionRVE.html">InclusionRVE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="RandomInclusionRVE.html">RandomInclusionRVE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GenericUnitCell.html">GenericUnitCell</a></li>
+<li class="toctree-l3"><a class="reference internal" href="SimpleCubicCell.html">SimpleCubicCell</a></li>
+<li class="toctree-l3"><a class="reference internal" href="BodyCenteredCubicCell.html">BodyCenteredCubicCell</a></li>
+<li class="toctree-l3"><a class="reference internal" href="FaceCenteredCubicCell.html">FaceCenteredCubicCell</a></li>
+<li class="toctree-l3"><a class="reference internal" href="HexagonalCell.html">HexagonalCell</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">HelicalChain</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#class-definition">Class Definition</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../Geometry/index.html">Geometry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Visualization/index.html">Visualization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../MeshExport/index.html">MeshExport</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">gmshModel</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Model</a></li>
+      <li class="breadcrumb-item active">HelicalChain</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/gmshModel/Model/HelicalChain.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="helicalchain">
+<h1>HelicalChain<a class="headerlink" href="#helicalchain" title="Link to this heading"></a></h1>
+<p>The HelicalChain class provides a class definition for a generation of unit
+cells with inclusions distributed in a helical chain. The class inherits from
+the InclusionRVE class and extends it in order to specify the remaining
+placeholder methods of the GenericModel.</p>
+<p>Currently, the class is restricted to circular and spherical inclusions which
+are arranged in a helical chain that is parallel to one of the coordinate axes.</p>
+<section id="class-definition">
+<h2>Class Definition<a class="headerlink" href="#class-definition" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="gmshModel.Model.HelicalChain.HelicalChain">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gmshModel.Model.HelicalChain.</span></span><span class="sig-name descname"><span class="pre">HelicalChain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chainRadius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inclusionRadius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numberCells</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[1,</span> <span class="pre">1,</span> <span class="pre">1]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inclusionType</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chainDirection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">1]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">periodicityFlags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[1,</span> <span class="pre">1,</span> <span class="pre">1]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domainGroup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'domain'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inclusionGroup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'inclusions'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gmshConfigChanges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/gmshModel/Model/HelicalChain.html#HelicalChain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gmshModel.Model.HelicalChain.HelicalChain" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="InclusionRVE.html#gmshModel.Model.InclusionRVE.InclusionRVE" title="gmshModel.Model.InclusionRVE.InclusionRVE"><code class="xref py py-class docutils literal notranslate"><span class="pre">InclusionRVE</span></code></a></p>
+<p>Class definition for helical chains (circular and spherical inclusions only)</p>
+<p>This class provides required information for meshes of unit cells with
+helical chains. It inherits from the InclusionRVE class and extends its
+attributes and methods to handle the geometry generation, boolean operations
+and the definition of physical groups.</p>
+<p>The HelicalChain class currently supports spherical and circular inclusions
+which are arranged in a chain that is parallel to one of the coordinate
+axes. The slope of the chain is determined from the passed size of the chain,
+the angle theta between neighboring inclusions (pi for circular inclusions,
+since it is the only reasonable choice) and the chain axis. One unit cell is
+supposed to contain one full helix.</p>
+<section id="attributes">
+<h3>Attributes:<a class="headerlink" href="#attributes" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>dimension: int</dt><dd><p>dimension of the model instance</p>
+</dd>
+<dt>chainRadius: float</dt><dd><p>radius of the helical chain</p>
+</dd>
+<dt>inclusionRadius: float</dt><dd><p>radius of the helical chain inclusions</p>
+</dd>
+<dt>theta: float</dt><dd><p>angle (radian) between two inclusions of the helical chain</p>
+</dd>
+<dt>chainDirection: list/array</dt><dd><p>array defining the chain axis direction
+-&gt; currently restricted to chains parallel to one of the coordinate axes</p>
+</dd>
+<dt>numberCells: list/array</dt><dd><p>array providing the number of cells in the individual axis directions
+-&gt; numberCells=[nx, ny, (nz)]</p>
+</dd>
+<dt>size: list/array</dt><dd><p>size of the helical chains surrounding unit cell (box-shaped cell)
+-&gt; if the angle alpha is passed, only the sizes perpendicular to the chain axis direction have to be passed
+-&gt; size=[Lx, Ly, (Lz)]</p>
+</dd>
+<dt>origin: list/array</dt><dd><p>origin of the unit cell
+-&gt; origin=[Ox, Oy, (Oz)]</p>
+</dd>
+<dt>inclusionType: string</dt><dd><p>string defining the type of inclusion
+-&gt; inclusionType= “Sphere”/”Circle”</p>
+</dd>
+<dt>relevantAxes: list/array</dt><dd><p>array defining the relevant axes for distance calculations</p>
+</dd>
+<dt>periodicityFlags: list/array</dt><dd><p>flags indicating the periodic axes of the unit cell
+-&gt; periodicityFlags=[0/1, 0/1, 0/1]</p>
+</dd>
+<dt>inclusionInfo: array</dt><dd><p>array containing relevant inclusion information (center, radius) for
+distance calculations</p>
+</dd>
+<dt>domainGroup: string</dt><dd><p>name of the group the unit cells domain should belong to</p>
+</dd>
+<dt>inclusionGroup: string</dt><dd><p>name of the group the unit cells inclusions should belong to</p>
+</dd>
+<dt>gmshConfigChanges: dict</dt><dd><p>dictionary for user updates of the default Gmsh configuration</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="gmshModel.Model.HelicalChain.HelicalChain.defineBooleanOperations">
+<span class="sig-name descname"><span class="pre">defineBooleanOperations</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/gmshModel/Model/HelicalChain.html#HelicalChain.defineBooleanOperations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gmshModel.Model.HelicalChain.HelicalChain.defineBooleanOperations" title="Link to this definition"></a></dt>
+<dd><p>Overwritten method of the GenericModel class to define the required
+boolean operations for the model generation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gmshModel.Model.HelicalChain.HelicalChain.defineGeometricObjects">
+<span class="sig-name descname"><span class="pre">defineGeometricObjects</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/gmshModel/Model/HelicalChain.html#HelicalChain.defineGeometricObjects"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gmshModel.Model.HelicalChain.HelicalChain.defineGeometricObjects" title="Link to this definition"></a></dt>
+<dd><p>Overwritten method of the GenericModel class to define and create the
+required geometric objects for the model generation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gmshModel.Model.HelicalChain.HelicalChain.definePhysicalGroups">
+<span class="sig-name descname"><span class="pre">definePhysicalGroups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/gmshModel/Model/HelicalChain.html#HelicalChain.definePhysicalGroups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gmshModel.Model.HelicalChain.HelicalChain.definePhysicalGroups" title="Link to this definition"></a></dt>
+<dd><p>Overwritten method of the GenericModel class to define the
+required physical groups for the model mesh generation</p>
+<p>In order to be able to assign different material properties to different
+regions in the generated mesh, physical groups are used in Gmsh to
+combine different regions into one group. The additional definition of
+a boundary group allows to identify the boundary of the mesh without
+searching for elements on the boundary within the solver.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gmshModel.Model.HelicalChain.HelicalChain.placeInclusions">
+<span class="sig-name descname"><span class="pre">placeInclusions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/gmshModel/Model/HelicalChain.html#HelicalChain.placeInclusions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gmshModel.Model.HelicalChain.HelicalChain.placeInclusions" title="Link to this definition"></a></dt>
+<dd><p>Method to place the inclusions within a unit cell of a helical chain</p>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="HexagonalCell.html" class="btn btn-neutral float-left" title="HexagonalCell" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../Geometry/index.html" class="btn btn-neutral float-right" title="Geometry" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Philipp Metsch.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

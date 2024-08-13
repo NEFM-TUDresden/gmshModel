@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gmshModel.Model.GenericRVE &mdash; gmshModel 1.0.19 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=b095c1a6"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            gmshModel
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingStarted/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingStarted/visualization.html">Using the visualization features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../gmshModel/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">gmshModel</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gmshModel.Model.GenericRVE</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gmshModel.Model.GenericRVE</h1><div class="highlight"><pre>
+<span></span><span class="c1">################################################################################</span>
+<span class="c1">#          CLASS FOR RVE MESHES GENERATED USING THE GMSH-PYTHON-API            #</span>
+<span class="c1">################################################################################</span>
+<span class="c1"># This file provides a class definition for an RVE generation using Python and</span>
+<span class="c1"># Gmsh. The class inherits from the GenericModel class and extends it in order</span>
+<span class="c1"># order to handle the problems that are connected with the generation of models</span>
+<span class="c1"># with periodicity constraints.</span>
+<span class="c1">#</span>
+<span class="c1"># Currently, the class is restricted to RVEs with rectangular (2D)/ box-shaped</span>
+<span class="c1"># (3D) domains (explicitly assumed within the setupPeriodicity() method).</span>
+
+<span class="c1">###########################</span>
+<span class="c1"># Load required libraries #</span>
+<span class="c1">###########################</span>
+<span class="c1"># Standard Python libraries</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>                                                              <span class="c1"># numpy for array computations</span>
+<span class="kn">import</span> <span class="nn">copy</span> <span class="k">as</span> <span class="nn">cp</span>                                                               <span class="c1"># copy for deepcopies of arrays</span>
+
+<span class="c1"># self-defined class definitions and modules</span>
+<span class="kn">from</span> <span class="nn">.GenericModel</span> <span class="kn">import</span> <span class="n">GenericModel</span>                                          <span class="c1"># generic model class definition (parent class)</span>
+
+
+<span class="c1">###########################</span>
+<span class="c1"># Define GenericRVE class #</span>
+<span class="c1">###########################</span>
+<div class="viewcode-block" id="GenericRVE">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericRVE.html#gmshModel.Model.GenericRVE.GenericRVE">[docs]</a>
+<span class="k">class</span> <span class="nc">GenericRVE</span><span class="p">(</span><span class="n">GenericModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generic class for RVEs created using the Gmsh-Python-API</span>
+
+<span class="sd">    Based on the GenericModel class, this class provides extra attributes and</span>
+<span class="sd">    methods that all box-shaped RVEs should have: the definition of size, origin</span>
+<span class="sd">    and periodicityFlags as additional attributes facilitates an update of the</span>
+<span class="sd">    parents class placeholder method setupPeriodicity().</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">    -----------</span>
+<span class="sd">    dimension: int</span>
+<span class="sd">        dimension of the model instance</span>
+
+<span class="sd">    size: list/array</span>
+<span class="sd">        size of the box-shaped RVE model</span>
+<span class="sd">        -&gt; size=[Lx, Ly, (Lz)]</span>
+
+<span class="sd">    origin: list/array</span>
+<span class="sd">        origin of the box-shaped RVE model</span>
+<span class="sd">        -&gt; origin=[Ox, Oy, (Oz)]</span>
+
+<span class="sd">    periodicityFlags: list/array</span>
+<span class="sd">        flags indicating the periodic axes of the box-shaped RVE model</span>
+<span class="sd">        -&gt; periodicityFlags=[0/1, 0/1, 0/1]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">#########################</span>
+    <span class="c1"># Initialization method #</span>
+    <span class="c1">#########################</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">origin</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span><span class="n">periodicityFlags</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">gmshConfigChanges</span><span class="o">=</span><span class="p">{}):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialization method for box-shaped RVE models</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        size: list/array</span>
+<span class="sd">            size of the box-shaped RVE model</span>
+<span class="sd">            -&gt; size=[Lx, Ly, (Lz)]</span>
+
+<span class="sd">        origin: list/array</span>
+<span class="sd">            origin of the box-shaped RVE model</span>
+<span class="sd">            -&gt; origin=[Ox, Oy, (Oz)]</span>
+
+<span class="sd">        periodicityFlags: list/array</span>
+<span class="sd">            flags indicating the periodic axes of the box-shaped RVE model</span>
+<span class="sd">            -&gt; periodicityFlags=[0/1, 0/1, 0/1]</span>
+
+<span class="sd">        gmshConfigChanges: dict</span>
+<span class="sd">            dictionary for user updates of the default Gmsh configuration</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># plausibility checks for input variables:</span>
+        <span class="k">for</span> <span class="n">varName</span><span class="p">,</span> <span class="n">varValue</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="n">size</span><span class="p">,</span> <span class="s2">&quot;origin&quot;</span><span class="p">:</span> <span class="n">origin</span><span class="p">,</span> <span class="s2">&quot;periodicityFlags&quot;</span><span class="p">:</span> <span class="n">periodicityFlags</span><span class="p">}</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">varValue</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>                                                <span class="c1"># check if variable has a value</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Variable </span><span class="se">\&quot;</span><span class="si">{}</span><span class="se">\&quot;</span><span class="s2"> not set! Check your input data.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">varName</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">varValue</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>                                   <span class="c1"># check for right amount of array dimensions</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Wrong amount of array dimensions for variable </span><span class="se">\&quot;</span><span class="si">{}</span><span class="se">\&quot;</span><span class="s2">! For a cuboid RVE, the variable </span><span class="se">\&quot;</span><span class="si">{}</span><span class="se">\&quot;</span><span class="s2"> can only be one-dimensional. Check your input data.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">varName</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">varValue</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]:</span>                                    <span class="c1"># check for right amount of values</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Wrong number of values for variable </span><span class="se">\&quot;</span><span class="si">{}</span><span class="se">\&quot;</span><span class="s2">! For a cuboid RVE, the variable </span><span class="se">\&quot;</span><span class="si">{}</span><span class="se">\&quot;</span><span class="s2"> has to have 2 or 3 values. Check your input data.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">varName</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">varName</span> <span class="ow">is</span> <span class="s2">&quot;size&quot;</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">varValue</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]:</span> <span class="c1"># check for right amount of non-zero values (size only)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Wrong number of non-zero values for variable </span><span class="se">\&quot;</span><span class="si">{}</span><span class="se">\&quot;</span><span class="s2">! Only 2D/3D RVEs supported: the variable </span><span class="se">\&quot;</span><span class="si">{}</span><span class="se">\&quot;</span><span class="s2"> has to have 2 or 3 non-zero values. Check your input data.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">varName</span><span class="p">))</span>
+
+        <span class="c1"># type conversion for input arguments</span>
+        <span class="n">size</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>                                                   <span class="c1"># type conversion for size to numpy array</span>
+        <span class="n">origin</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">origin</span><span class="p">)</span>                                               <span class="c1"># type conversion for origin to numpy array</span>
+        <span class="n">periodicityFlags</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">periodicityFlags</span><span class="p">)</span>                           <span class="c1"># type conversion for periodicityFlags to numpy array</span>
+
+        <span class="c1"># get dimension of RVE and correct potentially two-dimensional arrays</span>
+        <span class="n">dimension</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>                                        <span class="c1"># dimension equals number non-zero sizes</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">size</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>                                                      <span class="c1"># check if size is not a three-dimensional array</span>
+            <span class="n">size</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">size</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>                                                  <span class="c1"># -&gt; append 0</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">origin</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>                                                    <span class="c1"># check if origin is not a three-dimensional array</span>
+            <span class="n">newOrigin</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>                                               <span class="c1"># -&gt; create new three-dimensional array</span>
+            <span class="n">newOrigin</span><span class="p">[</span><span class="n">size</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">origin</span>                                         <span class="c1"># -&gt; assign values of origin to non-zero dimensions of new array</span>
+            <span class="n">origin</span><span class="o">=</span><span class="n">newOrigin</span>                                                    <span class="c1"># -&gt; overwrite origin with new array</span>
+
+        <span class="c1"># initialize parent (GenericModel) class attributes and methods</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">dimension</span><span class="o">=</span><span class="n">dimension</span><span class="p">,</span><span class="n">gmshConfigChanges</span><span class="o">=</span><span class="n">gmshConfigChanges</span><span class="p">)</span>
+
+        <span class="c1"># initialize attributes that all instances of GenericRVE should have</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">origin</span><span class="o">=</span><span class="n">origin</span>                                                      <span class="c1"># initialize unset RVE origin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">=</span><span class="n">size</span>                                                          <span class="c1"># initialize unset RVE size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">periodicityFlags</span><span class="o">=</span><span class="n">periodicityFlags</span>                                  <span class="c1"># initialize unset periodic axes flags for the RVE</span>
+
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">#                 SPECIFIED/OVERWRITTEN PLACEHOLDER METHODS                    #</span>
+<span class="c1">################################################################################</span>
+
+    <span class="c1">#########################################################</span>
+    <span class="c1"># Method to set up periodicity constraints for the mesh #</span>
+    <span class="c1">#########################################################</span>
+<div class="viewcode-block" id="GenericRVE.setupPeriodicity">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericRVE.html#gmshModel.Model.GenericRVE.GenericRVE.setupPeriodicity">[docs]</a>
+    <span class="k">def</span> <span class="nf">setupPeriodicity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Overwritten method of the parent GenericModel class to define</span>
+<span class="sd">        periodicity constraints for the model&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">iAx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="p">):</span>                                     <span class="c1"># loop over all axes</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">periodicityFlags</span><span class="p">[</span><span class="n">iAx</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>                                 <span class="c1"># -&gt; check if current axis is supposed to be periodic</span>
+                <span class="n">assocEnts</span><span class="p">,</span><span class="n">affineMatrix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getAssociatedEntities</span><span class="p">(</span><span class="n">iAx</span><span class="p">)</span>         <span class="c1"># -&gt;-&gt; get associated entities for the current axis</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">gmshAPI</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">setPeriodic</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">assocEnts</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">assocEnts</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">affineMatrix</span><span class="p">)</span> <span class="c1"># -&gt;-&gt; set periodicity constraints</span></div>
+
+
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">#           ADDITIONAL PRIVATE/HIDDEN METHODS FOR INTERNAL USE ONLY            #</span>
+<span class="c1">################################################################################</span>
+
+    <span class="c1">###################################################################</span>
+    <span class="c1"># Method to determine assosciated geometric entities of the model #</span>
+    <span class="c1">###################################################################</span>
+    <span class="k">def</span> <span class="nf">_getAssociatedEntities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">axis</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Internal method to search for associated Gmsh entities on opposing</span>
+<span class="sd">        sides of the RVE boundary&quot;&quot;&quot;</span>
+        <span class="c1"># calculate required information from the RVE data</span>
+        <span class="n">bboxRVE</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[[</span><span class="bp">self</span><span class="o">.</span><span class="n">origin</span><span class="p">],</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">origin</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">]]</span>                   <span class="c1"># bounding box of the RVE: bboxRVE=[[minBBoxPoint],[maxBBoxPoint]]</span>
+        <span class="n">tol</span><span class="o">=</span><span class="mi">100</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">getGmshOption</span><span class="p">(</span><span class="s2">&quot;Geometry.Tolerance&quot;</span><span class="p">)</span>                        <span class="c1"># tolerance for entity detection (factor 100 to find entities in wider bounding boxes)</span>
+
+        <span class="c1"># calculate translation vector and affine transformation matrix</span>
+        <span class="n">transVec</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>                                                <span class="c1"># initialize translation vector for the current pair of boundary entities</span>
+        <span class="n">transVec</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span><span class="o">=</span><span class="n">bboxRVE</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="n">axis</span><span class="p">]</span><span class="o">-</span><span class="n">bboxRVE</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">axis</span><span class="p">]</span>                          <span class="c1"># update translation vector for the current pair of boundary entities</span>
+        <span class="n">affineMatrix</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>                                                  <span class="c1"># initialize affine transformation matrix for current pair of boundary entities</span>
+        <span class="n">affineMatrix</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span><span class="o">=</span><span class="n">transVec</span>                                         <span class="c1"># update affine transformation matrix with translation information</span>
+        <span class="n">affineMatrix</span><span class="o">=</span><span class="n">affineMatrix</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>                          <span class="c1"># convert affine transformation matrix to list for output</span>
+
+        <span class="c1"># find associated entities for the current axes</span>
+        <span class="n">associatedEntities</span><span class="o">=</span><span class="p">[]</span>                                                   <span class="c1"># initialize list of associated entities</span>
+        <span class="k">for</span> <span class="n">iSide</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">):</span>                                                <span class="c1"># loop over both sides (positive/negative)</span>
+            <span class="n">bboxBnd</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">bboxRVE</span><span class="p">)</span>                                        <span class="c1"># -&gt; initialze bounding box for the current boundary as copy of bboxRVE</span>
+            <span class="n">bboxBnd</span><span class="p">[</span><span class="mi">1</span><span class="o">-</span><span class="n">iSide</span><span class="p">,</span><span class="n">axis</span><span class="p">]</span><span class="o">=</span><span class="n">bboxRVE</span><span class="p">[</span><span class="n">iSide</span><span class="p">,</span><span class="n">axis</span><span class="p">]</span>                           <span class="c1"># -&gt; modify the coordinate of the relevant dimension to match the boundary under consideration</span>
+            <span class="n">bboxBnd</span><span class="o">=</span><span class="n">bboxBnd</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="n">tol</span><span class="p">],[</span><span class="n">tol</span><span class="p">]])</span>                            <span class="c1"># -&gt; add tolerances to the bounding box</span>
+
+
+            <span class="c1"># find entities on boundary under consideration</span>
+            <span class="n">entityTags</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getIDsFromTags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gmshAPI</span><span class="o">.</span><span class="n">getEntitiesInBoundingBox</span><span class="p">(</span><span class="o">*</span><span class="n">bboxBnd</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">*</span><span class="n">bboxBnd</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+            <span class="n">associatedEntities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entityTags</span><span class="p">)</span>
+
+        <span class="c1"># sort associated entities of current pair to prevent errors</span>
+        <span class="n">associatedEntities</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_sortAssociatedEntities</span><span class="p">(</span><span class="n">associatedEntities</span><span class="p">,</span><span class="n">transVec</span><span class="p">)</span>
+
+        <span class="c1"># return associated entities and affine transformation matrix</span>
+        <span class="k">return</span> <span class="n">associatedEntities</span><span class="p">,</span> <span class="n">affineMatrix</span>
+
+
+    <span class="c1">###############################################################</span>
+    <span class="c1"># Security function to sort entities in associated boundaries #</span>
+    <span class="c1">###############################################################</span>
+    <span class="k">def</span> <span class="nf">_sortAssociatedEntities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">associatedEntities</span><span class="p">,</span><span class="n">translationVector</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Internal method to ensure a 1-1-mapping of associated Gmsh entities</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        associatedEntities: list</span>
+<span class="sd">            list of associated entities for the current pair of boundaries</span>
+
+<span class="sd">        translationVector: array</span>
+<span class="sd">            array defining the translation vector from one boundary to the other</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># get required information from input arguments</span>
+        <span class="n">dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="o">-</span><span class="mi">1</span>                                                    <span class="c1"># entity dimension</span>
+        <span class="n">nEntities</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">associatedEntities</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>                                    <span class="c1"># number of associated entities</span>
+
+        <span class="c1"># convert associatedEntites to numpy array for calculations</span>
+        <span class="n">associatedEntities</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">associatedEntities</span><span class="p">)</span>
+
+        <span class="c1"># get bounding boxes of all boundary entities on the negative side</span>
+        <span class="n">bboxesNeg</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nEntities</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">iEnt</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">nEntities</span><span class="p">):</span>
+            <span class="n">bboxesNeg</span><span class="p">[</span><span class="n">iEnt</span><span class="p">,:]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gmshAPI</span><span class="o">.</span><span class="n">getBoundingBox</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span><span class="n">associatedEntities</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">iEnt</span><span class="p">]))</span>
+
+        <span class="c1"># calculate associated boxes of corresponding entities on the positive side</span>
+        <span class="n">bboxesPos</span><span class="o">=</span><span class="n">bboxesNeg</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">translationVector</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">translationVector</span><span class="o">.</span><span class="n">T</span><span class="p">]</span>
+
+        <span class="c1"># search matching entities on positive side</span>
+        <span class="n">sortedIndices</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nEntities</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">jEnt</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">nEntities</span><span class="p">):</span>
+            <span class="n">bboxEnt</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gmshAPI</span><span class="o">.</span><span class="n">getBoundingBox</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span><span class="n">associatedEntities</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">jEnt</span><span class="p">]))</span> <span class="c1"># find bounding box of current entity</span>
+            <span class="n">bboxesDiff</span><span class="o">=</span><span class="n">bboxesPos</span><span class="o">-</span><span class="n">bboxEnt</span>                                        <span class="c1"># calculate difference to all precomputed bounding boxes on positive side</span>
+            <span class="n">sortedIndices</span><span class="p">[</span><span class="n">jEnt</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">bboxesDiff</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>       <span class="c1"># determine index of entity with minimum distance of actual and precomputed bounding boxes</span>
+
+        <span class="c1"># update sorting of entities on positive side</span>
+        <span class="n">associatedEntities</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">associatedEntities</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">sortedIndices</span><span class="p">]</span>
+
+        <span class="c1"># return updated associated entites</span>
+        <span class="k">return</span> <span class="n">associatedEntities</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Philipp Metsch.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

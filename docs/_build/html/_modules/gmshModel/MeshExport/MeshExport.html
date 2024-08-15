@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gmshModel.MeshExport.MeshExport &mdash; gmshModel 1.0.19 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=b095c1a6"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            gmshModel
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingStarted/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingStarted/visualization.html">Using the visualization features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../gmshModel/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">gmshModel</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gmshModel.MeshExport.MeshExport</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gmshModel.MeshExport.MeshExport</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<div class="viewcode-block" id="FeapExport">
+<a class="viewcode-back" href="../../../gmshModel/MeshExport/MeshExport.html#gmshModel.MeshExport.MeshExport.FeapExport">[docs]</a>
+<span class="k">def</span> <span class="nf">FeapExport</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Method providing a direct mesh export for FEAP using the mesh information</span>
+<span class="sd">    available from the model.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># nodal transformation for connectivity needed for 2nd order tetrahedron</span>
+    <span class="c1"># -&gt; swap last two entries</span>
+    <span class="n">tet_2</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="p">,</span> <span class="mi">1</span> <span class="p">,</span> <span class="mi">2</span> <span class="p">,</span> <span class="mi">3</span> <span class="p">,</span> <span class="mi">4</span> <span class="p">,</span> <span class="mi">5</span> <span class="p">,</span> <span class="mi">6</span> <span class="p">,</span> <span class="mi">7</span> <span class="p">,</span> <span class="mi">9</span> <span class="p">,</span> <span class="mi">8</span><span class="p">]</span>
+
+    <span class="c1"># prerequisites - abbreviations for easier access</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">gmshAPI</span>
+    <span class="n">mesh</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">mesh</span>
+    <span class="n">meshfile</span> <span class="o">=</span> <span class="s1">&#39;drve&#39;</span>
+
+    <span class="c1"># necessary information for writing feap mesh file</span>
+    <span class="n">dim</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">getDimension</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Physical dimension:&quot;</span><span class="p">,</span><span class="n">dim</span><span class="p">)</span>
+    <span class="n">meshfile</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span><span class="o">+</span><span class="n">meshfile</span>
+
+    <span class="c1"># get information on nodes</span>
+    <span class="n">nodeTags</span><span class="p">,</span> <span class="n">nodalCoord</span><span class="p">,</span> <span class="n">paramCoord</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">getNodes</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">includeBoundary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">nodeTags</span><span class="p">,</span><span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">nodeTags</span><span class="p">,</span> <span class="n">return_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">nNodes</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">nodeTags</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Number of nodes:&quot;</span><span class="p">,</span><span class="n">nNodes</span><span class="p">)</span>
+
+    <span class="c1"># sort nodes and coordinates before writing</span>
+    <span class="n">nodalX</span> <span class="o">=</span> <span class="n">nodalCoord</span><span class="p">[</span><span class="mi">0</span><span class="p">::</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">nodalY</span> <span class="o">=</span> <span class="n">nodalCoord</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">nodalZ</span> <span class="o">=</span> <span class="n">nodalCoord</span><span class="p">[</span><span class="mi">2</span><span class="p">::</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">nodalX</span> <span class="o">=</span> <span class="n">nodalX</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span>
+    <span class="n">nodalY</span> <span class="o">=</span> <span class="n">nodalY</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span>
+    <span class="n">nodalZ</span> <span class="o">=</span> <span class="n">nodalZ</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span>
+
+    <span class="n">nodalCoord</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">nNodes</span><span class="o">*</span><span class="mi">3</span><span class="p">))</span>
+    <span class="n">nodalCoord</span><span class="p">[</span><span class="mi">0</span><span class="p">::</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">nodalX</span>
+    <span class="n">nodalCoord</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">nodalY</span>
+    <span class="n">nodalCoord</span><span class="p">[</span><span class="mi">2</span><span class="p">::</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">nodalZ</span>
+
+    <span class="c1"># get information on elements</span>
+    <span class="n">elemTypes</span><span class="p">,</span><span class="n">elemTags</span><span class="p">,</span><span class="n">connectivity</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">getElements</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">nElem</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">maxNodesPerElem</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Element types:&quot;</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">elemTypes</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">elemTypes</span><span class="p">)):</span>
+        <span class="n">nElem</span> <span class="o">=</span> <span class="n">nElem</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">elemTags</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">currNodesPerElem</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">connectivity</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">elemTags</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">currNodesPerElem</span> <span class="o">&gt;</span> <span class="n">maxNodesPerElem</span><span class="p">:</span>
+        	<span class="n">maxNodesPerElem</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">currNodesPerElem</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Number of elements:&quot;</span><span class="p">,</span> <span class="n">nElem</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Maximum number of nodes per element:&quot;</span><span class="p">,</span><span class="n">maxNodesPerElem</span><span class="p">)</span>
+
+    <span class="c1"># get information on materials</span>
+    <span class="n">phyGroup</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">getPhysicalGroups</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span>
+    <span class="n">numberOfMat</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">phyGroup</span><span class="p">)</span>
+
+    <span class="c1">## build database where each element has a material</span>
+    <span class="n">elem2mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nElem</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">startind</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c1"># loop over all entities for each physical Group</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">numberOfMat</span><span class="p">):</span>
+        <span class="n">physEntities</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">getEntitiesForPhysicalGroup</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">physEntities</span><span class="p">)):</span>
+            <span class="n">currElemTypes</span><span class="p">,</span><span class="n">currElemTags</span><span class="p">,</span><span class="n">currConnectivity</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">getElements</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span><span class="n">physEntities</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+            <span class="c1"># build array[nElem,2], where each element has number of physical group</span>
+            <span class="n">elem2mat</span><span class="p">[</span><span class="n">startind</span><span class="p">:</span><span class="n">startind</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">currElemTags</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">currElemTags</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">elem2mat</span><span class="p">[</span><span class="n">startind</span><span class="p">:</span><span class="n">startind</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">currElemTags</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span>
+            <span class="n">startind</span> <span class="o">=</span> <span class="n">startind</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">currElemTags</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1"># write problem type file PROB_XXX with general definitions</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;PROB_&#39;</span><span class="o">+</span><span class="n">meshfile</span><span class="p">,</span><span class="s1">&#39;wt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+    	<span class="n">outfile</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">nNodes</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39; &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">nElem</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39; &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">numberOfMat</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39; &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39; &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39; &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">maxNodesPerElem</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    	<span class="n">outfile</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="s1">&#39;! nodes, elements, material sets, mesh dimension, maximum nodal DOF (default = dim), max nodes/element&#39;</span><span class="p">)</span>
+
+    <span class="c1"># write mesh file MESH_XXX with nodal coordinates and element connectivity for every element type</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;MESH_&#39;</span><span class="o">+</span><span class="n">meshfile</span><span class="p">,</span><span class="s1">&#39;wt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+        <span class="n">outfile</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="s1">&#39;COORDinate</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">nNodes</span><span class="p">):</span>
+            <span class="n">coordStr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array2string</span><span class="p">(</span><span class="n">nodalCoord</span><span class="p">[</span><span class="mi">3</span><span class="o">*</span><span class="n">i</span><span class="p">:</span><span class="mi">3</span><span class="o">*</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)],</span><span class="n">max_line_width</span><span class="o">=</span><span class="mi">100000</span><span class="p">)</span>
+            <span class="n">outfile</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39; 0 &#39;</span><span class="o">+</span><span class="n">coordStr</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">totalElemCount</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">elemTypes</span><span class="p">)):</span>
+            <span class="n">currNodesPerElem</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">connectivity</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">elemTags</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+            <span class="n">elemsOfType</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">elemTags</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;-------------------------------------------------&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Current nodes per element:&#39;</span><span class="p">,</span><span class="n">currNodesPerElem</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Elements of current type:&#39;</span><span class="p">,</span><span class="n">elemsOfType</span><span class="p">)</span>
+            <span class="n">outfile</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">outfile</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="s1">&#39;ELEMent NODEs=&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">currNodesPerElem</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="c1"># due to limited input records in one line (=16), elements with more</span>
+            <span class="c1"># than 13 nodes have to be split into several rows</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">elemsOfType</span><span class="p">):</span>
+                <span class="n">matNum</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">elem2mat</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">elem2mat</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="n">elemTags</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]),</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">totalElemCount</span> <span class="o">=</span> <span class="n">totalElemCount</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">outfile</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">totalElemCount</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39; 0 &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">matNum</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">dim</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">currNodesPerElem</span> <span class="o">==</span> <span class="mi">10</span><span class="p">:</span>
+                    <span class="n">currConnectivity</span> <span class="o">=</span> <span class="n">connectivity</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="o">*</span><span class="n">currNodesPerElem</span><span class="p">:(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">currNodesPerElem</span><span class="p">]</span>
+                    <span class="n">currConnectivity</span> <span class="o">=</span> <span class="n">currConnectivity</span><span class="p">[</span><span class="n">tet_2</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">currConnectivity</span> <span class="o">=</span> <span class="n">connectivity</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="o">*</span><span class="n">currNodesPerElem</span><span class="p">:(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">currNodesPerElem</span><span class="p">]</span>
+                <span class="n">connectStr13</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array2string</span><span class="p">(</span><span class="n">currConnectivity</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">currConnectivity</span><span class="p">),</span><span class="mi">13</span><span class="p">)],</span><span class="n">max_line_width</span><span class="o">=</span><span class="mi">100000</span><span class="p">)</span>
+                <span class="n">outfile</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="n">connectStr13</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="c1"># writing entries 14 - x of connectivity in new lines</span>
+                <span class="c1"># automatic linebreak every 16th entry</span>
+                <span class="k">for</span> <span class="n">cLines</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">currNodesPerElem</span><span class="o">-</span><span class="mi">13</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">/</span><span class="mi">16</span><span class="p">))):</span>
+                    <span class="n">connectStr14x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array2string</span><span class="p">(</span><span class="n">currConnectivity</span><span class="p">[</span><span class="mi">13</span><span class="o">+</span><span class="n">cLines</span><span class="o">*</span><span class="mi">16</span><span class="p">:</span><span class="nb">min</span><span class="p">(</span><span class="mi">13</span><span class="o">+</span><span class="p">(</span><span class="n">cLines</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="mi">16</span><span class="p">,</span><span class="n">currNodesPerElem</span><span class="p">)],</span><span class="n">max_line_width</span><span class="o">=</span><span class="mi">100000</span><span class="p">)</span>
+                    <span class="n">outfile</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="s1">&#39;    &#39;</span><span class="o">+</span><span class="n">connectStr14x</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Philipp Metsch.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

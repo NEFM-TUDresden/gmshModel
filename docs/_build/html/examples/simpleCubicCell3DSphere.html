@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simple cubic unit cell with spherical inclusions &mdash; gmshModel 1.0.19 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=b095c1a6"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Body-centered cubic unit cell with circular inclusions" href="bodyCenteredCubicCell2DCircle.html" />
+    <link rel="prev" title="Random distribution of cylindrical inclusions in a box-shaped domain" href="randomInclusions3DCylinder.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            gmshModel
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../gettingStarted/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingStarted/visualization.html">Using the visualization features</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="randomInclusions2DCircle.html">Random distribution of circular inclusions in a rectangular domain</a></li>
+<li class="toctree-l2"><a class="reference internal" href="randomInclusions3DSphere.html">Random distribution of spherical inclusions in a box-shaped domain</a></li>
+<li class="toctree-l2"><a class="reference internal" href="randomInclusions3DCylinder.html">Random distribution of cylindrical inclusions in a box-shaped domain</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Simple cubic unit cell with spherical inclusions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#code">Code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#result">Result</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bodyCenteredCubicCell2DCircle.html">Body-centered cubic unit cell with circular inclusions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faceCenteredCubicCell3DCylinder.html">Face-centered cubic unit cell with cylindrical inclusions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hexagonalCell3DSphere.html">Hexagonal unit cell with spherical inclusions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="helicalChain2DCircle.html">Helical chain with circular inclusions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="helicalChain3DSphere.html">Helical chain with spherical inclusions</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../gmshModel/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">gmshModel</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Examples</a></li>
+      <li class="breadcrumb-item active">Simple cubic unit cell with spherical inclusions</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/examples/simpleCubicCell3DSphere.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="simple-cubic-unit-cell-with-spherical-inclusions">
+<h1>Simple cubic unit cell with spherical inclusions<a class="headerlink" href="#simple-cubic-unit-cell-with-spherical-inclusions" title="Link to this heading"></a></h1>
+<p>This example shows the generation of a unit cell with a simple cubic distribution
+of spherical inclusions. The basic procedures of the model and mesh generation
+are pointed out and the resulting mesh is visualized. For the example, only the
+standard configuration is used. However, in order to show all available options -
+user configurations are passed as dictionaries to the individual classes and
+methods - the dictionaries containing the default values are passed. This
+means that, if they were not passed, the resulting mesh would be the same.</p>
+<section id="code">
+<h2>Code<a class="headerlink" href="#code" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Loading of the SimpleCubicUnitCell class</span>
+<span class="c1"># Before the model and mesh generation can start, the required class has to be</span>
+<span class="c1"># loaded. In this case it is the class SimpleCubicCell</span>
+<span class="kn">from</span> <span class="nn">gmshModel.Model</span> <span class="kn">import</span> <span class="n">SimpleCubicCell</span>
+
+<span class="c1"># Initialization of the unit cell</span>
+<span class="c1"># In order to generate a mesh for unit cells with a simple cubic distribution of</span>
+<span class="c1"># spherical inclusions, relevant data have to be passed for the initialization of</span>
+<span class="c1"># a new object instance. For unit cells of the type under consideration, the</span>
+<span class="c1"># following parameters are possible:</span>
+<span class="c1">#</span>
+<span class="c1"># radius: float (mandatory)</span>
+<span class="c1">#   radius of the inclusions within the unit cell</span>
+<span class="c1">#</span>
+<span class="c1"># distance: float (defining either distance or size is mandatory)</span>
+<span class="c1">#   distance of the inclusions within the unit cell</span>
+<span class="c1">#   -&gt; if the distance is given, the cells size is calculated automatically</span>
+<span class="c1">#</span>
+<span class="c1"># size: list/array (defining either distance or size is mandatory)</span>
+<span class="c1">#   array defining the size of the RVE in the individual directions</span>
+<span class="c1">#   -&gt; size=[L_x, L_y, (L_z)]</span>
+<span class="c1">#   -&gt; if the size is given, the inclusion distances are calculated automatically</span>
+<span class="c1">#      (this allows more flexibility and unit cells with inclusion distributions</span>
+<span class="c1">#       that are similar to the physical unit cell under consideration)</span>
+<span class="c1">#</span>
+<span class="c1"># numberCells: list/array (optional)</span>
+<span class="c1">#   array defining the number of cells in the 3 spatial axis directions</span>
+<span class="c1">#   -&gt; numberCells=[n_x, n_y, n_z]</span>
+<span class="c1">#</span>
+<span class="c1"># inclusionType: string (mandatory)</span>
+<span class="c1">#   string defining the type of inclusions within the RVE</span>
+<span class="c1">#</span>
+<span class="c1"># origin: list/array (optional)</span>
+<span class="c1">#   array defining the origin of the RVE</span>
+<span class="c1">#   -&gt; origin=[O_x, O_y, (O_z)]</span>
+<span class="c1">#</span>
+<span class="c1"># periodicityFlags: list/array (optional)</span>
+<span class="c1">#   array with flags (0/1) whether the current coordinate direction has to be</span>
+<span class="c1">#   treated as periodic</span>
+<span class="c1">#   periodicityFlags=[0/1, 0/1, 0/1]</span>
+<span class="c1">#</span>
+<span class="c1"># domainGroup: string (optional)</span>
+<span class="c1">#   string defining which group the geometric objects defining the domain belong</span>
+<span class="c1">#   to (to reference this group within boolean operations)</span>
+<span class="c1">#</span>
+<span class="c1"># inclusionGroup: string (optional)</span>
+<span class="c1">#   string defining which group the geometric objects defining the inclusions</span>
+<span class="c1">#   belong to (to reference this group within boolean operations)</span>
+<span class="c1">#</span>
+<span class="c1"># gmshConfigChanges: dict (optional)</span>
+<span class="c1">#   dictionary for user updates of the default Gmsh configuration</span>
+<span class="c1">#</span>
+<span class="n">initParameters</span><span class="o">=</span><span class="p">{</span>                                                                <span class="c1"># save all possible parameters in one dict to facilitate the method call</span>
+    <span class="s2">&quot;numberCells&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span>                                                     <span class="c1"># generate 1 unit cell in every spatial direction</span>
+    <span class="s2">&quot;radius&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>                                                                <span class="c1"># set the inclusion radius to 2</span>
+    <span class="s2">&quot;inclusionType&quot;</span><span class="p">:</span> <span class="s2">&quot;Sphere&quot;</span><span class="p">,</span>                                                  <span class="c1"># define inclusionType as &quot;Sphere&quot;</span>
+    <span class="s2">&quot;distance&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>                                                              <span class="c1"># set the inclusion distance to 8 and calculate the correspondig cell size</span>
+    <span class="s2">&quot;origin&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>                                                        <span class="c1"># set cell origin to [0,0,0]</span>
+    <span class="s2">&quot;periodicityFlags&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>                                              <span class="c1"># define all axis directions as periodic</span>
+    <span class="s2">&quot;domainGroup&quot;</span><span class="p">:</span> <span class="s2">&quot;domain&quot;</span><span class="p">,</span>                                                    <span class="c1"># use &quot;domain&quot; as name for the domainGroup</span>
+    <span class="s2">&quot;inclusionGroup&quot;</span><span class="p">:</span> <span class="s2">&quot;inclusions&quot;</span><span class="p">,</span>                                             <span class="c1"># use &quot;inclusions&quot; as name for the inclusionGroup</span>
+    <span class="s2">&quot;gmshConfigChanges&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;General.Terminal&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>                                <span class="c1"># deactivate console output by default (only activated for mesh generation)</span>
+                          <span class="s2">&quot;Mesh.CharacteristicLengthExtendFromBoundary&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>     <span class="c1"># do not calculate mesh sizes from the boundary by default (since mesh sizes are specified by fields)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+<span class="n">testCell</span><span class="o">=</span><span class="n">SimpleCubicCell</span><span class="p">(</span><span class="o">**</span><span class="n">initParameters</span><span class="p">)</span>
+
+
+<span class="c1"># Gmsh model generation</span>
+<span class="c1"># After all parameters for the unit cell are set, the Gmsh model can be generated.</span>
+<span class="c1"># This process involves the definition of geometric objects, their combination</span>
+<span class="c1"># to more complex shapes using boolean operations and the definition of physical</span>
+<span class="c1"># groups, i.e. groups of elements that belong to the same material or part of</span>
+<span class="c1"># the boundary. For unit cells no additional options are required for the</span>
+<span class="c1"># inclusion placement. To this end, the command is simply:</span>
+<span class="c1">#</span>
+<span class="n">testCell</span><span class="o">.</span><span class="n">createGmshModel</span><span class="p">()</span>
+
+<span class="c1"># Gmsh mesh creation</span>
+<span class="c1"># After the model has been created using the Gmsh-Python-API, the meshing</span>
+<span class="c1"># can be performed. To this end, refinement fields defining the mesh sizes</span>
+<span class="c1"># within the model have to be calculated and added to the Gmsh model. Once, the</span>
+<span class="c1"># mesh sizes are specified,the mesh can be generated. Available parameters are:</span>
+<span class="c1">#</span>
+<span class="c1"># threads: int</span>
+<span class="c1">#   number of threads to use for the meshing procedure</span>
+<span class="c1"># refinementOptions: dict (optional)</span>
+<span class="c1">#   dictionary containing user updates for the refinement field calculation</span>
+<span class="c1">#</span>
+<span class="n">meshingParameters</span><span class="o">=</span><span class="p">{</span>                                                             <span class="c1"># save all possible parameters in one dict to facilitate the method call</span>
+    <span class="s2">&quot;threads&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>                                                            <span class="c1"># do not activate parallel meshing by default</span>
+    <span class="s2">&quot;refinementOptions&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;maxMeshSize&quot;</span><span class="p">:</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>                                <span class="c1"># automatically calculate maximum mesh size with built-in method</span>
+                          <span class="s2">&quot;inclusionRefinement&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>                          <span class="c1"># flag to indicate active refinement of inclusions</span>
+                          <span class="s2">&quot;interInclusionRefinement&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>                     <span class="c1"># flag to indicate active refinement of space between inclusions (inter-inclusion refinement)</span>
+                          <span class="s2">&quot;elementsPerCircumference&quot;</span><span class="p">:</span> <span class="mi">18</span><span class="p">,</span>                       <span class="c1"># use 18 elements per inclusion circumference for inclusion refinement</span>
+                          <span class="s2">&quot;elementsBetweenInclusions&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>                       <span class="c1"># ensure 3 elements between close inclusions for inter-inclusion refinement</span>
+                          <span class="s2">&quot;inclusionRefinementWidth&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>                        <span class="c1"># use a relative (to inclusion radius) refinement width of 3 for inclusion refinement</span>
+                          <span class="s2">&quot;transitionElements&quot;</span><span class="p">:</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>                         <span class="c1"># automatically calculate number of transitioning elements (elements in which tanh function jumps from h_min to h_max) for inter-inclusion refinement</span>
+                          <span class="s2">&quot;aspectRatio&quot;</span><span class="p">:</span> <span class="mf">1.5</span>                                    <span class="c1"># aspect ratio for inter-inclusion refinement: ratio of refinement in inclusion distance and perpendicular directions</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+<span class="n">testCell</span><span class="o">.</span><span class="n">createMesh</span><span class="p">(</span><span class="o">**</span><span class="n">meshingParameters</span><span class="p">)</span>
+
+
+<span class="c1"># Save resulting mesh to file</span>
+<span class="c1"># The mesh is generated and can be saved to a file. To this end, only the file</span>
+<span class="c1"># name - possibly containing a directory and the extension of the wanted mesh</span>
+<span class="c1"># format - has to be passed. The package supports all mesh file formats that are</span>
+<span class="c1"># supported by meshio. If no filename is passed, meshes are stored to the current</span>
+<span class="c1"># directory using the unique model name and the default mesh file format (.msh)</span>
+<span class="n">testCell</span><span class="o">.</span><span class="n">saveMesh</span><span class="p">(</span><span class="s2">&quot;simpleCubicCell3DSphere.vtu&quot;</span><span class="p">)</span>
+
+
+<span class="c1"># Show resulting mesh</span>
+<span class="c1"># To check the generated mesh, the result can also be visualized using built-in</span>
+<span class="c1"># methods.</span>
+<span class="n">testCell</span><span class="o">.</span><span class="n">visualizeMesh</span><span class="p">()</span>
+
+
+<span class="c1"># Close Gmsh model</span>
+<span class="c1"># For a proper closing of the Gmsh-Python-API, the API has to be finalized. This</span>
+<span class="c1"># can be achieved by calling the close() method of the model</span>
+<span class="n">testCell</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="result">
+<h2>Result<a class="headerlink" href="#result" title="Link to this heading"></a></h2>
+<p>If the mesh generation is successful, the result should look like this:</p>
+<a class="reference internal image-reference" href="../_images/SimpleCubicCell3DSphere.png"><img alt="../_images/SimpleCubicCell3DSphere.png" class="align-center" src="../_images/SimpleCubicCell3DSphere.png" style="width: 60%;" />
+</a>
+<p>Since the inclusion is fully embedded in the surrounding matrix material,
+the BoxWidget of the PyVista-based visualization tool is used to extract
+the part of the mesh that can be seen in the image above.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="randomInclusions3DCylinder.html" class="btn btn-neutral float-left" title="Random distribution of cylindrical inclusions in a box-shaped domain" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="bodyCenteredCubicCell2DCircle.html" class="btn btn-neutral float-right" title="Body-centered cubic unit cell with circular inclusions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Philipp Metsch.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

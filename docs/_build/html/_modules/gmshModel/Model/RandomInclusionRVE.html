@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gmshModel.Model.RandomInclusionRVE &mdash; gmshModel 1.0.19 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=b095c1a6"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            gmshModel
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingStarted/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingStarted/visualization.html">Using the visualization features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../gmshModel/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">gmshModel</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gmshModel.Model.RandomInclusionRVE</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gmshModel.Model.RandomInclusionRVE</h1><div class="highlight"><pre>
+<span></span><span class="c1">################################################################################</span>
+<span class="c1">#     CLASS FOR INCLUSION RVE MESHES GENERATED USING THE GMSH-PYTHON-API       #</span>
+<span class="c1">################################################################################</span>
+<span class="c1"># This file provides a class definition for a generation of RVEs with randomly</span>
+<span class="c1"># placed inclusions. The class inherits from the InclusionRVE class and extends</span>
+<span class="c1"># it in order order to specify the remaining placeholder methods of the</span>
+<span class="c1"># GenericModel. Methods to create the geometry, define refinement information</span>
+<span class="c1"># and additional information for required boolean operations and physical groups</span>
+<span class="c1"># are part of the class.</span>
+
+<span class="c1">###########################</span>
+<span class="c1"># Load required libraries #</span>
+<span class="c1">###########################</span>
+<span class="c1"># Standard Python libraries</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>                                                              <span class="c1"># numpy for fast array computations</span>
+<span class="kn">import</span> <span class="nn">copy</span> <span class="k">as</span> <span class="nn">cp</span>                                                               <span class="c1"># copy  for deepcopies</span>
+
+<span class="c1"># self defined class definitions and modules</span>
+<span class="kn">from</span> <span class="nn">.InclusionRVE</span> <span class="kn">import</span> <span class="n">InclusionRVE</span>                                          <span class="c1"># generic RVE class definition (parent class)</span>
+
+
+<span class="c1">###################################</span>
+<span class="c1"># Define RandomInclusionRVE class #</span>
+<span class="c1">###################################</span>
+<div class="viewcode-block" id="RandomInclusionRVE">
+<a class="viewcode-back" href="../../../gmshModel/Model/RandomInclusionRVE.html#gmshModel.Model.RandomInclusionRVE.RandomInclusionRVE">[docs]</a>
+<span class="k">class</span> <span class="nc">RandomInclusionRVE</span><span class="p">(</span><span class="n">InclusionRVE</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class definition for box-shaped RVEs with randomly distributed inclusions</span>
+
+<span class="sd">    This class provides required information for box-shaped, RVEs with randomly</span>
+<span class="sd">    distributed inclusions. It inherits from the InclusionRVE class and extends</span>
+<span class="sd">    its attributes and methods to handle the inclusion placement as well as the</span>
+<span class="sd">    definition of required boolean operations and physical groups.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">    -----------</span>
+<span class="sd">    dimension: int</span>
+<span class="sd">        dimension of the model instance</span>
+
+<span class="sd">    inclusionSets: list/array</span>
+<span class="sd">        array providing the necessary information for sets of inclusions to be</span>
+<span class="sd">        placed</span>
+<span class="sd">        -&gt; inclusionSets=[radius, amount] (for the individual sets of inclusions)</span>
+
+<span class="sd">    size: list/array</span>
+<span class="sd">        size of the box-shaped RVE model</span>
+<span class="sd">        -&gt; size=[Lx, Ly, (Lz)]</span>
+
+<span class="sd">    origin: list/array</span>
+<span class="sd">        origin of the box-shaped RVE model</span>
+<span class="sd">        -&gt; origin=[Ox, Oy, (Oz)]</span>
+
+<span class="sd">    inclusionType: string</span>
+<span class="sd">        string defining the type of inclusion</span>
+<span class="sd">        -&gt; iunclusionType= &quot;Sphere&quot;/&quot;Cylinder&quot;/&quot;Circle&quot;</span>
+
+<span class="sd">    inclusionAxis:list/array</span>
+<span class="sd">        array defining the inclusion axis (only relevant for inclusionType &quot;Cylinder&quot;)</span>
+<span class="sd">        -&gt; currently restricted to Cylinders parallel to one of the coordinate axes</span>
+<span class="sd">        -&gt; inclusionAxes=[Ax, Ay, Az]</span>
+
+<span class="sd">    relevantAxes: list/array</span>
+<span class="sd">        array defining the relevant axes for distance calculations</span>
+
+<span class="sd">    periodicityFlags: list/array</span>
+<span class="sd">        flags indicating the periodic axes of the box-shaped RVE model</span>
+<span class="sd">        -&gt; periodicityFlags=[0/1, 0/1, 0/1]</span>
+
+<span class="sd">    inclusionInfo: array</span>
+<span class="sd">        array containing relevant inclusion information (center, radius) for</span>
+<span class="sd">        distance calculations</span>
+
+<span class="sd">    domainGroup: string</span>
+<span class="sd">        name of the group the RVE domain should belong to</span>
+
+<span class="sd">    inclusionGroup: string</span>
+<span class="sd">        name of the group the inclusions should belong to</span>
+
+<span class="sd">    gmshConfigChanges: dict</span>
+<span class="sd">        dictionary for user updates of the default Gmsh configuration</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#########################</span>
+    <span class="c1"># Initialization method #</span>
+    <span class="c1">#########################</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">inclusionSets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">inclusionType</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">inclusionAxis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">origin</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span><span class="n">periodicityFlags</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">domainGroup</span><span class="o">=</span><span class="s2">&quot;domain&quot;</span><span class="p">,</span><span class="n">inclusionGroup</span><span class="o">=</span><span class="s2">&quot;inclusions&quot;</span><span class="p">,</span><span class="n">gmshConfigChanges</span><span class="o">=</span><span class="p">{}):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialization method for RandomInclusionRVE object instances</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        inclusionSets: list/array</span>
+<span class="sd">            array providing the necessary information for sets of inclusions to be</span>
+<span class="sd">            placed</span>
+<span class="sd">            -&gt; inclusionSets=[radius, amount] (for the individual sets of inclusions)</span>
+
+<span class="sd">        size: list/array</span>
+<span class="sd">            size of the box-shaped RVE model</span>
+<span class="sd">            -&gt; size=[Lx, Ly, (Lz)]</span>
+
+<span class="sd">        origin: list/array</span>
+<span class="sd">            origin of the box-shaped RVE model</span>
+<span class="sd">            -&gt; origin=[Ox, Oy, (Oz)]</span>
+
+<span class="sd">        inclusionType: string</span>
+<span class="sd">            string defining the type of inclusion</span>
+<span class="sd">            -&gt; iunclusionType= &quot;Sphere&quot;/&quot;Cylinder&quot;/&quot;Circle&quot;</span>
+
+<span class="sd">        inclusionAxis:list/array</span>
+<span class="sd">            array defining the inclusion axis (only relevant for inclusionType &quot;Cylinder&quot;)</span>
+<span class="sd">            -&gt; currently restricted to Cylinders parallel to one of the coordinate axes</span>
+<span class="sd">            -&gt; inclusionAxes=[Ax, Ay, Az]</span>
+
+<span class="sd">        relevantAxes: list/array</span>
+<span class="sd">            array defining the relevant axes for distance calculations</span>
+
+<span class="sd">        periodicityFlags: list/array</span>
+<span class="sd">            flags indicating the periodic axes of the box-shaped RVE model</span>
+<span class="sd">            -&gt; periodicityFlags=[0/1, 0/1, 0/1]</span>
+
+<span class="sd">        inclusionInfo: array</span>
+<span class="sd">            array containing relevant inclusion information (center, radius) for</span>
+<span class="sd">            distance calculations</span>
+
+<span class="sd">        domainGroup: string</span>
+<span class="sd">            name of the group the RVE domain should belong to</span>
+
+<span class="sd">        inclusionGroup: string</span>
+<span class="sd">            name of the group the inclusions should belong to</span>
+
+<span class="sd">        gmshConfigChanges: dict</span>
+<span class="sd">            dictionary for user updates of the default Gmsh configuration</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># initialize parents classes attributes and methods</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span><span class="n">inclusionType</span><span class="o">=</span><span class="n">inclusionType</span><span class="p">,</span><span class="n">inclusionAxis</span><span class="o">=</span><span class="n">inclusionAxis</span><span class="p">,</span><span class="n">origin</span><span class="o">=</span><span class="n">origin</span><span class="p">,</span><span class="n">periodicityFlags</span><span class="o">=</span><span class="n">periodicityFlags</span><span class="p">,</span><span class="n">gmshConfigChanges</span><span class="o">=</span><span class="n">gmshConfigChanges</span><span class="p">)</span>
+
+        <span class="c1"># plausibility checks for input variables</span>
+        <span class="k">if</span> <span class="n">inclusionSets</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Variable </span><span class="se">\&quot;</span><span class="s2">inclusionSets</span><span class="se">\&quot;</span><span class="s2"> not set! For RVEs with random inclusion distributions, the inclusionSets must be defined. Check your input data.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># update inclusion sets to start placement with biggest inclusions</span>
+        <span class="n">inclusionSets</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">inclusionSets</span><span class="p">)</span>                              <span class="c1"># type conversion for inclusionSets to be matrix-like</span>
+        <span class="n">inclusionSets</span><span class="o">=</span><span class="n">inclusionSets</span><span class="p">[</span><span class="n">inclusionSets</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>   <span class="c1"># sort inclusionSets (descending) to start algorithm with biggest inclusions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inclusionSets</span><span class="o">=</span><span class="n">inclusionSets</span>                                        <span class="c1"># save updated inclusionSets array to class object</span>
+
+        <span class="c1"># set attributes from input parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">domainGroup</span><span class="o">=</span><span class="n">domainGroup</span>                                            <span class="c1"># set group name for the domain object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inclusionGroup</span><span class="o">=</span><span class="n">inclusionGroup</span>                                      <span class="c1"># set group name for the inclusion objects</span>
+
+        <span class="c1"># set default placement options</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">placementOptions</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;maxAttempts&quot;</span><span class="p">:</span> <span class="mi">10000</span><span class="p">,</span>                                               <span class="c1"># maximum number of attempts to place one inclusion</span>
+            <span class="s2">&quot;minRelDistBnd&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>                                               <span class="c1"># minimum relative (to inclusion radius) distance to the domain boundaries</span>
+            <span class="s2">&quot;minRelDistInc&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>                                               <span class="c1"># minimum relative (to inclusion radius) distance to other inclusions</span>
+        <span class="p">}</span>
+
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">#                 SPECIFIED/OVERWRITTEN PLACEHOLDER METHODS                    #</span>
+<span class="c1">################################################################################</span>
+
+    <span class="c1">############################################################################</span>
+    <span class="c1"># Method to define the required geometric objects for the model generation #</span>
+    <span class="c1">############################################################################</span>
+<div class="viewcode-block" id="RandomInclusionRVE.defineGeometricObjects">
+<a class="viewcode-back" href="../../../gmshModel/Model/RandomInclusionRVE.html#gmshModel.Model.RandomInclusionRVE.RandomInclusionRVE.defineGeometricObjects">[docs]</a>
+    <span class="k">def</span> <span class="nf">defineGeometricObjects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">placementOptions</span><span class="o">=</span><span class="p">{}):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Overwritten method of the GenericModel class to define and create the</span>
+<span class="sd">        required geometric objects for the model generation</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        placementOptions: dict</span>
+<span class="sd">            dictionary for user updates of the default placement options</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># update placement options</span>
+        <span class="n">placementOptions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">updatePlacementOptions</span><span class="p">(</span><span class="n">placementOptions</span><span class="p">)</span>
+
+        <span class="c1"># generate geometry</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addGeometricObject</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">domainType</span><span class="p">,</span><span class="n">group</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">domainGroup</span><span class="p">,</span><span class="n">origin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">origin</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">)</span> <span class="c1"># add domain object to calling RVE</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">placeInclusions</span><span class="p">(</span><span class="n">placementOptions</span><span class="p">)</span>                                  <span class="c1"># call internal inclusion placement routine</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inclusionInfo</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>                      <span class="c1"># loop over all inclusions</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inclusionType</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;Sphere&quot;</span><span class="p">,</span><span class="s2">&quot;Circle&quot;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">addGeometricObject</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inclusionType</span><span class="p">,</span><span class="n">group</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inclusionGroup</span><span class="p">,</span><span class="n">center</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inclusionInfo</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span><span class="n">radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inclusionInfo</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span> <span class="c1"># add inclusions to calling RVE object</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">inclusionType</span> <span class="o">==</span> <span class="s2">&quot;Cylinder&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">addGeometricObject</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inclusionType</span><span class="p">,</span><span class="n">group</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inclusionGroup</span><span class="p">,</span><span class="n">center</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inclusionInfo</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span><span class="n">radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inclusionInfo</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inclusionAxis</span><span class="p">)</span> <span class="c1"># add inclusions to calling RVE object</span></div>
+
+
+
+    <span class="c1">###################################################</span>
+    <span class="c1"># Method for the definition of boolean operations #</span>
+    <span class="c1">###################################################</span>
+<div class="viewcode-block" id="RandomInclusionRVE.defineBooleanOperations">
+<a class="viewcode-back" href="../../../gmshModel/Model/RandomInclusionRVE.html#gmshModel.Model.RandomInclusionRVE.RandomInclusionRVE.defineBooleanOperations">[docs]</a>
+    <span class="k">def</span> <span class="nf">defineBooleanOperations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Overwritten method of the GenericModel class to define the required</span>
+<span class="sd">        boolean operations for the model generation</span>
+
+<span class="sd">        Normally, the definition of basic geometric objects is not sufficient</span>
+<span class="sd">        to generate the RVE geometry. To this end, boolean operations can be</span>
+<span class="sd">        used to generate more complex RVEs from the basic geometric objects.</span>
+<span class="sd">        The required boolean operations for the generation of an RVE with</span>
+<span class="sd">        randomly distributed inclusions is defined here.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">booleanOperations</span><span class="o">=</span><span class="p">[{</span>                                               <span class="c1"># first boolean operation (intersect domain group and inclusions group to get rid of parts that exceed the domain boundary)</span>
+            <span class="s2">&quot;operation&quot;</span><span class="p">:</span> <span class="s2">&quot;intersect&quot;</span><span class="p">,</span>                                           <span class="c1"># -&gt; intersection of &quot;domain&quot; and &quot;inclusions&quot;</span>
+            <span class="s2">&quot;object&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">domainGroup</span><span class="p">,</span>                                         <span class="c1"># -&gt; use &quot;domain&quot; group as object</span>
+            <span class="s2">&quot;tool&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">inclusionGroup</span><span class="p">,</span>                                        <span class="c1"># -&gt; use &quot;inclusions&quot; group as tool</span>
+            <span class="s2">&quot;removeObject&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>                                              <span class="c1"># -&gt; keep the object (&quot;domain&quot;) after the boolean operation for further use</span>
+            <span class="s2">&quot;removeTool&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>                                                 <span class="c1"># -&gt; remove the tool (&quot;inclusions&quot;) after the boolean operation</span>
+            <span class="s2">&quot;resultingGroup&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">inclusionGroup</span>                               <span class="c1"># -&gt; assign the result of the boolean operation to the &quot;inclusions&quot; group (i.e. overwrite the group) for further use</span>
+        <span class="p">},</span>
+        <span class="p">{</span>                                                                       <span class="c1"># second boolean operation (cut domain with resulting inclusions to create holes within the domain where the inclusions are placed)</span>
+            <span class="s2">&quot;operation&quot;</span><span class="p">:</span> <span class="s2">&quot;cut&quot;</span><span class="p">,</span>                                                 <span class="c1"># -&gt; cut &quot;inclusions&quot; (updated group) from &quot;domain&quot;</span>
+            <span class="s2">&quot;object&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">domainGroup</span><span class="p">,</span>                                         <span class="c1"># -&gt; use &quot;domain&quot; group as object</span>
+            <span class="s2">&quot;tool&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">inclusionGroup</span><span class="p">,</span>                                        <span class="c1"># -&gt; use &quot;inclusions&quot; group as tool</span>
+            <span class="s2">&quot;removeObject&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>                                               <span class="c1"># -&gt; remove the object (&quot;domain&quot;) after the boolean operation</span>
+            <span class="s2">&quot;removeTool&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>                                                <span class="c1"># -&gt; keep the tool (&quot;inclusions&quot;) after the boolean operation for further use</span>
+            <span class="s2">&quot;resultingGroup&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">domainGroup</span>                                  <span class="c1"># -&gt; assign the result of the boolean operation to the &quot;domain&quot; group (i.e. overwrite the group)</span>
+        <span class="p">}]</span></div>
+
+
+
+    <span class="c1">################################################</span>
+    <span class="c1"># Method for the definition of physical groups #</span>
+    <span class="c1">################################################</span>
+<div class="viewcode-block" id="RandomInclusionRVE.definePhysicalGroups">
+<a class="viewcode-back" href="../../../gmshModel/Model/RandomInclusionRVE.html#gmshModel.Model.RandomInclusionRVE.RandomInclusionRVE.definePhysicalGroups">[docs]</a>
+    <span class="k">def</span> <span class="nf">definePhysicalGroups</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Overwritten method of the GenericModel class to define and the</span>
+<span class="sd">        required physical groups for the model mesh generation</span>
+
+<span class="sd">        In order to be able to assign different material properties to different</span>
+<span class="sd">        regions in the generated mesh, physical groups are used in Gmsh to</span>
+<span class="sd">        combine different regions into one group. The additional definition of</span>
+<span class="sd">        a boundary group allows to identify the boundary of the mesh without</span>
+<span class="sd">        searching for elements on the boundary within the solver.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># append boundary group to save boundary information in the mesh, too</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;boundary&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">getBoundaryEntities</span><span class="p">()})</span>
+
+        <span class="c1"># define physical groups</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">physicalGroups</span><span class="o">=</span><span class="p">[{</span>
+            <span class="s2">&quot;dimension&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="p">,</span>                                        <span class="c1"># define dimension of the physical group</span>
+            <span class="s2">&quot;group&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">domainGroup</span><span class="p">,</span>                                          <span class="c1"># define name of the physical group</span>
+            <span class="s2">&quot;physicalNumber&quot;</span><span class="p">:</span> <span class="mi">1</span>                                                 <span class="c1"># set physical number of the physical group</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;dimension&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="p">,</span>                                        <span class="c1"># define dimension of the physical group</span>
+            <span class="s2">&quot;group&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">inclusionGroup</span><span class="p">,</span>                                       <span class="c1"># define name of the physical group</span>
+            <span class="s2">&quot;physicalNumber&quot;</span><span class="p">:</span> <span class="mi">2</span>                                                 <span class="c1"># set physical number of the physical group</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;dimension&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span>                                      <span class="c1"># define dimension of the physical group</span>
+            <span class="s2">&quot;group&quot;</span><span class="p">:</span> <span class="s2">&quot;boundary&quot;</span><span class="p">,</span>                                                <span class="c1"># define name of the physical group</span>
+            <span class="s2">&quot;physicalNumber&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>                                                <span class="c1"># set physical number of the physical group</span>
+        <span class="p">}]</span></div>
+
+
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">#               ADDITIONAL METHODS FOR THE INCLUSION PLACEMENT                 #</span>
+<span class="c1">################################################################################</span>
+
+    <span class="c1">##########################################</span>
+    <span class="c1"># Method to get update placement options #</span>
+    <span class="c1">##########################################</span>
+<div class="viewcode-block" id="RandomInclusionRVE.updatePlacementOptions">
+<a class="viewcode-back" href="../../../gmshModel/Model/RandomInclusionRVE.html#gmshModel.Model.RandomInclusionRVE.RandomInclusionRVE.updatePlacementOptions">[docs]</a>
+    <span class="k">def</span> <span class="nf">updatePlacementOptions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">optionsUpdate</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to updated the inclusion placement options</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        optionsUpdate: dict</span>
+<span class="sd">            dictionary storing the updates for the currently set placement options</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">placementOptions</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">optionsUpdate</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">placementOptions</span></div>
+
+
+
+    <span class="c1">#########################################</span>
+    <span class="c1"># Method for random inclusion placement #</span>
+    <span class="c1">#########################################</span>
+<div class="viewcode-block" id="RandomInclusionRVE.placeInclusions">
+<a class="viewcode-back" href="../../../gmshModel/Model/RandomInclusionRVE.html#gmshModel.Model.RandomInclusionRVE.RandomInclusionRVE.placeInclusions">[docs]</a>
+    <span class="k">def</span> <span class="nf">placeInclusions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">placementOptions</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to place inclusions for the RVE geometry</span>
+
+<span class="sd">        Within this method, the inclusions for the user-defined inclusion sets</span>
+<span class="sd">        (sets of inclusion radii and amounts) are placed in a - up to now -</span>
+<span class="sd">        standard random-close-packing algorithm. This allows for moderate volume</span>
+<span class="sd">        fractions of inclusions with identical radii. For high volume fractions,</span>
+<span class="sd">        the algorithm needs to be refined. The applied method ensures periodicity</span>
+<span class="sd">        in the user-defined directions and allows to define minimum distances</span>
+<span class="sd">        between two inclusions as well as the inclusion surface and the surrounding</span>
+<span class="sd">        domain boundaries (to facilitate meshing).</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        placementOptions: dict</span>
+<span class="sd">            dictionary with options for the inclusion placement</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># get inlusion radii and amounts for the individual sets</span>
+        <span class="n">rSets</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inclusionSets</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span>                               <span class="c1"># radii of inclusion for the individual sets</span>
+        <span class="n">nSets</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inclusionSets</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>                                           <span class="c1"># amount of inclusions for the individual sets</span>
+        <span class="n">distBndSets</span><span class="o">=</span><span class="n">rSets</span><span class="o">*</span><span class="n">placementOptions</span><span class="p">[</span><span class="s2">&quot;minRelDistBnd&quot;</span><span class="p">]</span>                     <span class="c1"># distance of inclusions to the domain boundaries for the individual sets</span>
+        <span class="n">distIncSets</span><span class="o">=</span><span class="n">rSets</span><span class="o">*</span><span class="n">placementOptions</span><span class="p">[</span><span class="s2">&quot;minRelDistInc&quot;</span><span class="p">]</span>                     <span class="c1"># distance of inclusions to other inclusions for the individual sets</span>
+
+        <span class="c1"># initialization</span>
+        <span class="n">totalInstancesSet</span><span class="o">=</span><span class="mi">0</span>                                                     <span class="c1"># number of already set inclusion instances (inclusions and copies of them)</span>
+        <span class="n">incInfo</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">nSets</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span><span class="mi">6</span><span class="p">))</span>                       <span class="c1"># incInfo=[ [incCoords], rInc, mindDistBnd, mindDistInc] -&gt; assume every inclusion to cut potentially two boundaries (i.e. to have three copies) for initialization</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">placementInfo</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">rSets</span><span class="p">))</span>                            <span class="c1"># information about placed inclusions for the individual sets</span>
+
+        <span class="c1"># loop over all incSets</span>
+        <span class="n">relevantAxesFlags</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,))</span>                                        <span class="c1"># creaty auxiliary flag variable to indicate axes which are relevant for inclusion center calculation</span>
+        <span class="n">relevantAxesFlags</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">relevantAxes</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span>                                  <span class="c1"># set relevantAxesFlags to 1 for the relevant axes</span>
+        <span class="k">for</span> <span class="n">iSet</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">rSets</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>
+
+            <span class="c1"># initialization:</span>
+            <span class="n">nAttempts</span><span class="o">=</span><span class="mi">0</span>                                                         <span class="c1"># attempts to place the current inclusion</span>
+            <span class="n">placedIncsForSet</span><span class="o">=</span><span class="mi">0</span>                                                  <span class="c1"># amount of placed inclusions for the current set</span>
+
+            <span class="c1"># try to place all inclusions for the current set</span>
+            <span class="k">while</span> <span class="n">placedIncsForSet</span> <span class="o">&lt;</span> <span class="n">nSets</span><span class="p">[</span><span class="n">iSet</span><span class="p">]</span> <span class="ow">and</span> <span class="n">nAttempts</span> <span class="o">&lt;</span> <span class="n">placementOptions</span><span class="p">[</span><span class="s2">&quot;maxAttempts&quot;</span><span class="p">]:</span>
+
+                <span class="c1"># calculate random coordinates for current inclusion (ensure 2D array for proper handling)</span>
+                <span class="n">thisIncInfo</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">*</span><span class="n">relevantAxesFlags</span><span class="p">,</span> <span class="n">rSets</span><span class="p">[</span><span class="n">iSet</span><span class="p">],</span> <span class="n">distBndSets</span><span class="p">[</span><span class="n">iSet</span><span class="p">],</span> <span class="n">distIncSets</span><span class="p">[</span><span class="n">iSet</span><span class="p">]])</span>
+
+                <span class="c1"># check inclusion distance to boundaries</span>
+                <span class="n">acceptInc</span><span class="p">,</span> <span class="n">distBnd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkBndDistance</span><span class="p">(</span><span class="n">thisIncInfo</span><span class="p">[</span><span class="mi">0</span><span class="p">,:],</span><span class="bp">self</span><span class="o">.</span><span class="n">relevantAxes</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">acceptInc</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>                                          <span class="c1"># start with next attempt, if inclusion is not accepted</span>
+                    <span class="n">nAttempts</span><span class="o">+=</span><span class="mi">1</span>
+                    <span class="k">continue</span>
+                <span class="k">else</span><span class="p">:</span>                                                           <span class="c1"># set number of required inclusion instances to 1, if inclusion is accepted</span>
+                    <span class="n">thisIncInstances</span><span class="o">=</span><span class="mi">1</span>
+
+                <span class="c1"># generate periodic copies, if necessary</span>
+                <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">periodicityFlags</span><span class="p">)</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+                    <span class="n">thisIncInfo</span><span class="p">,</span> <span class="n">thisIncInstances</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_periodicIncs</span><span class="p">(</span><span class="n">thisIncInfo</span><span class="p">,</span><span class="n">distBnd</span><span class="p">)</span>
+
+                <span class="c1"># check inclusion distance to inclusions placed so far</span>
+                <span class="n">acceptInc</span><span class="o">=</span><span class="kc">True</span>                                                  <span class="c1"># initially assume that current inclusion is accepted</span>
+                <span class="k">if</span> <span class="n">totalInstancesSet</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>                                       <span class="c1"># only check if at least one inclusion has been placed</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">thisIncInstances</span><span class="p">):</span>                         <span class="c1"># check i-th instance of current inclusion</span>
+                        <span class="n">acceptIncInstance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkIncDistance</span><span class="p">(</span><span class="n">thisIncInfo</span><span class="p">[</span><span class="n">i</span><span class="p">,:],</span><span class="n">incInfo</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">totalInstancesSet</span><span class="p">,:],</span><span class="bp">self</span><span class="o">.</span><span class="n">relevantAxes</span><span class="p">)</span> <span class="c1"># check if i-th instance is accepted</span>
+                        <span class="k">if</span> <span class="n">acceptIncInstance</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>                          <span class="c1"># do not check other instances, if this one is not accepted</span>
+                            <span class="n">acceptInc</span><span class="o">=</span><span class="kc">False</span>                                     <span class="c1"># do not accept current inclusion, if one of the instances is not accepted</span>
+                            <span class="k">break</span>
+
+                    <span class="c1"># check if current inclusion is accepted or not</span>
+                    <span class="k">if</span> <span class="n">acceptInc</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>                                      <span class="c1"># start with next attempt, if inclusion is not accepted</span>
+                        <span class="n">nAttempts</span><span class="o">+=</span><span class="mi">1</span>
+                        <span class="k">if</span> <span class="n">nAttempts</span> <span class="o">==</span> <span class="n">placementOptions</span><span class="p">[</span><span class="s2">&quot;maxAttempts&quot;</span><span class="p">]:</span>        <span class="c1"># user info, if not all inclusions of the current set could be placed</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Could not place all inclusions for the current set. For r=</span><span class="si">{0:.2f}</span><span class="s2">, </span><span class="si">{1:.0f}</span><span class="s2">/</span><span class="si">{2:.0f}</span><span class="s2"> have been placed.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rSets</span><span class="p">[</span><span class="n">iSet</span><span class="p">],</span><span class="n">placedIncsForSet</span><span class="p">,</span><span class="n">nSets</span><span class="p">[</span><span class="n">iSet</span><span class="p">]))</span>
+                        <span class="k">continue</span>
+                    <span class="k">else</span><span class="p">:</span>                                                       <span class="c1"># update incInfo and number of set inclusions/inclusion instances</span>
+                        <span class="n">incInfo</span><span class="p">[</span><span class="n">totalInstancesSet</span><span class="p">:</span><span class="n">totalInstancesSet</span><span class="o">+</span><span class="n">thisIncInstances</span><span class="p">,:]</span><span class="o">=</span><span class="n">thisIncInfo</span>
+                        <span class="n">placedIncsForSet</span><span class="o">+=</span><span class="mi">1</span>
+                        <span class="n">totalInstancesSet</span><span class="o">+=</span><span class="n">thisIncInstances</span>
+                <span class="k">else</span><span class="p">:</span>                                                           <span class="c1"># set first inclusion</span>
+                    <span class="n">incInfo</span><span class="p">[</span><span class="n">totalInstancesSet</span><span class="p">:</span><span class="n">totalInstancesSet</span><span class="o">+</span><span class="n">thisIncInstances</span><span class="p">,:]</span><span class="o">=</span><span class="n">thisIncInfo</span>
+                    <span class="n">placedIncsForSet</span><span class="o">+=</span><span class="mi">1</span>
+                    <span class="n">totalInstancesSet</span><span class="o">+=</span><span class="n">thisIncInstances</span>
+
+                <span class="c1"># save number of placed inclusions for the current set to placementInfo</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">placementInfo</span><span class="p">[</span><span class="n">iSet</span><span class="p">]</span><span class="o">=</span><span class="n">placedIncsForSet</span>
+
+        <span class="c1"># prepare incInfo for output (get relevant rows and cols)</span>
+        <span class="n">incInfo</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span><span class="o">=</span><span class="n">incInfo</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">origin</span><span class="p">)</span>                <span class="c1"># translate center coordinates to match with defined origin of the RVE domain</span>
+        <span class="n">incInfo</span><span class="o">=</span><span class="n">incInfo</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">totalInstancesSet</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>                                <span class="c1"># incInfo=[M_x, M_y, M_z, R] with M: center points, R: radii</span>
+
+        <span class="c1"># save relevant results in randomInclusions object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inclusionInfo</span><span class="o">=</span><span class="n">incInfo</span></div>
+
+
+
+    <span class="c1">#######################################################</span>
+    <span class="c1"># Method to save inclusion information to a text file #</span>
+    <span class="c1">#######################################################</span>
+<div class="viewcode-block" id="RandomInclusionRVE.saveIncInfo">
+<a class="viewcode-back" href="../../../gmshModel/Model/RandomInclusionRVE.html#gmshModel.Model.RandomInclusionRVE.RandomInclusionRVE.saveIncInfo">[docs]</a>
+    <span class="k">def</span> <span class="nf">saveIncInfo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">file</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to save inclusion information to delimited ascii file</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        file: string</span>
+<span class="sd">            name of the file to save the inclusion information in</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fileDir</span><span class="p">,</span><span class="n">fileName</span><span class="p">,</span><span class="n">fileExt</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getFileParts</span><span class="p">(</span><span class="n">file</span><span class="p">,</span><span class="s2">&quot;Misc&quot;</span><span class="p">)</span>                <span class="c1"># split fileName into file parts</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fileDir</span><span class="o">+</span><span class="s2">&quot;/&quot;</span><span class="o">+</span><span class="n">fileName</span><span class="o">+</span><span class="n">fileExt</span><span class="p">,</span><span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">incInfoFile</span><span class="p">:</span>             <span class="c1"># open file</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">incInfoFile</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">inclusionInfo</span><span class="p">)</span>                          <span class="c1"># save information to file</span></div>
+
+
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">#           ADDITIONAL PRIVATE/HIDDEN METHODS FOR INTERNAL USE ONLY            #</span>
+<span class="c1">################################################################################</span>
+
+    <span class="c1">####################################################</span>
+    <span class="c1"># Method to generate periodic copies of inclusions #</span>
+    <span class="c1">####################################################</span>
+    <span class="k">def</span> <span class="nf">_periodicIncs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">thisIncInfo</span><span class="p">,</span><span class="n">distBnd</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Internal method to generate periodic copies for inclusions cutting</span>
+<span class="sd">        the domain boundaries</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        thsiIncInfo: array</span>
+<span class="sd">            array containing information of the inclusion that cuts the boundary</span>
+
+<span class="sd">        distBnd: array</span>
+<span class="sd">            distance of the inclusion to the RVE boundary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># check if inclusion cuts the boundaries and get indices</span>
+        <span class="c1">#</span>
+        <span class="c1"># bndCuts variable:</span>
+        <span class="c1">#------------------</span>
+        <span class="c1"># 1st row of &quot;distBnd &lt; 0&quot; shows cuts with negative x,y,z-surfaces (boolean)</span>
+        <span class="c1"># 2nd row of &quot;distBnd &lt; 0&quot; shows cuts with positive x,y,z-surfaces (boolean)</span>
+        <span class="c1"># -&gt; 1st row of &quot;bndCuts&quot; defines if negative (0) or positive (1) boundary are cut -&gt; sign of necessary displacement of original inclusion</span>
+        <span class="c1"># -&gt; 2nd row of &quot;bndCuts&quot; defines direction for which the cut has been found -&gt; direction for which displacement has to be performed</span>
+        <span class="n">bndCuts</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">distBnd</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">))</span>
+
+        <span class="c1"># loop over all directions for which copies have to be generated</span>
+        <span class="n">thisIncInstances</span><span class="o">=</span><span class="mi">1</span>                                                      <span class="c1"># initialize number of required inclusion instances</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">bndCuts</span><span class="p">)[</span><span class="mi">1</span><span class="p">]):</span>                                 <span class="c1"># find all direction for which copies have to be generated</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">periodicityFlags</span><span class="p">[</span><span class="n">bndCuts</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">]]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>                               <span class="c1"># only create periodic copy if current direction is marked as periodic</span>
+                <span class="n">thisIncCopies</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">thisIncInfo</span><span class="p">)</span>                          <span class="c1"># initialize current copy with current inclusion data (deepcopy)</span>
+                <span class="n">thisIncCopies</span><span class="p">[:,</span><span class="n">bndCuts</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">]]</span><span class="o">=</span><span class="n">thisIncCopies</span><span class="p">[:,</span><span class="n">bndCuts</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">]]</span><span class="o">+</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="n">bndCuts</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="n">bndCuts</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">]]</span> <span class="c1"># modify inclusion centers of copies</span>
+                <span class="n">thisIncInfo</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">thisIncInfo</span><span class="p">,</span><span class="n">thisIncCopies</span><span class="p">]</span>                    <span class="c1"># append copied inclusions to current inclusion data</span>
+                <span class="n">thisIncInstances</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">thisIncInfo</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>                       <span class="c1"># update number of required inclusion instances</span>
+
+        <span class="c1"># return relevant data</span>
+        <span class="k">return</span> <span class="n">thisIncInfo</span><span class="p">,</span> <span class="n">thisIncInstances</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Philipp Metsch.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

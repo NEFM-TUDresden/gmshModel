@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gmshModel.Visualization.GeometryVisualization &mdash; gmshModel 1.0.19 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=b095c1a6"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            gmshModel
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingStarted/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingStarted/visualization.html">Using the visualization features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../gmshModel/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">gmshModel</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gmshModel.Visualization.GeometryVisualization</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gmshModel.Visualization.GeometryVisualization</h1><div class="highlight"><pre>
+<span></span><span class="c1">################################################################################</span>
+<span class="c1">#              CLASS FOR GEOMETRY VISUALIZATION USING PYTHONOCC                #</span>
+<span class="c1">################################################################################</span>
+<span class="c1"># This file provides the class definition for the geometry visualization of the</span>
+<span class="c1"># model. It is based on the pythonocc library and provides simple methods for</span>
+<span class="c1"># the visualization.</span>
+
+<span class="c1">############################</span>
+<span class="c1"># Load required libraries: #</span>
+<span class="c1">############################</span>
+<span class="c1"># Standard Python libraries</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>                                                              <span class="c1"># numpy for fast array computations</span>
+<span class="kn">import</span> <span class="nn">tempfile</span> <span class="k">as</span> <span class="nn">tf</span>                                                           <span class="c1"># tempfile for temporary files and folders</span>
+<span class="kn">import</span> <span class="nn">logging</span>                                                                  <span class="c1"># logging for ẃarning messages</span>
+<span class="n">logger</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>                                              <span class="c1"># -&gt; set logger</span>
+
+<span class="c1"># additional program libraries</span>
+<span class="k">try</span><span class="p">:</span>                                                                            <span class="c1"># try import of pythonocc library</span>
+    <span class="kn">from</span> <span class="nn">OCC.Display.SimpleGui</span> <span class="kn">import</span> <span class="n">init_display</span> <span class="k">as</span> <span class="n">initRenderer</span>              <span class="c1"># -&gt; load rendering window initialization</span>
+    <span class="kn">from</span> <span class="nn">OCC.Extend.DataExchange</span> <span class="kn">import</span> <span class="n">read_step_file</span> <span class="k">as</span> <span class="n">stepReader</span>            <span class="c1"># step file reader</span>
+    <span class="kn">from</span> <span class="nn">OCC.Core.TopoDS</span> <span class="kn">import</span> <span class="n">TopoDS_Shape</span> <span class="k">as</span> <span class="n">topoShape</span>                       <span class="c1"># -&gt; load creation of OCC shapes</span>
+    <span class="kn">from</span> <span class="nn">OCC.Extend.TopologyUtils</span> <span class="kn">import</span> <span class="n">TopologyExplorer</span> <span class="k">as</span> <span class="n">topoExplorer</span>       <span class="c1"># -&gt; load topology exploring (needed to cycle through the objects of the compund)</span>
+    <span class="kn">from</span> <span class="nn">OCC.Core.Quantity</span> <span class="kn">import</span> <span class="n">Quantity_Color</span> <span class="k">as</span> <span class="n">color</span>                       <span class="c1"># -&gt; load color methods</span>
+    <span class="kn">from</span> <span class="nn">OCC.Core.Quantity</span> <span class="kn">import</span> <span class="n">Quantity_TOC_RGB</span> <span class="k">as</span> <span class="n">typeRGB</span>                   <span class="c1"># -&gt; load RGB color type</span>
+    <span class="kn">from</span> <span class="nn">OCC.Core.Aspect</span> <span class="kn">import</span> <span class="n">Aspect_TOTP_LEFT_LOWER</span>                          <span class="c1"># -&gt; load property to place axes widget into the lower left corner</span>
+    <span class="kn">from</span> <span class="nn">OCC.Core.V3d</span> <span class="kn">import</span> <span class="n">V3d_ZBUFFER</span>                                        <span class="c1"># -&gt; load property to place axes widget into the lower left corner</span>
+    <span class="n">PYTHONOCC_AVAILABLE</span><span class="o">=</span><span class="kc">True</span>                                                    <span class="c1"># -&gt; set availability flag to True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>                                                             <span class="c1"># handle unavailable OCC module</span>
+    <span class="n">PYTHONOCC_AVAILABLE</span><span class="o">=</span><span class="kc">False</span>                                                   <span class="c1"># -&gt; set availability flag to False</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;The geometry visualization relies on the pythonocc package. To visualize the model geometry, install pythonocc.&quot;</span><span class="p">)</span>
+
+
+<span class="c1">######################################</span>
+<span class="c1"># Define GeometryVisualization class #</span>
+<span class="c1">######################################</span>
+<div class="viewcode-block" id="GeometryVisualization">
+<a class="viewcode-back" href="../../../gmshModel/Visualization/GeometryVisualization.html#gmshModel.Visualization.GeometryVisualization.GeometryVisualization">[docs]</a>
+<span class="k">class</span> <span class="nc">GeometryVisualization</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for Gmsh model geometry visualization</span>
+
+<span class="sd">    This class visualizes the geometry of a given GmshModel using the PYTHONOCC</span>
+<span class="sd">    library. It provides a simple method to visualize the model geometry by</span>
+<span class="sd">    storing the geometric model information into a temporary &quot;.brep&quot;-file which</span>
+<span class="sd">    is read by PYTHONOCC.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">    -----------</span>
+<span class="sd">    model: GmshModel object instance</span>
+<span class="sd">        model instance for which the geometry has to be displayed</span>
+
+<span class="sd">    renderer: renderer object instance</span>
+<span class="sd">        instance of a rendering class</span>
+
+<span class="sd">    groupColors: list of PYTHONOCC Quantity_Colors</span>
+<span class="sd">        colors used for the visualization of the individual physical model groups</span>
+
+<span class="sd">    lineColor: PYTHONOCC Quantity_Color</span>
+<span class="sd">        color used for the cisualization of lines (especially in wireframe mode)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#########################</span>
+    <span class="c1"># Initialization method #</span>
+    <span class="c1">#########################</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initilaization method for the GeometryVisualization class</span>
+
+<span class="sd">        This method initializes a new instance of the GeometryVisualization</span>
+<span class="sd">        class and visualizes the geometry of the passed GmshModel instance.</span>
+<span class="sd">        Within the method, basic visualization settings as well as additional</span>
+<span class="sd">        key press events for the rendering window are defined, before the</span>
+<span class="sd">        visualization method is called.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        model: GmshModel object instance</span>
+<span class="sd">            model for which the geometry has to be visualized</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># plausibility checks for input arguments</span>
+        <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;No model instance to visualize passed. For the visualization of the model geometry, that model has to be known. Check your input data.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">=</span><span class="n">model</span>
+
+        <span class="c1"># set renderer and place axes widget in the lower left corner</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">startRenderer</span> <span class="o">=</span> <span class="n">initRenderer</span><span class="p">(</span><span class="n">display_triedron</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">background_gradient_color1</span><span class="o">=</span><span class="p">[</span><span class="mi">82</span><span class="p">,</span> <span class="mi">87</span><span class="p">,</span> <span class="mi">110</span><span class="p">],</span><span class="n">background_gradient_color2</span><span class="o">=</span><span class="p">[</span><span class="mi">82</span><span class="p">,</span> <span class="mi">87</span><span class="p">,</span> <span class="mi">110</span><span class="p">])[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">View</span><span class="o">.</span><span class="n">TriedronDisplay</span><span class="p">(</span><span class="n">Aspect_TOTP_LEFT_LOWER</span><span class="p">,</span> <span class="n">color</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">typeRGB</span><span class="p">),</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">V3d_ZBUFFER</span><span class="p">)</span>
+
+        <span class="c1"># set window title</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">get_parent</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s2">&quot;GmshModel Geometry Visualization&quot;</span><span class="p">)</span>
+
+        <span class="c1"># set additional key events</span>
+        <span class="n">backendOpts</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">get_parent</span><span class="p">()</span>                                  <span class="c1"># get options of the rendering backend</span>
+        <span class="n">backendOpts</span><span class="o">.</span><span class="n">_key_map</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="nb">ord</span><span class="p">(</span><span class="s2">&quot;X&quot;</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">setViewX</span><span class="p">})</span>                  <span class="c1"># x-key pressed -&gt; set view to y-z plane</span>
+        <span class="n">backendOpts</span><span class="o">.</span><span class="n">_key_map</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="nb">ord</span><span class="p">(</span><span class="s2">&quot;Y&quot;</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">setViewY</span><span class="p">})</span>                  <span class="c1"># y-key pressed -&gt; set view to x-z plane</span>
+        <span class="n">backendOpts</span><span class="o">.</span><span class="n">_key_map</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="nb">ord</span><span class="p">(</span><span class="s2">&quot;Z&quot;</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">setViewZ</span><span class="p">})</span>                  <span class="c1"># z-key pressed -&gt; set view to x-y plane</span>
+        <span class="n">backendOpts</span><span class="o">.</span><span class="n">_key_map</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="nb">ord</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">resetView</span><span class="p">})</span>                 <span class="c1"># r-key pressed -&gt; set reset view</span>
+        <span class="n">backendOpts</span><span class="o">.</span><span class="n">_key_map</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="nb">ord</span><span class="p">(</span><span class="s2">&quot;Q&quot;</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">})</span>                     <span class="c1"># q-key pressed -&gt; close window</span>
+
+        <span class="c1"># set colors for the individual model groups</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">groupColors</span><span class="o">=</span><span class="p">[]</span>
+        <span class="n">shapeColors</span><span class="o">=</span><span class="p">[</span><span class="n">color</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.7</span><span class="p">,</span><span class="n">typeRGB</span><span class="p">),</span>                                    <span class="c1"># (dark) blue</span>
+                     <span class="n">color</span><span class="p">(</span><span class="mf">0.7</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">typeRGB</span><span class="p">),</span>                                    <span class="c1"># (dark) red</span>
+                     <span class="n">color</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.7</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">typeRGB</span><span class="p">),</span>                                    <span class="c1"># (dark) green</span>
+                     <span class="n">color</span><span class="p">(</span><span class="mf">0.7</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">typeRGB</span><span class="p">),</span>                                    <span class="c1"># purple</span>
+                     <span class="n">color</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mf">0.57</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">typeRGB</span><span class="p">),</span>                                   <span class="c1"># orange</span>
+                     <span class="n">color</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.7</span><span class="p">,</span><span class="mf">0.7</span><span class="p">,</span><span class="n">typeRGB</span><span class="p">),</span>                                  <span class="c1"># cyan</span>
+                     <span class="n">color</span><span class="p">(</span><span class="mf">0.7</span><span class="p">,</span><span class="mf">0.7</span><span class="p">,</span><span class="mf">0.7</span><span class="p">,</span><span class="n">typeRGB</span><span class="p">),</span>                                <span class="c1"># (dark) grey</span>
+        <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lineColor</span><span class="o">=</span><span class="n">color</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">typeRGB</span><span class="p">)</span>                                     <span class="c1"># white</span>
+        <span class="k">for</span> <span class="n">iEnt</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">gmshAPI</span><span class="o">.</span><span class="n">getEntities</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dimension</span><span class="p">):</span>                 <span class="c1"># loop over all gmsh entities of the highest model dimension</span>
+            <span class="n">entGrp</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">gmshAPI</span><span class="o">.</span><span class="n">getPhysicalGroupsForEntity</span><span class="p">(</span><span class="o">*</span><span class="n">iEnt</span><span class="p">)</span>              <span class="c1"># get the physical group of the entity</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">groupColors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shapeColors</span><span class="p">[</span><span class="n">entGrp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>                   <span class="c1"># assign color assuming that order of shapes in brep file is the same as in Gmsh model</span>
+
+        <span class="c1"># visualize the model geometry</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">visualizeGeometry</span><span class="p">()</span>
+
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">#                 MAIN METHOD FOR GEOMETRY VISUALIZATION                       #</span>
+<span class="c1">################################################################################</span>
+
+    <span class="c1">####################################</span>
+    <span class="c1"># Method to visualize the geometry #</span>
+    <span class="c1">####################################</span>
+<div class="viewcode-block" id="GeometryVisualization.visualizeGeometry">
+<a class="viewcode-back" href="../../../gmshModel/Visualization/GeometryVisualization.html#gmshModel.Visualization.GeometryVisualization.GeometryVisualization.visualizeGeometry">[docs]</a>
+    <span class="k">def</span> <span class="nf">visualizeGeometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Main method for the geometry visualization</span>
+
+<span class="sd">        Within this method, the geometry of the GmshModel instance is visualized.</span>
+<span class="sd">        A temporary geometry file is created and opened using the PYTHONOCC</span>
+<span class="sd">        module.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmpDir</span><span class="p">:</span>                                 <span class="c1"># create temporary directory</span>
+            <span class="n">tmpFile</span><span class="o">=</span><span class="n">tmpDir</span><span class="o">+</span><span class="s2">&quot;/&quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modelName</span><span class="o">+</span><span class="s2">&quot;.step&quot;</span>                     <span class="c1"># create name of file in temporary directory</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">saveGeometry</span><span class="p">(</span><span class="n">tmpFile</span><span class="p">)</span>                                    <span class="c1"># write geometry to file in temporary directory</span>
+
+            <span class="c1"># load geometry file with pythonocc</span>
+            <span class="n">compoundData</span><span class="o">=</span><span class="n">stepReader</span><span class="p">(</span><span class="n">tmpFile</span><span class="p">)</span>                                    <span class="c1"># read file and write compound object to compoundData</span>
+
+            <span class="c1"># show all compound objects of the highest model dimension</span>
+            <span class="n">compoundTopology</span><span class="o">=</span><span class="n">topoExplorer</span><span class="p">(</span><span class="n">compoundData</span><span class="p">)</span>                         <span class="c1"># get shapes of the compound</span>
+            <span class="n">cntObj</span><span class="o">=</span><span class="mi">0</span>                                                            <span class="c1"># initialize object counter for correct color coding of the objects</span>
+            <span class="k">for</span> <span class="n">shape</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getRelevantShape</span><span class="p">(</span><span class="n">compoundTopology</span><span class="p">):</span>              <span class="c1"># loop over all shapes</span>
+                <span class="n">obj</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">DisplayShape</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">groupColors</span><span class="p">[</span><span class="n">cntObj</span><span class="p">],</span><span class="n">transparency</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># -&gt; visualize current shape</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_setRenderingObjectProperties</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>                         <span class="c1"># -&gt; set shape properties</span>
+                <span class="n">cntObj</span><span class="o">+=</span><span class="mi">1</span>                                                       <span class="c1"># -&gt; increase counter</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">FitAll</span><span class="p">()</span>                                              <span class="c1"># fit view to rendering window</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">startRenderer</span><span class="p">()</span>                                                <span class="c1"># activate/start rendering window</span></div>
+
+
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">#               ADDITIONAL METHODS FOR SETTINGS AND KEY EVENTS                 #</span>
+<span class="c1">################################################################################</span>
+
+    <span class="c1">###########################################</span>
+    <span class="c1"># Method to set the view to the y-z-plane #</span>
+    <span class="c1">###########################################</span>
+<div class="viewcode-block" id="GeometryVisualization.setViewX">
+<a class="viewcode-back" href="../../../gmshModel/Visualization/GeometryVisualization.html#gmshModel.Visualization.GeometryVisualization.GeometryVisualization.setViewX">[docs]</a>
+    <span class="k">def</span> <span class="nf">setViewX</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to set the view to a plane with normal in x-direction&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">View_Right</span><span class="p">()</span>                                              <span class="c1"># use pythonocc method to set correct view</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">FitAll</span><span class="p">()</span>                                                  <span class="c1"># fit view in render window</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">ZoomFactor</span><span class="p">(</span><span class="mf">0.8</span><span class="p">)</span>                                           <span class="c1"># set zoom factor to add some space around the view</span></div>
+
+
+
+    <span class="c1">###########################################</span>
+    <span class="c1"># Method to set the view to the x-z-plane #</span>
+    <span class="c1">###########################################</span>
+<div class="viewcode-block" id="GeometryVisualization.setViewY">
+<a class="viewcode-back" href="../../../gmshModel/Visualization/GeometryVisualization.html#gmshModel.Visualization.GeometryVisualization.GeometryVisualization.setViewY">[docs]</a>
+    <span class="k">def</span> <span class="nf">setViewY</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to set the view to a plane with normal in y-direction&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">View_Rear</span><span class="p">()</span>                                               <span class="c1"># use pythonocc method to set correct view</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">FitAll</span><span class="p">()</span>                                                  <span class="c1"># fit view in render window</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">ZoomFactor</span><span class="p">(</span><span class="mf">0.8</span><span class="p">)</span>                                           <span class="c1"># set zoom factor to add some space around the view</span></div>
+
+
+
+    <span class="c1">###########################################</span>
+    <span class="c1"># Method to set the view to the x-y-plane #</span>
+    <span class="c1">###########################################</span>
+<div class="viewcode-block" id="GeometryVisualization.setViewZ">
+<a class="viewcode-back" href="../../../gmshModel/Visualization/GeometryVisualization.html#gmshModel.Visualization.GeometryVisualization.GeometryVisualization.setViewZ">[docs]</a>
+    <span class="k">def</span> <span class="nf">setViewZ</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to set the view to a plane with normal in z-direction&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">View_Top</span><span class="p">()</span>                                                <span class="c1"># use pythonocc method to set correct view</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">FitAll</span><span class="p">()</span>                                                  <span class="c1"># fit view in render window</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">ZoomFactor</span><span class="p">(</span><span class="mf">0.8</span><span class="p">)</span>                                           <span class="c1"># set zoom factor to add some space around the view</span></div>
+
+
+
+    <span class="c1">############################</span>
+    <span class="c1"># Method to reset the view #</span>
+    <span class="c1">############################</span>
+<div class="viewcode-block" id="GeometryVisualization.resetView">
+<a class="viewcode-back" href="../../../gmshModel/Visualization/GeometryVisualization.html#gmshModel.Visualization.GeometryVisualization.GeometryVisualization.resetView">[docs]</a>
+    <span class="k">def</span> <span class="nf">resetView</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to reset the view&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">View</span><span class="o">.</span><span class="n">Reset</span><span class="p">()</span>                                              <span class="c1"># use pythonocc method to reset view</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">FitAll</span><span class="p">()</span>                                                  <span class="c1"># fit view in render window</span></div>
+
+
+
+    <span class="c1">########################################</span>
+    <span class="c1"># Method to close the rendering window #</span>
+    <span class="c1">########################################</span>
+<div class="viewcode-block" id="GeometryVisualization.close">
+<a class="viewcode-back" href="../../../gmshModel/Visualization/GeometryVisualization.html#gmshModel.Visualization.GeometryVisualization.GeometryVisualization.close">[docs]</a>
+    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to close the current rendering window&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">get_parent</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>                             <span class="c1"># close parent rendering window</span></div>
+
+
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">#           ADDITIONAL PRIVATE/HIDDEN METHODS FOR INTERNAL USE ONLY            #</span>
+<span class="c1">################################################################################</span>
+
+    <span class="c1">############################################</span>
+    <span class="c1"># Method to get the correct topology shape #</span>
+    <span class="c1">############################################</span>
+    <span class="k">def</span> <span class="nf">_getRelevantShape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">topology</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Internal method to return the relevant shape method depending on the highest</span>
+<span class="sd">        model dimension.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        topology: PYTHONOCC TopologyExplorer object instance</span>
+<span class="sd">            topology for which the relevant shape has to be returned</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">dimension</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>                                             <span class="c1"># model dimension is 3</span>
+            <span class="k">return</span> <span class="n">topology</span><span class="o">.</span><span class="n">solids</span><span class="p">()</span>                                            <span class="c1"># -&gt; search for solids</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">dimension</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>                                           <span class="c1"># model dimension is 2</span>
+            <span class="k">return</span> <span class="n">topology</span><span class="o">.</span><span class="n">shells</span><span class="p">()</span>                                            <span class="c1"># -&gt; search for shells</span>
+
+
+    <span class="c1">###################################################</span>
+    <span class="c1"># Method to configure rendering object properties #</span>
+    <span class="c1">###################################################</span>
+    <span class="k">def</span> <span class="nf">_setRenderingObjectProperties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">obj</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Internal Method to set the rendering properties of a given object</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        obj: PYTHONOCC AIS_SHAPE object instance</span>
+<span class="sd">            rendering object to set the properties for</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">GetContext</span><span class="p">()</span><span class="o">.</span><span class="n">SetAutomaticHilight</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>                             <span class="c1"># disable highlighting since this is only a viewer</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">SetWidth</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>                                                         <span class="c1"># adjust line width</span>
+        <span class="n">attr</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">Attributes</span><span class="p">()</span>                                                   <span class="c1"># get object attributes</span>
+        <span class="n">attr</span><span class="o">.</span><span class="n">SeenLineAspect</span><span class="p">()</span><span class="o">.</span><span class="n">SetColor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lineColor</span><span class="p">)</span>                          <span class="c1"># set color of various types of lines to specified lineColor</span>
+        <span class="n">attr</span><span class="o">.</span><span class="n">HiddenLineAspect</span><span class="p">()</span><span class="o">.</span><span class="n">SetColor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lineColor</span><span class="p">)</span>
+        <span class="n">attr</span><span class="o">.</span><span class="n">WireAspect</span><span class="p">()</span><span class="o">.</span><span class="n">SetColor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lineColor</span><span class="p">)</span>
+        <span class="n">attr</span><span class="o">.</span><span class="n">LineAspect</span><span class="p">()</span><span class="o">.</span><span class="n">SetColor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lineColor</span><span class="p">)</span>
+        <span class="n">attr</span><span class="o">.</span><span class="n">FaceBoundaryAspect</span><span class="p">()</span><span class="o">.</span><span class="n">SetColor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lineColor</span><span class="p">)</span>
+        <span class="n">attr</span><span class="o">.</span><span class="n">FreeBoundaryAspect</span><span class="p">()</span><span class="o">.</span><span class="n">SetColor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lineColor</span><span class="p">)</span>
+        <span class="n">attr</span><span class="o">.</span><span class="n">UnFreeBoundaryAspect</span><span class="p">()</span><span class="o">.</span><span class="n">SetColor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lineColor</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Philipp Metsch.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

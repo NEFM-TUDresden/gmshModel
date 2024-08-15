@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gmshModel.Visualization.MeshVisualization &mdash; gmshModel 1.0.19 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=b095c1a6"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            gmshModel
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingStarted/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingStarted/visualization.html">Using the visualization features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../gmshModel/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">gmshModel</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gmshModel.Visualization.MeshVisualization</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gmshModel.Visualization.MeshVisualization</h1><div class="highlight"><pre>
+<span></span><span class="c1">################################################################################</span>
+<span class="c1">#             CLASS FOR RVE VISUALIZATION USING PYVISTA AND VTK                #</span>
+<span class="c1">################################################################################</span>
+<span class="c1"># This file provides the class definition for the mesh visualization of a Gmsh</span>
+<span class="c1"># model. It is based on the pyvista and vtk libraries und implements additional</span>
+<span class="c1"># features for the mesh visualization.</span>
+
+<span class="c1">############################</span>
+<span class="c1"># Load required libraries: #</span>
+<span class="c1">############################</span>
+<span class="c1"># Standard Python libraries</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>                                                              <span class="c1"># numpy for fast array computations</span>
+<span class="kn">import</span> <span class="nn">copy</span> <span class="k">as</span> <span class="nn">cp</span>                                                               <span class="c1"># copy for deepcopies</span>
+<span class="kn">import</span> <span class="nn">tempfile</span> <span class="k">as</span> <span class="nn">tf</span>                                                           <span class="c1"># tempfile for temporary files and folders</span>
+<span class="kn">import</span> <span class="nn">logging</span>                                                                  <span class="c1"># logging for warning messages</span>
+<span class="n">logger</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>                                              <span class="c1"># -&gt; set logger</span>
+
+<span class="c1"># additional program libraries</span>
+<span class="kn">import</span> <span class="nn">pyvista</span> <span class="k">as</span> <span class="nn">pv</span>                                                            <span class="c1"># -&gt; load pyVista visualization module</span>
+<span class="kn">import</span> <span class="nn">vtk</span>                                                                      <span class="c1"># -&gt; load vtk since pyvista depends on it, i.e. it must be available</span>
+
+
+<span class="c1">##################################</span>
+<span class="c1"># Define MeshVisualization class #</span>
+<span class="c1">##################################</span>
+<div class="viewcode-block" id="MeshVisualization">
+<a class="viewcode-back" href="../../../gmshModel/Visualization/MeshVisualization.html#gmshModel.Visualization.MeshVisualization.MeshVisualization">[docs]</a>
+<span class="k">class</span> <span class="nc">MeshVisualization</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for Gmsh model mesh visualization</span>
+
+<span class="sd">    This class visualizes the mesh of a given GmshModel using the pyvista and</span>
+<span class="sd">    vtk libraries. It provides a simple method to visualize the model geometry</span>
+<span class="sd">    by storing the mesh into a temporary &quot;.vtu&quot; file which is read by pyvista.</span>
+<span class="sd">    With additional slider widgets for a threshold algorithm based on physical</span>
+<span class="sd">    groups of the Gmsh model and a box widget to facilitate an extraction of</span>
+<span class="sd">    areas within the mesh, the visualization tool allows to get an impression</span>
+<span class="sd">    of the generated mesh.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">    -----------</span>
+<span class="sd">    model: GmshModel object instance</span>
+<span class="sd">        model instance for which the geometry has to be displayed</span>
+
+<span class="sd">    defaultSettings: dict</span>
+<span class="sd">        dictionary holding the default widget visualization options to allow</span>
+<span class="sd">        restoring those options</span>
+
+<span class="sd">    currentSettings: dict</span>
+<span class="sd">        dictionary holding the current widget visualization options</span>
+
+<span class="sd">    plotterObj: pyvista plotter object instance</span>
+<span class="sd">        current plotter/renderer object</span>
+
+<span class="sd">    mesh: mesh object instance</span>
+<span class="sd">        object holding the current mesh information</span>
+
+<span class="sd">    thresholdAlgorithm: vtk Threshold Algorithm instance</span>
+<span class="sd">        object instance with information for the applied vtkThreshold algorithm</span>
+
+<span class="sd">    thresholdAlgorithm: vtk Extraction Algorithm instance</span>
+<span class="sd">        object instance with information for the applied vtkExtractGeometry</span>
+<span class="sd">        algorithm</span>
+
+<span class="sd">    extractionBox: vtkBox object instance</span>
+<span class="sd">        object instance storing information of the extraction box</span>
+
+<span class="sd">    extractionBoxBounds: pyvista PolyData object instance</span>
+<span class="sd">        object instance storing information about the extraction box boundaries</span>
+
+<span class="sd">    active widgets: list</span>
+<span class="sd">        list of active widgets within the rendering object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#########################</span>
+    <span class="c1"># Initialization method #</span>
+    <span class="c1">#########################</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initilaization method for the MeshVisualization class</span>
+
+<span class="sd">        This method initializes a new instance of the MeshVisualization</span>
+<span class="sd">        class and visualizes the mesh of the passed GmshModel instance.</span>
+<span class="sd">        Within the method, basic visualization settings are defined, before the</span>
+<span class="sd">        visualization method is called.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        model: GmshModel object instance</span>
+<span class="sd">            model for which the mesh has to be visualized</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># plausibility checks for input arguments</span>
+        <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;No model instance to visualize passed. For the visualization of a model, that model has to be known. Check your input data.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">=</span><span class="n">model</span>
+
+        <span class="c1"># set plotting theme</span>
+        <span class="n">pv</span><span class="o">.</span><span class="n">set_plot_theme</span><span class="p">(</span><span class="s2">&quot;paraview&quot;</span><span class="p">)</span>                                           <span class="c1"># use Paraview style for plotting</span>
+
+        <span class="c1"># get necessary model information for the default configuration</span>
+        <span class="n">physicalIDs</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">getIDsFromTags</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">gmshAPI</span><span class="o">.</span><span class="n">getPhysicalGroups</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">dimension</span><span class="p">))</span>  <span class="c1"># get group IDs for physical groups of the highest dimension</span>
+        <span class="n">modelBBox</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">_getGmshModelBoundingBox</span><span class="p">()</span>                              <span class="c1"># get the overall bounding box of the Gmsh model</span>
+
+        <span class="c1"># define settings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">defaultSettings</span><span class="o">=</span><span class="p">{</span>
+                <span class="s2">&quot;lowerThreshold&quot;</span><span class="p">:</span> <span class="nb">min</span><span class="p">(</span><span class="n">physicalIDs</span><span class="p">),</span>                             <span class="c1"># set lower threshold value to minimum value of active scalar field</span>
+                <span class="s2">&quot;upperThreshold&quot;</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="n">physicalIDs</span><span class="p">),</span>                             <span class="c1"># set upper threshold value to minimum value of active scalar field</span>
+                <span class="s2">&quot;boxBounds&quot;</span><span class="p">:</span> <span class="n">modelBBox</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>                             <span class="c1"># define bounds of extraction box to match bounds of the model (factor 1.25 will be applied automatically)</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentSettings</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">defaultSettings</span><span class="p">)</span>                  <span class="c1"># copy default settings as initial version of current settings</span>
+
+        <span class="c1"># initialize arrays required for proper mesh visualization</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotterObj</span><span class="o">=</span><span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;GmshModel Mesh Visualization&quot;</span><span class="p">)</span>        <span class="c1"># initialize plotterObj from pyvista and set title</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">=</span><span class="kc">None</span>                                                          <span class="c1"># initialize mesh</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thresholdAlgorithm</span><span class="o">=</span><span class="kc">None</span>                                            <span class="c1"># initialize threshold algorithm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extractionBox</span><span class="o">=</span><span class="n">vtk</span><span class="o">.</span><span class="n">vtkBox</span><span class="p">()</span>                                         <span class="c1"># initiliaze dummy extraction box to update information of boxWidget</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extractionBoxBounds</span><span class="o">=</span><span class="n">pv</span><span class="o">.</span><span class="n">PolyData</span><span class="p">()</span>                                  <span class="c1"># initialize dummy extraction box bounds to store information of boxWidget bounds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extractionAlgorithm</span><span class="o">=</span><span class="kc">None</span>                                           <span class="c1"># initialize extraction algorithm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activeWidgets</span><span class="o">=</span><span class="p">[]</span>                                                   <span class="c1"># initialize list of active widgets</span>
+
+        <span class="c1"># visualize the model mesh</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">visualizeMesh</span><span class="p">()</span>
+
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">#                 MAIN METHODS FOR GEOMETRY VISUALIZATION                      #</span>
+<span class="c1">################################################################################</span>
+
+    <span class="c1">################################</span>
+    <span class="c1"># Method to visualize the mesh #</span>
+    <span class="c1">################################</span>
+<div class="viewcode-block" id="MeshVisualization.visualizeMesh">
+<a class="viewcode-back" href="../../../gmshModel/Visualization/MeshVisualization.html#gmshModel.Visualization.MeshVisualization.MeshVisualization.visualizeMesh">[docs]</a>
+    <span class="k">def</span> <span class="nf">visualizeMesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Main method for the mesh visualization</span>
+
+<span class="sd">        Within this method, the mesh data of the model is stored into a temporary</span>
+<span class="sd">        &quot;.vtu&quot;-file which is read pyvista. After setting up widgets and additional</span>
+<span class="sd">        key-press-events, the mesh is visualized.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmpDir</span><span class="p">:</span>                                 <span class="c1"># create temporary directory</span>
+            <span class="n">tmpFile</span><span class="o">=</span><span class="n">tmpDir</span><span class="o">+</span><span class="s2">&quot;/&quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modelName</span><span class="o">+</span><span class="s2">&quot;.vtu&quot;</span>                      <span class="c1"># set name of file in temorary directory</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">saveMesh</span><span class="p">(</span><span class="n">tmpFile</span><span class="p">)</span>                                        <span class="c1"># create temporary file</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">=</span><span class="n">pv</span><span class="o">.</span><span class="n">UnstructuredGrid</span><span class="p">(</span><span class="n">tmpFile</span><span class="p">)</span>                              <span class="c1"># load mesh from temporary file with pyvista</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">set_active_scalars</span><span class="p">(</span><span class="s2">&quot;gmsh:physical&quot;</span><span class="p">)</span>                       <span class="c1"># set gmsh:physical to be the active scalar</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scalars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">active_scalars_info</span>                        <span class="c1"># get field ID and name of active scalar field</span>
+
+            <span class="c1"># add widgets and key events</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addSliderWidgets</span><span class="p">()</span>                                             <span class="c1"># add slider widgets for threshold filter</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addBoxWidget</span><span class="p">()</span>                                                 <span class="c1"># add box widget for extraction filter</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addKeyPressEvents</span><span class="p">()</span>                                            <span class="c1"># add defined key press events</span>
+
+            <span class="c1"># add mesh to plotterObj</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plotterObj</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="p">,</span><span class="n">scalars</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scalars</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;mesh&quot;</span><span class="p">,</span><span class="n">reset_camera</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">clim</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">currentSettings</span><span class="p">[</span><span class="s2">&quot;lowerThreshold&quot;</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">currentSettings</span><span class="p">[</span><span class="s2">&quot;upperThreshold&quot;</span><span class="p">]],</span><span class="n">show_edges</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="c1"># update settings of the rendering scene and show plot</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plotterObj</span><span class="o">.</span><span class="n">remove_scalar_bar</span><span class="p">()</span>                                 <span class="c1"># remove scalar bar (since no results will be shown but just the mesh)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plotterObj</span><span class="o">.</span><span class="n">show_axes</span><span class="p">()</span>                                         <span class="c1"># show axes orientation</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plotterObj</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>                                              <span class="c1"># show resulting plot</span></div>
+
+
+
+    <span class="c1">#######################################</span>
+    <span class="c1"># Method to apply filters to the mesh #</span>
+    <span class="c1">#######################################</span>
+<div class="viewcode-block" id="MeshVisualization.filterPipeline">
+<a class="viewcode-back" href="../../../gmshModel/Visualization/MeshVisualization.html#gmshModel.Visualization.MeshVisualization.MeshVisualization.filterPipeline">[docs]</a>
+    <span class="k">def</span> <span class="nf">filterPipeline</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Filter pipeline method for mesh visualization</span>
+
+<span class="sd">        For every confirmed change of the widget settings, the mesh has to be</span>
+<span class="sd">        updated. To this end, the filter pipeline consisting of the implemented</span>
+<span class="sd">        threshold and extraction algorithms has to be executed. It is done</span>
+<span class="sd">        within this method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># apply threshold filter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thresholdAlgorithm</span><span class="o">.</span><span class="n">ThresholdBetween</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentSettings</span><span class="p">[</span><span class="s2">&quot;lowerThreshold&quot;</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">currentSettings</span><span class="p">[</span><span class="s2">&quot;upperThreshold&quot;</span><span class="p">])</span> <span class="c1"># set threshold values from slider widgets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thresholdAlgorithm</span><span class="o">.</span><span class="n">Update</span><span class="p">()</span>                                        <span class="c1"># update information stored in thresold algorithm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">shallow_copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">thresholdAlgorithm</span><span class="o">.</span><span class="n">GetOutput</span><span class="p">())</span>             <span class="c1"># store resulting information in the mesh -&gt; update mesh to visualize</span>
+
+        <span class="c1"># apply extraction filter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extractionBox</span><span class="o">.</span><span class="n">SetBounds</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">currentSettings</span><span class="p">[</span><span class="s2">&quot;boxBounds&quot;</span><span class="p">])</span>        <span class="c1"># set box bounds from box widget</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extractionAlgorithm</span><span class="o">.</span><span class="n">Update</span><span class="p">()</span>                                       <span class="c1"># update information stored in extraction algorithm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">shallow_copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extractionAlgorithm</span><span class="o">.</span><span class="n">GetOutput</span><span class="p">())</span>            <span class="c1"># store resulting information in the mesh -&gt; update mesh to visualize</span>
+
+        <span class="c1"># force update of the rendering scene</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotterObj</span><span class="o">.</span><span class="n">render</span><span class="p">()</span>                                                <span class="c1"># if not done, the renderer might update only after the next interaction with the plot</span></div>
+
+
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">#                      INTERFACING METHODS FOR PYVISTA                         #</span>
+<span class="c1">################################################################################</span>
+
+    <span class="c1">############################################</span>
+    <span class="c1"># Method to set up the threshold algorithm #</span>
+    <span class="c1">############################################</span>
+<div class="viewcode-block" id="MeshVisualization.setupThresholdAlgorithm">
+<a class="viewcode-back" href="../../../gmshModel/Visualization/MeshVisualization.html#gmshModel.Visualization.MeshVisualization.MeshVisualization.setupThresholdAlgorithm">[docs]</a>
+    <span class="k">def</span> <span class="nf">setupThresholdAlgorithm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Threshold algorithm method for mesh visualization</span>
+
+<span class="sd">        This method implements the threshold algorithm used within the filter</span>
+<span class="sd">        pipeline. Based on the settings of the slider widgets, the visibility</span>
+<span class="sd">        of physical groups is enabled oder disabled.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thresholdAlgorithm</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkThreshold</span><span class="p">()</span>                            <span class="c1"># use vtkThreshold filter class of vtk library</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thresholdAlgorithm</span><span class="o">.</span><span class="n">SetInputDataObject</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="p">)</span>                   <span class="c1"># set mesh to plot as input data object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thresholdAlgorithm</span><span class="o">.</span><span class="n">SetInputArrayToProcess</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scalars</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scalars</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="c1"># args: (idx, port, connection, field, name)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thresholdAlgorithm</span><span class="o">.</span><span class="n">Update</span><span class="p">()</span>                                        <span class="c1"># update threshold algorithm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">=</span><span class="n">pv</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">thresholdAlgorithm</span><span class="o">.</span><span class="n">GetOutput</span><span class="p">())</span>                  <span class="c1"># update mesh once and connect it with with the algorithm output</span></div>
+
+
+
+    <span class="c1">#############################################</span>
+    <span class="c1"># Method to set up the extraction algorithm #</span>
+    <span class="c1">#############################################</span>
+<div class="viewcode-block" id="MeshVisualization.setupExtractionAlgorithm">
+<a class="viewcode-back" href="../../../gmshModel/Visualization/MeshVisualization.html#gmshModel.Visualization.MeshVisualization.MeshVisualization.setupExtractionAlgorithm">[docs]</a>
+    <span class="k">def</span> <span class="nf">setupExtractionAlgorithm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extraction algorithm method for mesh visualization</span>
+
+<span class="sd">        This method implements the extraction algorithm used within the filter</span>
+<span class="sd">        pipeline. Based on the settings of the box widget, the mesh elements</span>
+<span class="sd">        within the extraction box bounds are extracted.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extractionAlgorithm</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkExtractGeometry</span><span class="p">()</span>                     <span class="c1"># use vtkExtractGeometry filter class of vtk library</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extractionAlgorithm</span><span class="o">.</span><span class="n">SetInputDataObject</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="p">)</span>                  <span class="c1"># use (potentially updated) mesh to plot as input data object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extractionAlgorithm</span><span class="o">.</span><span class="n">SetImplicitFunction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extractionBox</span><span class="p">)</span>        <span class="c1"># describe extraction box by implicit function with the information stored in extractionBox</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extractionAlgorithm</span><span class="o">.</span><span class="n">Update</span><span class="p">()</span>                                       <span class="c1"># update extraction algorithm</span></div>
+
+
+
+    <span class="c1">################################</span>
+    <span class="c1"># Method to add slider widgets #</span>
+    <span class="c1">################################</span>
+<div class="viewcode-block" id="MeshVisualization.addSliderWidgets">
+<a class="viewcode-back" href="../../../gmshModel/Visualization/MeshVisualization.html#gmshModel.Visualization.MeshVisualization.MeshVisualization.addSliderWidgets">[docs]</a>
+    <span class="k">def</span> <span class="nf">addSliderWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to configure a slider widget and add it to the rendering scene&quot;&quot;&quot;</span>
+
+        <span class="c1"># set up corresponding algorithm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setupThresholdAlgorithm</span><span class="p">()</span>                                          <span class="c1"># connect threshold algorithm to slider widgets</span>
+
+        <span class="c1"># set up widgets</span>
+        <span class="n">pointsA</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.92</span><span class="p">],[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.79</span><span class="p">]])</span>                           <span class="c1"># define starting points of slider widgets (normalized coordinates)</span>
+        <span class="n">pointsB</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.11</span><span class="p">,</span> <span class="mf">0.92</span><span class="p">],[</span><span class="mf">0.11</span><span class="p">,</span> <span class="mf">0.79</span><span class="p">]])</span>                           <span class="c1"># define end points of slider widgets (normalized coordinates)</span>
+        <span class="n">initialValues</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">currentSettings</span><span class="p">[</span><span class="s2">&quot;lowerThreshold&quot;</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">currentSettings</span><span class="p">[</span><span class="s2">&quot;upperThreshold&quot;</span><span class="p">]]</span> <span class="c1"># define initial slider values according to current settings</span>
+        <span class="n">titles</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Min&quot;</span><span class="p">,</span> <span class="s2">&quot;Max&quot;</span><span class="p">]</span>                                                   <span class="c1"># define titles of slider widgets</span>
+        <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_callbackLowerThreshold</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_callbackUpperThreshold</span><span class="p">]</span>  <span class="c1"># define callback methods of the slider widgets</span>
+        <span class="k">for</span> <span class="n">iSlider</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]:</span>                                                   <span class="c1"># loop over both sliders</span>
+            <span class="n">slider</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">plotterObj</span><span class="o">.</span><span class="n">add_slider_widget</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">callbacks</span><span class="p">[</span><span class="n">iSlider</span><span class="p">],</span> <span class="n">value</span><span class="o">=</span><span class="n">initialValues</span><span class="p">[</span><span class="n">iSlider</span><span class="p">],</span> <span class="n">rng</span><span class="o">=</span><span class="n">initialValues</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">titles</span><span class="p">[</span><span class="n">iSlider</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span> <span class="c1"># use add_slider_widget of pyvista to define the widgets</span>
+            <span class="n">slider</span><span class="o">.</span><span class="n">GetRepresentation</span><span class="p">()</span><span class="o">.</span><span class="n">GetPoint1Coordinate</span><span class="p">()</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="n">pointsA</span><span class="p">[</span><span class="n">iSlider</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">pointsA</span><span class="p">[</span><span class="n">iSlider</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span> <span class="c1"># properly set slider widget starting point (error in pyvista implementation (divide by int))</span>
+            <span class="n">slider</span><span class="o">.</span><span class="n">GetRepresentation</span><span class="p">()</span><span class="o">.</span><span class="n">GetPoint2Coordinate</span><span class="p">()</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="n">pointsB</span><span class="p">[</span><span class="n">iSlider</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">pointsB</span><span class="p">[</span><span class="n">iSlider</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span> <span class="c1"># properly set slider widget end point (error in pyvista implementation (divide by int))</span>
+            <span class="n">slider</span><span class="o">.</span><span class="n">GetRepresentation</span><span class="p">()</span><span class="o">.</span><span class="n">SetSliderWidth</span><span class="p">(</span><span class="mf">0.02</span><span class="p">)</span>                     <span class="c1"># set width of the slider (normalized coordinates)</span>
+            <span class="n">slider</span><span class="o">.</span><span class="n">GetRepresentation</span><span class="p">()</span><span class="o">.</span><span class="n">SetSliderLength</span><span class="p">(</span><span class="mf">0.015</span><span class="p">)</span>                   <span class="c1"># set length of the slider (normalized coordinates)</span>
+            <span class="n">slider</span><span class="o">.</span><span class="n">GetRepresentation</span><span class="p">()</span><span class="o">.</span><span class="n">SetEndCapLength</span><span class="p">(</span><span class="mf">0.005</span><span class="p">)</span>                   <span class="c1"># set length of the bars at beginning and end of the slider widget (normalized coordinates)</span>
+            <span class="n">slider</span><span class="o">.</span><span class="n">GetRepresentation</span><span class="p">()</span><span class="o">.</span><span class="n">SetEndCapWidth</span><span class="p">(</span><span class="mf">0.033</span><span class="p">)</span>                    <span class="c1"># set width of the bars at beginning and end of the slider widget (normalized coordinates)</span>
+            <span class="n">slider</span><span class="o">.</span><span class="n">GetRepresentation</span><span class="p">()</span><span class="o">.</span><span class="n">SetTubeWidth</span><span class="p">(</span><span class="mf">0.005</span><span class="p">)</span>                      <span class="c1"># set width of the line connecting both slider ends (normalized coordinates)</span>
+            <span class="n">slider</span><span class="o">.</span><span class="n">GetRepresentation</span><span class="p">()</span><span class="o">.</span><span class="n">SetTitleHeight</span><span class="p">(</span><span class="mf">0.025</span><span class="p">)</span>                    <span class="c1"># set height of the title (normalized coordinates)</span>
+            <span class="n">slider</span><span class="o">.</span><span class="n">GetRepresentation</span><span class="p">()</span><span class="o">.</span><span class="n">SetLabelHeight</span><span class="p">(</span><span class="mf">0.025</span><span class="p">)</span>                    <span class="c1"># set height of the label (normalized coordinates)</span>
+            <span class="n">slider</span><span class="o">.</span><span class="n">GetRepresentation</span><span class="p">()</span><span class="o">.</span><span class="n">GetSelectedProperty</span><span class="p">()</span><span class="o">.</span><span class="n">SetColor</span><span class="p">([</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">])</span> <span class="c1"># set color of selected slider</span>
+            <span class="n">slider</span><span class="o">.</span><span class="n">Off</span><span class="p">()</span>                                                        <span class="c1"># initially make slider widget invisible</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">activeWidgets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">slider</span><span class="p">)</span>                                   <span class="c1"># add slider widget to the list of active widgets</span></div>
+
+
+
+    <span class="c1">############################</span>
+    <span class="c1"># Method to add box widget #</span>
+    <span class="c1">############################</span>
+<div class="viewcode-block" id="MeshVisualization.addBoxWidget">
+<a class="viewcode-back" href="../../../gmshModel/Visualization/MeshVisualization.html#gmshModel.Visualization.MeshVisualization.MeshVisualization.addBoxWidget">[docs]</a>
+    <span class="k">def</span> <span class="nf">addBoxWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to configure a box widget and add it to the rendering scene&quot;&quot;&quot;</span>
+
+        <span class="c1"># set up corresponding algorithm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setupExtractionAlgorithm</span><span class="p">()</span>                                         <span class="c1"># connect extraction algorithm to box widget</span>
+
+        <span class="c1"># set up widget</span>
+        <span class="n">box</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">plotterObj</span><span class="o">.</span><span class="n">add_box_widget</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_callbackExtraction</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">defaultSettings</span><span class="p">[</span><span class="s2">&quot;boxBounds&quot;</span><span class="p">],</span> <span class="n">rotation_enabled</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="c1"># use add_box_widget of pyvista to define the widget</span>
+        <span class="n">box</span><span class="o">.</span><span class="n">Off</span><span class="p">()</span>                                                               <span class="c1"># initially make box widget invisible</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activeWidgets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">box</span><span class="p">)</span>                                          <span class="c1"># add box widget to the list of active widgets</span></div>
+
+
+
+    <span class="c1">##################################</span>
+    <span class="c1"># Method to add key press events #</span>
+    <span class="c1">##################################</span>
+<div class="viewcode-block" id="MeshVisualization.addKeyPressEvents">
+<a class="viewcode-back" href="../../../gmshModel/Visualization/MeshVisualization.html#gmshModel.Visualization.MeshVisualization.MeshVisualization.addKeyPressEvents">[docs]</a>
+    <span class="k">def</span> <span class="nf">addKeyPressEvents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to add all user-defined key-press events&quot;&quot;&quot;</span>
+        <span class="n">activeKeys</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="s2">&quot;space&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">]</span>                      <span class="c1"># define list of keys with active (user-defined) key press events</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">activeKeys</span><span class="p">:</span>                                                  <span class="c1"># loop over all active keys</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plotterObj</span><span class="o">.</span><span class="n">add_key_event</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_keyPressEvents</span><span class="p">)</span>             <span class="c1"># add corresponding key press events</span></div>
+
+
+
+    <span class="c1">####################################</span>
+    <span class="c1"># Method to toggle menu visibility #</span>
+    <span class="c1">####################################</span>
+<div class="viewcode-block" id="MeshVisualization.toggleMenu">
+<a class="viewcode-back" href="../../../gmshModel/Visualization/MeshVisualization.html#gmshModel.Visualization.MeshVisualization.MeshVisualization.toggleMenu">[docs]</a>
+    <span class="k">def</span> <span class="nf">toggleMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to toggle the menu/widget visibility&quot;&quot;&quot;</span>
+        <span class="c1"># loop over all active widgets</span>
+        <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">activeWidgets</span><span class="p">:</span>                                       <span class="c1"># get current widget</span>
+            <span class="n">toggleFuncs</span><span class="o">=</span><span class="p">[</span><span class="n">widget</span><span class="o">.</span><span class="n">On</span><span class="p">,</span> <span class="n">widget</span><span class="o">.</span><span class="n">Off</span><span class="p">]</span>                                 <span class="c1"># define toggle functions depending on state [0/1]</span>
+            <span class="n">toggleStatus</span><span class="o">=</span><span class="n">widget</span><span class="o">.</span><span class="n">GetEnabled</span><span class="p">()</span>                                    <span class="c1"># get widget state</span>
+            <span class="n">toggleFuncs</span><span class="p">[</span><span class="n">toggleStatus</span><span class="p">]()</span>                                         <span class="c1"># use toggle function according to current state</span></div>
+
+
+
+    <span class="c1">######################################</span>
+    <span class="c1"># Method to restore default settings #</span>
+    <span class="c1">######################################</span>
+<div class="viewcode-block" id="MeshVisualization.restoreDefaultSettings">
+<a class="viewcode-back" href="../../../gmshModel/Visualization/MeshVisualization.html#gmshModel.Visualization.MeshVisualization.MeshVisualization.restoreDefaultSettings">[docs]</a>
+    <span class="k">def</span> <span class="nf">restoreDefaultSettings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to restore default visualization options&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentSettings</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">defaultSettings</span><span class="p">)</span>                       <span class="c1"># restore default settings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotterObj</span><span class="o">.</span><span class="n">slider_widgets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">GetRepresentation</span><span class="p">()</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentSettings</span><span class="p">[</span><span class="s2">&quot;lowerThreshold&quot;</span><span class="p">])</span> <span class="c1"># set value of lower threshold slider according to settings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotterObj</span><span class="o">.</span><span class="n">slider_widgets</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">GetRepresentation</span><span class="p">()</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentSettings</span><span class="p">[</span><span class="s2">&quot;upperThreshold&quot;</span><span class="p">])</span> <span class="c1"># set value of upper threshold slider according to settings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotterObj</span><span class="o">.</span><span class="n">box_widgets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">PlaceWidget</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">currentSettings</span><span class="p">[</span><span class="s2">&quot;boxBounds&quot;</span><span class="p">])</span>  <span class="c1"># set bounds of extraction box according to settings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_callbackExtraction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extractionBoxBounds</span><span class="p">)</span>                      <span class="c1"># also call callback method of extraction box to complete the update</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filterPipeline</span><span class="p">()</span>                                                   <span class="c1"># update filter pipeline with restored settings</span></div>
+
+
+
+    <span class="c1">####################################</span>
+    <span class="c1"># Method to show command line help #</span>
+    <span class="c1">####################################</span>
+<div class="viewcode-block" id="MeshVisualization.showCommandLineHelp">
+<a class="viewcode-back" href="../../../gmshModel/Visualization/MeshVisualization.html#gmshModel.Visualization.MeshVisualization.MeshVisualization.showCommandLineHelp">[docs]</a>
+    <span class="k">def</span> <span class="nf">showCommandLineHelp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Internal method to show command line help after the rendering window</span>
+<span class="sd">        is displayed&quot;&quot;&quot;</span>
+        <span class="n">infoText</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Use one of the following key events to control the plot:</span><span class="se">\n</span><span class="s2">&quot;</span>
+                  <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+                  <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">s </span><span class="se">\t</span><span class="s2">activate surface representation of objects</span><span class="se">\n</span><span class="s2">&quot;</span>
+                  <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">w </span><span class="se">\t</span><span class="s2">activate wireframe representation if objects</span><span class="se">\n</span><span class="s2">&quot;</span>
+                  <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">v </span><span class="se">\t</span><span class="s2">enable isometric view</span><span class="se">\n</span><span class="s2">&quot;</span>
+                  <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">x </span><span class="se">\t</span><span class="s2">set view to y-z-plane</span><span class="se">\n</span><span class="s2">&quot;</span>
+                  <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">y </span><span class="se">\t</span><span class="s2">set view to z-x-plane</span><span class="se">\n</span><span class="s2">&quot;</span>
+                  <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">z </span><span class="se">\t</span><span class="s2">set view to x-y-plane</span><span class="se">\n</span><span class="s2">&quot;</span>
+                  <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">m </span><span class="se">\t</span><span class="s2">toggle menu</span><span class="se">\n</span><span class="s2">&quot;</span>
+                  <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">space </span><span class="se">\t</span><span class="s2">confirm menu settings</span><span class="se">\n</span><span class="s2">&quot;</span>
+                  <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">d </span><span class="se">\t</span><span class="s2">restore default settings</span><span class="se">\n</span><span class="s2">&quot;</span>
+                  <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">q </span><span class="se">\t</span><span class="s2">close rendering window</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">infoText</span><span class="p">)</span></div>
+
+
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">#           ADDITIONAL PRIVATE/HIDDEN METHODS FOR INTERNAL USE ONLY            #</span>
+<span class="c1">################################################################################</span>
+
+    <span class="c1">#########################################################</span>
+    <span class="c1"># Internal callback method tofor lower threshold slider #</span>
+    <span class="c1">#########################################################</span>
+    <span class="k">def</span> <span class="nf">_callbackLowerThreshold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">sliderThresholdValue</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Internal callback method for the lower threshold widget&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentSettings</span><span class="p">[</span><span class="s2">&quot;lowerThreshold&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">sliderThresholdValue</span>             <span class="c1"># update lower threshold value with current slider position</span>
+
+        <span class="c1"># prevent mixed up threshold sliders (lower &gt; upper)</span>
+        <span class="k">try</span><span class="p">:</span>                                                                    <span class="c1"># use try-catch environment to prevent error in plot initialization (other slider is not defined yet)</span>
+            <span class="k">if</span> <span class="n">sliderThresholdValue</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotterObj</span><span class="o">.</span><span class="n">slider_widgets</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">GetRepresentation</span><span class="p">()</span><span class="o">.</span><span class="n">GetValue</span><span class="p">():</span> <span class="c1"># check if value of lower threshold exceeds current upper threshold value</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">plotterObj</span><span class="o">.</span><span class="n">slider_widgets</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">GetRepresentation</span><span class="p">()</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="n">sliderThresholdValue</span><span class="p">)</span>    <span class="c1"># -&gt; update upper threshold value</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">currentSettings</span><span class="p">[</span><span class="s2">&quot;upperThreshold&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">sliderThresholdValue</span>     <span class="c1"># also update upper threshold value in current settings</span>
+        <span class="k">except</span><span class="p">:</span>                                                                 <span class="c1"># other slider does not exists yet</span>
+            <span class="k">pass</span>                                                                <span class="c1"># do nothing</span>
+
+
+    <span class="c1">#######################################################</span>
+    <span class="c1"># Internal callback method for upper threshold slider #</span>
+    <span class="c1">#######################################################</span>
+    <span class="k">def</span> <span class="nf">_callbackUpperThreshold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">sliderThresholdValue</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Internal callback method for the upper threshold widget&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentSettings</span><span class="p">[</span><span class="s2">&quot;upperThreshold&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">sliderThresholdValue</span>             <span class="c1"># update upper threshold value with current slider position</span>
+
+        <span class="c1"># prevent mixed up threshold sliders (upper &lt; lower)</span>
+        <span class="k">try</span><span class="p">:</span>                                                                    <span class="c1"># use try-catch environment to prevent error during plot initialization (other slider is not defined yet)</span>
+            <span class="k">if</span> <span class="n">sliderThresholdValue</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotterObj</span><span class="o">.</span><span class="n">slider_widgets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">GetRepresentation</span><span class="p">()</span><span class="o">.</span><span class="n">GetValue</span><span class="p">():</span> <span class="c1"># check if value of upper threshold is below current lower threshold value</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">plotterObj</span><span class="o">.</span><span class="n">slider_widgets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">GetRepresentation</span><span class="p">()</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="n">sliderThresholdValue</span><span class="p">)</span>    <span class="c1"># -&gt; update lower threshold value</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">currentSettings</span><span class="p">[</span><span class="s2">&quot;lowerThreshold&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">sliderThresholdValue</span>     <span class="c1"># also update lower threshold value in current settings</span>
+        <span class="k">except</span><span class="p">:</span>                                                                 <span class="c1"># other slider does not exist yet</span>
+            <span class="k">pass</span>                                                                <span class="c1"># do nothing</span>
+
+
+    <span class="c1">##################################################</span>
+    <span class="c1"># Internal callback method for extraction widget #</span>
+    <span class="c1">##################################################</span>
+    <span class="k">def</span> <span class="nf">_callbackExtraction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">boundsObj</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Internal callback method for the extraction box widget&quot;&quot;&quot;</span>
+        <span class="c1"># update bounds of extraction box with current box bounds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extractionBoxBounds</span><span class="o">.</span><span class="n">shallow_copy</span><span class="p">(</span><span class="n">boundsObj</span><span class="p">)</span>                        <span class="c1"># copy information of passed bounds object fom widget</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentSettings</span><span class="p">[</span><span class="s2">&quot;boxBounds&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">boundsObj</span><span class="o">.</span><span class="n">bounds</span>                      <span class="c1"># update current settings</span>
+
+
+    <span class="c1">##############################################</span>
+    <span class="c1"># Internal method to define key press events #</span>
+    <span class="c1">##############################################</span>
+    <span class="k">def</span> <span class="nf">_keyPressEvents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Internal method setting up user-defined key-press events&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotterObj</span><span class="o">.</span><span class="n">iren</span><span class="o">.</span><span class="n">GetKeySym</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;h&quot;</span><span class="p">:</span>                             <span class="c1"># check if &quot;h&quot;-key was pressed</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">showCommandLineHelp</span><span class="p">()</span>                                          <span class="c1"># -&gt; show help</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotterObj</span><span class="o">.</span><span class="n">iren</span><span class="o">.</span><span class="n">GetKeySym</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span>                           <span class="c1"># check if &quot;m&quot;-key was pressed</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">toggleMenu</span><span class="p">()</span>                                                   <span class="c1"># -&gt; toggle menu</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotterObj</span><span class="o">.</span><span class="n">iren</span><span class="o">.</span><span class="n">GetKeySym</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;d&quot;</span><span class="p">:</span>                           <span class="c1"># check if &quot;d&quot;-key was pressed</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">restoreDefaultSettings</span><span class="p">()</span>                                       <span class="c1"># restore defaults</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotterObj</span><span class="o">.</span><span class="n">iren</span><span class="o">.</span><span class="n">GetKeySym</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;space&quot;</span><span class="p">:</span>                       <span class="c1"># check if &quot;space&quot;-key was pressed</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filterPipeline</span><span class="p">()</span>                                               <span class="c1"># update filter pipeline with confirmed settings</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotterObj</span><span class="o">.</span><span class="n">iren</span><span class="o">.</span><span class="n">GetKeySym</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;x&quot;</span><span class="p">:</span>                           <span class="c1"># check if &quot;x&quot;-key was pressed</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plotterObj</span><span class="o">.</span><span class="n">view_yz</span><span class="p">()</span>                                           <span class="c1"># set view to y-z-plane</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotterObj</span><span class="o">.</span><span class="n">iren</span><span class="o">.</span><span class="n">GetKeySym</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span>                           <span class="c1"># check if &quot;y&quot;-key was pressed</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plotterObj</span><span class="o">.</span><span class="n">view_zx</span><span class="p">()</span>                                           <span class="c1"># set view to z-x-plane</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotterObj</span><span class="o">.</span><span class="n">iren</span><span class="o">.</span><span class="n">GetKeySym</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span>                           <span class="c1"># check if &quot;z&quot;-key was pressed</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plotterObj</span><span class="o">.</span><span class="n">view_xy</span><span class="p">()</span>                                           <span class="c1"># set view to x-y-plane</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Philipp Metsch.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

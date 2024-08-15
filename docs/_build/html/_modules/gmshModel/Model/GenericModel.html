@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gmshModel.Model.GenericModel &mdash; gmshModel 1.0.19 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=b095c1a6"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            gmshModel
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingStarted/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingStarted/visualization.html">Using the visualization features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../gmshModel/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">gmshModel</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gmshModel.Model.GenericModel</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gmshModel.Model.GenericModel</h1><div class="highlight"><pre>
+<span></span><span class="c1">################################################################################</span>
+<span class="c1">#    CLASS DEFINITION FOR MESHING MODELS GENERATED USING THE GMSH-PYTHON-API   #</span>
+<span class="c1">################################################################################</span>
+<span class="c1"># Within this file, the generic Model class is defined. It is the base class</span>
+<span class="c1"># for other, more specific classes which aim to mesh models using the Gmsh-</span>
+<span class="c1"># Python-API. In addition to the methods defined within the Gmsh-Python-API,</span>
+<span class="c1"># this class provides methods for all basic steps of a model generation using</span>
+<span class="c1"># Gmsh: some of these methods are only placeholders here and - if required -</span>
+<span class="c1"># have to be specified/overwritten for the more specialized models.</span>
+
+<span class="c1">###########################</span>
+<span class="c1"># Load required libraries #</span>
+<span class="c1">###########################</span>
+<span class="c1"># Standard Python libraries</span>
+<span class="kn">import</span> <span class="nn">os</span>                                                                       <span class="c1"># os for file handling (split extensions from file)</span>
+<span class="kn">import</span> <span class="nn">inspect</span>                                                                  <span class="c1"># inspect to search for classes in modules</span>
+<span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>                                                           <span class="c1"># datetime for time stamps</span>
+<span class="kn">import</span> <span class="nn">copy</span> <span class="k">as</span> <span class="nn">cp</span>                                                               <span class="c1"># copy for deepcopies of arrays</span>
+<span class="kn">import</span> <span class="nn">tempfile</span> <span class="k">as</span> <span class="nn">tf</span>                                                           <span class="c1"># tempfile for generation of temprory files and folders</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>                                                              <span class="c1"># numpy for array computations</span>
+<span class="kn">import</span> <span class="nn">pickle</span>                                                                   <span class="c1"># pickle for saving and loading of gmshModels</span>
+<span class="kn">import</span> <span class="nn">logging</span>                                                                  <span class="c1"># logging for log messages</span>
+<span class="n">logger</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>                                              <span class="c1"># set logger</span>
+
+<span class="c1"># additional program libraries</span>
+<span class="kn">import</span> <span class="nn">gmsh</span>                                                                     <span class="c1"># Gmsh Python-API</span>
+<span class="kn">import</span> <span class="nn">meshio</span>                                                                   <span class="c1"># meshio for mesh file format conversions</span>
+
+<span class="c1"># self-defined class definitions and modules</span>
+<span class="kn">from</span> <span class="nn">..Geometry</span> <span class="kn">import</span> <span class="n">GeometricObjects</span> <span class="k">as</span> <span class="n">geomObj</span>                              <span class="c1"># classes for implemented geometric objects</span>
+<span class="kn">from</span> <span class="nn">..Visualization.GeometryVisualization</span> <span class="kn">import</span> <span class="n">GeometryVisualization</span><span class="p">,</span> <span class="n">PYTHONOCC_AVAILABLE</span>   <span class="c1"># class for geometry visualization</span>
+<span class="kn">from</span> <span class="nn">..Visualization.MeshVisualization</span> <span class="kn">import</span> <span class="n">MeshVisualization</span>                 <span class="c1"># class for mesh visualization</span>
+<span class="kn">from</span> <span class="nn">..MeshExport</span> <span class="kn">import</span> <span class="n">FeapExport</span>
+
+
+<span class="c1">#############################</span>
+<span class="c1"># Set configuration options #</span>
+<span class="c1">#############################</span>
+<span class="n">SUPPORTED_GEOMETRY_FORMATS</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;.brep&quot;</span><span class="p">,</span> <span class="s2">&quot;.stp&quot;</span><span class="p">,</span> <span class="s2">&quot;.step&quot;</span><span class="p">]</span>                           <span class="c1"># set supported geometry formats</span>
+<span class="n">SUPPORTED_MESH_FORMATS</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">meshio</span><span class="o">.</span><span class="n">extension_to_filetype</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>                <span class="c1"># set supported mesh file formats</span>
+
+
+<span class="c1">#############################</span>
+<span class="c1"># Define GenericModel class #</span>
+<span class="c1">#############################</span>
+<div class="viewcode-block" id="GenericModel">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericModel.html#gmshModel.Model.GenericModel.GenericModel">[docs]</a>
+<span class="k">class</span> <span class="nc">GenericModel</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generic class for meshing models generated using the Gmsh-Python-API</span>
+
+<span class="sd">    This class provides the basic mesh generation framework for Gmsh. It</span>
+<span class="sd">    implements the methods for:</span>
+
+<span class="sd">        (1) Setting up a geometry using basic geometric entities and boolean</span>
+<span class="sd">            operations</span>
+<span class="sd">        (2) Adding the geometric objects to Gmsh, performing the boolean operations,</span>
+<span class="sd">            defining physical groups</span>
+<span class="sd">        (3) creating a mesh with user-defined refinement fields</span>
+<span class="sd">        (4) saving and visualizing the mesh</span>
+
+<span class="sd">    Some of the methods used within the framework are only defined as placeholder</span>
+<span class="sd">    methods here and have to be specified in detail within the child classes.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">    -----------</span>
+<span class="sd">    dimension: int</span>
+<span class="sd">        dimension of the model instance</span>
+
+<span class="sd">    modelName: string</span>
+<span class="sd">        name of the Gmsh model and default name for all resulting files</span>
+
+<span class="sd">    gmshConfigChanges: dict</span>
+<span class="sd">        dictionary for user updates of the default Gmsh configuration</span>
+
+<span class="sd">    geometricObjects: list</span>
+<span class="sd">        list containing the instances of geometric objects used for the</span>
+<span class="sd">        model geometry creation</span>
+
+<span class="sd">    groups: dict</span>
+<span class="sd">        dictionary with group information for the model entities</span>
+
+<span class="sd">    booleanOperations: list</span>
+<span class="sd">        list with dictionaries defining the individual boolean operations</span>
+<span class="sd">        to perform for the model generation</span>
+
+<span class="sd">    physicalGroups: list</span>
+<span class="sd">        list with dictionary defining which Gmsh entities are defined as</span>
+<span class="sd">        physical groups (e.g. different materials)</span>
+
+<span class="sd">    refinementFields: list</span>
+<span class="sd">        list of dictionaries defining the refinement fields that have to</span>
+<span class="sd">        be added to the Gmsh model</span>
+
+<span class="sd">    backgroundField: int</span>
+<span class="sd">        number of the field that has to be used as the background field/mesh</span>
+<span class="sd">        for the mesh generation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">#########################</span>
+    <span class="c1"># Initialization method #</span>
+    <span class="c1">#########################</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">dimension</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">gmshConfigChanges</span><span class="o">=</span><span class="p">{}):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialization method of a generic GmshModel object</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        dimension: int</span>
+<span class="sd">            dimension of the model instance</span>
+
+<span class="sd">        gmshConfigChanges: dict</span>
+<span class="sd">            dictionary for user updates of the default Gmsh configuration</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># set unique model name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modelName</span><span class="o">=</span><span class="s2">&quot;Model_&quot;</span><span class="o">+</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">_%H%M%S</span><span class="si">%f</span><span class="s2">&quot;</span><span class="p">)</span>   <span class="c1"># use time stamp of initialization (with microseconds) for unique model name</span>
+
+        <span class="c1"># set default file extensions depending on the savin method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_defaultFileExts</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;Geometry&quot;</span><span class="p">:</span> <span class="s2">&quot;.brep&quot;</span><span class="p">,</span>                                                <span class="c1"># use &quot;.brep&quot; as default extension for saving the geometry</span>
+            <span class="s2">&quot;Mesh&quot;</span><span class="p">:</span> <span class="s2">&quot;.msh&quot;</span><span class="p">,</span>                                                     <span class="c1"># use &quot;.msh&quot; as default extension for saving meshes</span>
+            <span class="s2">&quot;Model&quot;</span><span class="p">:</span> <span class="s2">&quot;.gmshModel&quot;</span><span class="p">,</span>                                              <span class="c1"># use &quot;.gmshModel&quot; as default extension for saving models</span>
+            <span class="s2">&quot;Misc&quot;</span><span class="p">:</span> <span class="s2">&quot;.txt&quot;</span>                                                      <span class="c1"># use &quot;.txt&quot; as default extension for miscellaneous information</span>
+        <span class="p">}</span>
+
+        <span class="c1"># initialize Gmsh-Python-API</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gmshConfigChanges</span><span class="o">=</span><span class="p">{</span>                                                <span class="c1"># default Gmsh configuration changes</span>
+            <span class="s2">&quot;General.Terminal&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>                                              <span class="c1"># deactivate console output by default (only activated for mesh generation)</span>
+            <span class="s2">&quot;Geometry.OCCBoundsUseStl&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>                                      <span class="c1"># use more accurate computation of bounding boxes (slower but advantegous for periodicity constraints)</span>
+            <span class="s2">&quot;Geometry.Tolerance&quot;</span><span class="p">:</span> <span class="mf">1e-12</span>                                         <span class="c1"># adjust geometric tolerance to be a little more precise then default (1e-8)</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gmshAPI</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">initializeGmsh</span><span class="p">(</span><span class="n">gmshConfigChanges</span><span class="p">)</span>                     <span class="c1"># this assignment facilitates the usage of all methods provided by the gmsh.model class</span>
+
+        <span class="c1"># initialize attributes that all instances of GenericModel should have</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="o">=</span><span class="n">dimension</span>                                                <span class="c1"># set (highest) dimension of the model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geometricObjects</span><span class="o">=</span><span class="p">[]</span>                                                <span class="c1"># initialze empty list of geomtric objects (used for model generation)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="o">=</span><span class="p">{}</span>                                                          <span class="c1"># initialize empty dictionary of groups (used for boolean operations adn physical groups)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">booleanOperations</span><span class="o">=</span><span class="p">[]</span>                                               <span class="c1"># initialize empty list of defined boolean operations (used to generate the model from basic geometrical objects)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">physicalGroups</span><span class="o">=</span><span class="p">[]</span>                                                  <span class="c1"># initialize empty list of defined physical groups (used to identify materials and boundaries within the mesh)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">refinementFields</span><span class="o">=</span><span class="p">[]</span>                                                <span class="c1"># initialize empty list of refinement fields (used to control the mesh sizes)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">backgroundField</span><span class="o">=</span><span class="kc">None</span>                                               <span class="c1"># initialize background field for the meshing algorithm (used to control the mesh sizes)</span>
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">#                MAIN METHODS FOR MODEL AND MESH GENERATION                    #</span>
+<span class="c1">################################################################################</span>
+
+    <span class="c1">############################################</span>
+    <span class="c1"># Method to initialize the Gmsh-Python-API #</span>
+    <span class="c1">############################################</span>
+<div class="viewcode-block" id="GenericModel.initializeGmsh">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericModel.html#gmshModel.Model.GenericModel.GenericModel.initializeGmsh">[docs]</a>
+    <span class="k">def</span> <span class="nf">initializeGmsh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">gmshConfigChanges</span><span class="o">=</span><span class="p">{}):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gmsh initialization method</span>
+
+<span class="sd">        This method initializes the Gmsh-Python-API and adds it to the GmshModel</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        gmshConfigChanges: dict</span>
+<span class="sd">            dictionary with Gmsh configuration options that have to be set</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">gmsh</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="kc">False</span><span class="p">)</span>                                               <span class="c1"># initialize Gmsh Python-API without using local .gmshrc configuration file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateGmshConfiguration</span><span class="p">(</span><span class="n">gmshConfigChanges</span><span class="p">)</span>                         <span class="c1"># update default configuration with user updates and set the options</span>
+        <span class="n">gmshAPI</span><span class="o">=</span><span class="n">gmsh</span><span class="o">.</span><span class="n">model</span>                                                      <span class="c1"># define gmshAPI as the model class of the Gmsh-Python-API (contains only static methods -&gt; no instance required)</span>
+
+        <span class="n">gmshAPI</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modelName</span><span class="p">)</span>                                             <span class="c1"># add new model to the gmshAPI</span>
+        <span class="k">return</span> <span class="n">gmshAPI</span>                                                          <span class="c1"># retrun gmshAPI</span></div>
+
+
+
+    <span class="c1">################################################################</span>
+    <span class="c1"># Method to set up model information and create the Gmsh model #</span>
+    <span class="c1">################################################################</span>
+<div class="viewcode-block" id="GenericModel.createGmshModel">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericModel.html#gmshModel.Model.GenericModel.GenericModel.createGmshModel">[docs]</a>
+    <span class="k">def</span> <span class="nf">createGmshModel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">geometryOptions</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to create the Gmsh Model and provide necessary information to it</span>
+
+<span class="sd">        This method contains the basic Gmsh model creation steps: after geoetric</span>
+<span class="sd">        objects are defined, boolean operations are performed to generate the</span>
+<span class="sd">        final geometry. Parts of the geometry are combined to physical groups in</span>
+<span class="sd">        order to be able to assign, e.g., material parameters to them. If required,</span>
+<span class="sd">        a periodicity constraint is finally added to the model.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        geometryOptions: key-value pairs of options</span>
+<span class="sd">            key-value pairs of options required for the geometry generation</span>
+<span class="sd">            process</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># define geometric objects and add them to the Gmsh model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">defineGeometricObjects</span><span class="p">(</span><span class="o">**</span><span class="n">geometryOptions</span><span class="p">)</span>                          <span class="c1"># placeholder method: has to be specified/overwritten for the individual models</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addGeometricObjectsToGmshModel</span><span class="p">()</span>                                   <span class="c1"># use Gmsh-API to add geometric information to the Gmsh model</span>
+
+        <span class="c1"># define boolean operations and add them to the Gmsh model (perform them)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">defineBooleanOperations</span><span class="p">()</span>                                          <span class="c1"># placeholder method: has to be specified/overwritten for the individual models</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">performBooleanOperationsForGmshModel</span><span class="p">()</span>                             <span class="c1"># use Gmsh-API to perform defined operations</span>
+
+        <span class="c1"># define physical groups and add them to the Gmsh model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">definePhysicalGroups</span><span class="p">()</span>                                             <span class="c1"># placeholder method: has to be specified/overwritten for the individual models</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addPhysicalGroupsToGmshModel</span><span class="p">()</span>                                     <span class="c1"># use Gmsh-API to add defined groups to the Gmsh model</span>
+
+        <span class="c1"># set up periodicity constraints</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setupPeriodicity</span><span class="p">()</span>                                                 <span class="c1"># placeholder method: has to be specified/overwritten for the individual models if necessary</span></div>
+
+
+
+    <span class="c1">####################################################################</span>
+    <span class="c1"># Method to calculate refinement information and generate the mesh #</span>
+    <span class="c1">####################################################################</span>
+<div class="viewcode-block" id="GenericModel.createMesh">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericModel.html#gmshModel.Model.GenericModel.GenericModel.createMesh">[docs]</a>
+    <span class="k">def</span> <span class="nf">createMesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">threads</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">refinementOptions</span><span class="o">=</span><span class="p">{}):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to generate the model mesh</span>
+
+<span class="sd">        This method contains the basic mesh generation steps for a Gmsh model:</span>
+<span class="sd">        refinement fields are calculated with user-defined options and added to</span>
+<span class="sd">        the model. Afterwards, a background field is specified and used for the</span>
+<span class="sd">        mesh size computation within Gmsh. Finally, the mesh is created.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        threads: int</span>
+<span class="sd">            number of threads to use for the mesh generation</span>
+<span class="sd">        refinementOptions: dict</span>
+<span class="sd">            dictionary with user-defined options for the refinement field calculations</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">threads</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>                                                 <span class="c1"># set number of threads in Gmsh</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">updateGmshConfiguration</span><span class="p">({</span><span class="s2">&quot;Mesh.MaxNumThreads1D&quot;</span><span class="p">:</span> <span class="n">threads</span><span class="p">,</span>
+                                          <span class="s2">&quot;Mesh.MaxNumThreads2D&quot;</span><span class="p">:</span> <span class="n">threads</span><span class="p">,</span>
+                                          <span class="s2">&quot;Mesh.MaxNumThreads3D&quot;</span><span class="p">:</span> <span class="n">threads</span><span class="p">})</span>
+
+        <span class="c1"># deine refinement information and add them to the Gmsh model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">defineRefinementFields</span><span class="p">(</span><span class="n">refinementOptions</span><span class="o">=</span><span class="n">refinementOptions</span><span class="p">)</span>        <span class="c1"># placeholder method: has to be specified/overwritten for the individual models</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addRefinementFieldsToGmshModel</span><span class="p">()</span>                                   <span class="c1"># use Gmsh-API to add defined fields to the Gmsh model</span>
+
+        <span class="c1"># set background field for meshing procedure (if possible)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">backgroundField</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gmshAPI</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">setAsBackgroundMesh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">backgroundField</span><span class="p">)</span>   <span class="c1"># define background field (field which is used for mesh size determination)</span>
+
+        <span class="c1"># generate mesh (with activate console output)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gmshOutput</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>                                                     <span class="c1"># activate Gmsh console output</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gmshAPI</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="p">)</span>                              <span class="c1"># generate mesh using the Gmsh-API</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gmshOutput</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>                                                     <span class="c1"># deactivate Gmsh console output</span></div>
+
+
+
+    <span class="c1">############################################################</span>
+    <span class="c1"># Closing method to terminate the current Gmsh-API session #</span>
+    <span class="c1">############################################################</span>
+<div class="viewcode-block" id="GenericModel.close">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericModel.html#gmshModel.Model.GenericModel.GenericModel.close">[docs]</a>
+    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gmsh finalization method</span>
+
+<span class="sd">        The Gmsh-Python-API has to be finalized for a proper termination of the</span>
+<span class="sd">        model.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">gmsh</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span></div>
+
+
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">#             MAIN METHODS FOR LOADING AND SAVING INFORMATION                  #</span>
+<span class="c1">################################################################################</span>
+
+    <span class="c1">########################################################</span>
+    <span class="c1"># Method to save the geometry of the model into a file #</span>
+    <span class="c1">########################################################</span>
+<div class="viewcode-block" id="GenericModel.saveGeometry">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericModel.html#gmshModel.Model.GenericModel.GenericModel.saveGeometry">[docs]</a>
+    <span class="k">def</span> <span class="nf">saveGeometry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to save the generated geometry into a geometry file</span>
+
+<span class="sd">        This method allows to store geometry information into &quot;.step&quot; or &quot;.brep&quot;-</span>
+<span class="sd">        files.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># get fileparts of passed file string (return defaults if nothing is passed)</span>
+        <span class="n">fileDir</span><span class="p">,</span><span class="n">fileName</span><span class="p">,</span><span class="n">fileExt</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getFileParts</span><span class="p">(</span><span class="n">file</span><span class="p">,</span><span class="s2">&quot;Geometry&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">fileExt</span> <span class="ow">in</span> <span class="n">SUPPORTED_GEOMETRY_FORMATS</span><span class="p">:</span>                               <span class="c1"># check if file extension is supported by gmsh</span>
+            <span class="n">gmsh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fileDir</span><span class="o">+</span><span class="s2">&quot;/&quot;</span><span class="o">+</span><span class="n">fileName</span><span class="o">+</span><span class="n">fileExt</span><span class="p">)</span>                            <span class="c1"># write geometry to file (use Gmsh-internal &quot;guess from extension&quot; feature)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown geometry file extension </span><span class="si">{}</span><span class="s2">. The output geometry format must be supported by the gmsh library.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fileExt</span><span class="p">))</span></div>
+
+
+
+    <span class="c1">####################################################</span>
+    <span class="c1"># Method to save the mesh of the model into a file #</span>
+    <span class="c1">####################################################</span>
+<div class="viewcode-block" id="GenericModel.saveMesh">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericModel.html#gmshModel.Model.GenericModel.GenericModel.saveMesh">[docs]</a>
+    <span class="k">def</span> <span class="nf">saveMesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to save the generated mesh into a mesh file</span>
+
+<span class="sd">        After the mesh is generated, it has to be saved into a usable file format.</span>
+<span class="sd">        Here, all meshes that are supported by the meshio library, can be used to</span>
+<span class="sd">        save the mesh. If meshio is not available, the mesh format is restricted</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># get fileparts of passed file string (return defaults if nothing is passed)</span>
+        <span class="n">fileDir</span><span class="p">,</span><span class="n">fileName</span><span class="p">,</span><span class="n">fileExt</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getFileParts</span><span class="p">(</span><span class="n">file</span><span class="p">,</span><span class="s2">&quot;Mesh&quot;</span><span class="p">)</span>
+
+        <span class="c1"># create mesh file depending on the chosen file extension</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">fileDir</span><span class="p">,</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>                                      <span class="c1"># ensure that the file directory exists</span>
+        <span class="k">if</span> <span class="n">fileExt</span> <span class="o">==</span> <span class="s2">&quot;.msh&quot;</span><span class="p">:</span>                                                   <span class="c1"># file extension is &quot;.msh&quot;</span>
+            <span class="n">gmsh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fileDir</span><span class="o">+</span><span class="s2">&quot;/&quot;</span><span class="o">+</span><span class="n">fileName</span><span class="o">+</span><span class="n">fileExt</span><span class="p">)</span>                            <span class="c1"># -&gt; save mesh using built-in gmsh.write method</span>
+        <span class="k">elif</span> <span class="n">fileExt</span> <span class="o">==</span> <span class="s1">&#39;.msh2&#39;</span><span class="p">:</span>                                                <span class="c1"># file extension is &quot;.msh2&quot;</span>
+            <span class="n">gmsh</span><span class="o">.</span><span class="n">option</span><span class="o">.</span><span class="n">setNumber</span><span class="p">(</span><span class="s2">&quot;Mesh.MshFileVersion&quot;</span><span class="p">,</span> <span class="mf">2.</span><span class="p">)</span>                    <span class="c1"># change format to msh2</span>
+            <span class="n">gmsh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fileDir</span><span class="o">+</span><span class="s2">&quot;/&quot;</span><span class="o">+</span><span class="n">fileName</span><span class="o">+</span><span class="s2">&quot;.msh&quot;</span><span class="p">)</span>                             <span class="c1"># -&gt; save mesh using built-in gmsh.write method</span>
+        <span class="k">elif</span> <span class="n">fileExt</span> <span class="o">==</span> <span class="s2">&quot;.feap&quot;</span><span class="p">:</span>                                                <span class="c1"># file extension is &quot;.feap&quot; -&gt; write feap mesh files</span>
+            <span class="n">FeapExport</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>                                                                   <span class="c1"># file extension is different from &quot;.msh&quot;</span>
+            <span class="k">if</span> <span class="n">fileExt</span> <span class="ow">in</span> <span class="n">SUPPORTED_MESH_FORMATS</span><span class="p">:</span>                               <span class="c1"># -&gt; check if file extension is supported by meshio</span>
+                <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmpDir</span><span class="p">:</span>                         <span class="c1"># -&gt;-&gt; create temporary directory</span>
+                    <span class="n">tmpFile</span><span class="o">=</span><span class="n">tmpDir</span><span class="o">+</span><span class="s2">&quot;/&quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">modelName</span><span class="o">+</span><span class="s2">&quot;.msh&quot;</span>                    <span class="c1"># -&gt;-&gt; create temporary file</span>
+                    <span class="n">gmshBinaryConfig</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getGmshOption</span><span class="p">(</span><span class="s2">&quot;Mesh.Binary&quot;</span><span class="p">)</span>          <span class="c1"># -&gt;-&gt; get Gmsh configuration for binary mesh export</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">setGmshOption</span><span class="p">(</span><span class="s2">&quot;Mesh.Binary&quot;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>                         <span class="c1"># -&gt;-&gt; temporarily activate binary mesh export (reduce file size, increase speed)</span>
+                    <span class="n">gmsh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">tmpFile</span><span class="p">)</span>                                         <span class="c1"># -&gt;-&gt; use built-in gmsh.write method to generate binary mesh in temporary folder</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">setGmshOption</span><span class="p">(</span><span class="s2">&quot;Mesh.Binary&quot;</span><span class="p">,</span><span class="n">gmshBinaryConfig</span><span class="p">)</span>          <span class="c1"># -&gt;-&gt; reset Gmsh configuration</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_convertMesh</span><span class="p">(</span><span class="n">tmpFile</span><span class="p">,</span><span class="n">fileDir</span><span class="o">+</span><span class="s2">&quot;/&quot;</span><span class="o">+</span><span class="n">fileName</span><span class="o">+</span><span class="n">fileExt</span><span class="p">)</span>     <span class="c1"># -&gt;-&gt; convert mesh to required file format</span>
+            <span class="k">else</span><span class="p">:</span>                                                               <span class="c1"># raise error if mesh file format is not supported by meshio</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown mesh file extension </span><span class="si">{}</span><span class="s2">. The output mesh format must be supported by the meshio library.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fileExt</span><span class="p">))</span></div>
+
+
+
+    <span class="c1">#####################################################</span>
+    <span class="c1"># Method to save Gmsh model object to a binary file #</span>
+    <span class="c1">#####################################################</span>
+<div class="viewcode-block" id="GenericModel.saveModel">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericModel.html#gmshModel.Model.GenericModel.GenericModel.saveModel">[docs]</a>
+    <span class="k">def</span> <span class="nf">saveModel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to save the complete model into a pickle object</span>
+
+<span class="sd">        In order to be able to reuse generated models, the whole model can be</span>
+<span class="sd">        saved. Within this method, the pickle module is used to save the model</span>
+<span class="sd">        to a binary file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># get file parts of passed file string (return defaultsd if nothing is passed)</span>
+        <span class="n">fileDir</span><span class="p">,</span><span class="n">fileName</span><span class="p">,</span><span class="n">fileExt</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__getFileParts</span><span class="p">(</span><span class="n">file</span><span class="p">,</span><span class="s2">&quot;Model&quot;</span><span class="p">)</span>
+
+        <span class="c1"># save file</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">fileDir</span><span class="p">,</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>                                      <span class="c1"># ensure that the file directory exists</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fileDir</span><span class="o">+</span><span class="s2">&quot;/&quot;</span><span class="o">+</span><span class="n">fileName</span><span class="o">+</span><span class="n">fileExt</span><span class="p">,</span><span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>                   <span class="c1"># open file with writing permissions in binary mode</span>
+            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">file</span><span class="p">)</span>                                              <span class="c1"># save file using pickle</span></div>
+
+
+
+    <span class="c1">#################################################</span>
+    <span class="c1"># Class method to load existing model instances #</span>
+    <span class="c1">#################################################</span>
+<div class="viewcode-block" id="GenericModel.load">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericModel.html#gmshModel.Model.GenericModel.GenericModel.load">[docs]</a>
+    <span class="nd">@classmethod</span>                                                                <span class="c1"># define method as a class method</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span><span class="n">fileName</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to load an existing GmshModel object</span>
+
+<span class="sd">        Objects that have been saved to a binary file using the pickle module</span>
+<span class="sd">        can be reloaded here.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span><span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>                                       <span class="c1"># load file</span>
+            <span class="n">modelInstance</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>                                   <span class="c1"># load saved file with pickle module</span>
+        
+        <span class="c1"># Use saved geometry information to rebuild the model</span>
+        <span class="n">modelInstance</span><span class="o">.</span><span class="n">initializeGmsh</span><span class="p">(</span><span class="n">modelInstance</span><span class="o">.</span><span class="n">gmshConfigChanges</span><span class="p">)</span>           <span class="c1"># initialize Gmsh API</span>
+        <span class="n">modelInstance</span><span class="o">.</span><span class="n">addGeometricObjectsToGmshModel</span><span class="p">()</span>                          <span class="c1"># use Gmsh-API to add geometric information to the Gmsh </span>
+        <span class="n">modelInstance</span><span class="o">.</span><span class="n">performBooleanOperationsForGmshModel</span><span class="p">()</span>                    <span class="c1"># use Gmsh-API to perform defined operations</span>
+        <span class="n">modelInstance</span><span class="o">.</span><span class="n">addPhysicalGroupsToGmshModel</span><span class="p">()</span>                            <span class="c1"># use Gmsh-API to add defined groups to the Gmsh model</span>
+        <span class="n">modelInstance</span><span class="o">.</span><span class="n">setupPeriodicity</span><span class="p">()</span>                                        <span class="c1"># set up periodicity constraints</span>
+        <span class="k">return</span> <span class="n">modelInstance</span>                                            </div>
+
+
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">#                           VISUALIZATION METHODS                              #</span>
+<span class="c1">################################################################################</span>
+
+    <span class="c1">##########################################################</span>
+    <span class="c1"># Method to visualize the model geometry using pythonocc #</span>
+    <span class="c1">##########################################################</span>
+<div class="viewcode-block" id="GenericModel.visualizeGeometry">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericModel.html#gmshModel.Model.GenericModel.GenericModel.visualizeGeometry">[docs]</a>
+    <span class="k">def</span> <span class="nf">visualizeGeometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to visualize the Gmsh model geometry using pythonocc&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">PYTHONOCC_AVAILABLE</span><span class="p">:</span>                                                 <span class="c1"># optional pythonocc package is available</span>
+            <span class="n">GeometryVisualization</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>                                         <span class="c1"># -&gt; visualize the geometry</span>
+        <span class="k">else</span><span class="p">:</span>                                                                   <span class="c1"># optional pythonocc package is unavailable</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Geometry visualization is unavailabe due to missing packages.&quot;</span><span class="p">)</span> <span class="c1"># do nothing but printing a warning</span></div>
+
+
+
+    <span class="c1">############################################################</span>
+    <span class="c1"># Method to visualize the model mesh using pyvista and vtk #</span>
+    <span class="c1">############################################################</span>
+<div class="viewcode-block" id="GenericModel.visualizeMesh">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericModel.html#gmshModel.Model.GenericModel.GenericModel.visualizeMesh">[docs]</a>
+    <span class="k">def</span> <span class="nf">visualizeMesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to visualize the generated mesh using pyvista and vtk&quot;&quot;&quot;</span>
+        <span class="n">MeshVisualization</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>                                                 <span class="c1"># -&gt; visualize the mesh</span></div>
+
+
+
+    <span class="c1">####################################################################</span>
+    <span class="c1"># Method to show the whole model in Gmsh using the Gmsh-Python-API #</span>
+    <span class="c1">####################################################################</span>
+<div class="viewcode-block" id="GenericModel.showModelInGmsh">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericModel.html#gmshModel.Model.GenericModel.GenericModel.showModelInGmsh">[docs]</a>
+    <span class="k">def</span> <span class="nf">showModelInGmsh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to open the complete model in Gmsh&quot;&quot;&quot;</span>
+        <span class="n">gmsh</span><span class="o">.</span><span class="n">fltk</span><span class="o">.</span><span class="n">run</span><span class="p">()</span></div>
+
+
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">#       PLACEHOLDER METHODS TO BE SPECIALIZED FOR THE INDIVIDUAL MODELS        #</span>
+<span class="c1">################################################################################</span>
+
+    <span class="c1">##################################################</span>
+    <span class="c1"># Method for the definition of geometric objects #</span>
+    <span class="c1">##################################################</span>
+<div class="viewcode-block" id="GenericModel.defineGeometricObjects">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericModel.html#gmshModel.Model.GenericModel.GenericModel.defineGeometricObjects">[docs]</a>
+    <span class="k">def</span> <span class="nf">defineGeometricObjects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">options</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Placeholder method for the definition of geometric objects. Has to be</span>
+<span class="sd">        specified in child classes&quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+
+
+    <span class="c1">###################################################</span>
+    <span class="c1"># Method for the definition of boolean operations #</span>
+    <span class="c1">###################################################</span>
+<div class="viewcode-block" id="GenericModel.defineBooleanOperations">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericModel.html#gmshModel.Model.GenericModel.GenericModel.defineBooleanOperations">[docs]</a>
+    <span class="k">def</span> <span class="nf">defineBooleanOperations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Placeholder method for the definition of necessary boolean Operations.</span>
+<span class="sd">        Has to be specified in child classes&quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+
+
+    <span class="c1">################################################</span>
+    <span class="c1"># Method for the definition of physical groups #</span>
+    <span class="c1">################################################</span>
+<div class="viewcode-block" id="GenericModel.definePhysicalGroups">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericModel.html#gmshModel.Model.GenericModel.GenericModel.definePhysicalGroups">[docs]</a>
+    <span class="k">def</span> <span class="nf">definePhysicalGroups</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Placeholder method to define required physical groups. Has to be</span>
+<span class="sd">        specified in child classes&quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+
+
+    <span class="c1">###########################################</span>
+    <span class="c1"># Method to define refinement information #</span>
+    <span class="c1">###########################################</span>
+<div class="viewcode-block" id="GenericModel.defineRefinementFields">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericModel.html#gmshModel.Model.GenericModel.GenericModel.defineRefinementFields">[docs]</a>
+    <span class="k">def</span> <span class="nf">defineRefinementFields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Placeholder method to define/compute refinement fields for the mesh</span>
+<span class="sd">        generation. Has to be specified in child classes&quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+
+
+    <span class="c1">###############################################################</span>
+    <span class="c1"># Method to set up periodicity constraints for the Gmsh model #</span>
+    <span class="c1">###############################################################</span>
+<div class="viewcode-block" id="GenericModel.setupPeriodicity">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericModel.html#gmshModel.Model.GenericModel.GenericModel.setupPeriodicity">[docs]</a>
+    <span class="k">def</span> <span class="nf">setupPeriodicity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Placeholder method to set up periodicity constraints for RVEs. Has to</span>
+<span class="sd">        be specified in child classes, if required&quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">#         INTERFACING METHODS TO PASS INFORMATION TO THE GMSH MODEL            #</span>
+<span class="c1">################################################################################</span>
+
+    <span class="c1">###############################################</span>
+    <span class="c1"># Method to transform Gmsh entity Tags to IDs #</span>
+    <span class="c1">###############################################</span>
+<div class="viewcode-block" id="GenericModel.getIDsFromTags">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericModel.html#gmshModel.Model.GenericModel.GenericModel.getIDsFromTags">[docs]</a>
+    <span class="k">def</span> <span class="nf">getIDsFromTags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tags</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Interfacing method to get Gmsh entity IDs from given list of Gmsh</span>
+<span class="sd">        entityTags</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        tags: (list of) tuples</span>
+<span class="sd">            list of Gmsh entity tag tuples</span>
+<span class="sd">            tags=(entityDimension, entityID)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_</span><span class="p">,</span><span class="n">IDs</span><span class="o">=</span><span class="nb">map</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">tags</span><span class="p">))</span>                                              <span class="c1"># get IDs of tags-array (tag: (dimension,ID)-tuple)</span>
+        <span class="k">return</span> <span class="n">IDs</span>                                                              <span class="c1"># return IDs</span></div>
+
+
+
+    <span class="c1">############################################################</span>
+    <span class="c1"># method to get a single Gmsh option depending on its type #</span>
+    <span class="c1">############################################################</span>
+<div class="viewcode-block" id="GenericModel.getGmshOption">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericModel.html#gmshModel.Model.GenericModel.GenericModel.getGmshOption">[docs]</a>
+    <span class="k">def</span> <span class="nf">getGmshOption</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">optionName</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to get the value of a Gmsh configuratio option with known name</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        optionName: string</span>
+<span class="sd">            name of the option</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>                                                                    <span class="c1"># try to return option value assuming it is a string</span>
+            <span class="k">return</span> <span class="n">gmsh</span><span class="o">.</span><span class="n">option</span><span class="o">.</span><span class="n">getString</span><span class="p">(</span><span class="n">optionName</span><span class="p">)</span>                            <span class="c1"># -&gt; use built-in gmsh.option.getString method</span>
+        <span class="k">except</span><span class="p">:</span>                                                                 <span class="c1"># option value was no string, so it must be a number</span>
+            <span class="k">return</span> <span class="n">gmsh</span><span class="o">.</span><span class="n">option</span><span class="o">.</span><span class="n">getNumber</span><span class="p">(</span><span class="n">optionName</span><span class="p">)</span>                            <span class="c1"># -&gt; use built-in gmsh.option.getNumber method</span></div>
+
+
+
+    <span class="c1">############################################################</span>
+    <span class="c1"># method to set a single Gmsh option depending on its type #</span>
+    <span class="c1">############################################################</span>
+<div class="viewcode-block" id="GenericModel.setGmshOption">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericModel.html#gmshModel.Model.GenericModel.GenericModel.setGmshOption">[docs]</a>
+    <span class="k">def</span> <span class="nf">setGmshOption</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">optionName</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">optionValue</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to set a Gmsh configuration option</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        optionName: string</span>
+<span class="sd">            name of the option to set</span>
+<span class="sd">        optionValue: int/float/string</span>
+<span class="sd">            value of the option to set</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">optionValue</span><span class="p">,</span><span class="nb">str</span><span class="p">):</span>                                         <span class="c1"># option value is a string</span>
+            <span class="n">gmsh</span><span class="o">.</span><span class="n">option</span><span class="o">.</span><span class="n">setString</span><span class="p">(</span><span class="n">optionName</span><span class="p">,</span><span class="n">optionValue</span><span class="p">)</span>                       <span class="c1"># -&gt; use built-in gmsh.option.setString method</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">optionValue</span><span class="p">,</span><span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">optionValue</span><span class="p">,</span><span class="nb">float</span><span class="p">):</span>      <span class="c1"># optionValue is a number</span>
+            <span class="n">gmsh</span><span class="o">.</span><span class="n">option</span><span class="o">.</span><span class="n">setNumber</span><span class="p">(</span><span class="n">optionName</span><span class="p">,</span><span class="n">optionValue</span><span class="p">)</span>                       <span class="c1"># -&gt; use built-in gmsh.option.setNumber method</span></div>
+
+
+
+    <span class="c1">############################################################</span>
+    <span class="c1"># Method to add the model boundary to the physical entites #</span>
+    <span class="c1">############################################################</span>
+<div class="viewcode-block" id="GenericModel.getBoundaryEntities">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericModel.html#gmshModel.Model.GenericModel.GenericModel.getBoundaryEntities">[docs]</a>
+    <span class="k">def</span> <span class="nf">getBoundaryEntities</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to get the entities on the boundary of the Gmsh model&quot;&quot;&quot;</span>
+        <span class="c1"># get information for a physical entity containing the model boundary</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gmshAPI</span><span class="o">.</span><span class="n">getBoundary</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gmshAPI</span><span class="o">.</span><span class="n">getEntities</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="p">),</span> <span class="n">combined</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">oriented</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+
+    <span class="c1">###########################################</span>
+    <span class="c1"># Method to update the gmsh configuration #</span>
+    <span class="c1">###########################################</span>
+<div class="viewcode-block" id="GenericModel.updateGmshConfiguration">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericModel.html#gmshModel.Model.GenericModel.GenericModel.updateGmshConfiguration">[docs]</a>
+    <span class="k">def</span> <span class="nf">updateGmshConfiguration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">configurationUpdate</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to update the Gmsh configuration options with a dictionary</span>
+<span class="sd">        of updated options</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        configurationUpdate: dict</span>
+<span class="sd">            dictionary of configuration options to be updated</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gmshConfigChanges</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">configurationUpdate</span><span class="p">)</span>                      <span class="c1"># update stored Gmsh configuration</span>
+        <span class="k">for</span> <span class="n">optionName</span><span class="p">,</span> <span class="n">optionValue</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">gmshConfigChanges</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>          <span class="c1"># loop over all configuration settings</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setGmshOption</span><span class="p">(</span><span class="n">optionName</span><span class="o">=</span><span class="n">optionName</span><span class="p">,</span><span class="n">optionValue</span><span class="o">=</span><span class="n">optionValue</span><span class="p">)</span>   <span class="c1"># -&gt; activate changed configuration</span></div>
+
+
+
+    <span class="c1">#########################################################</span>
+    <span class="c1"># Method to add all geometric objects to the Gmsh model #</span>
+    <span class="c1">#########################################################</span>
+<div class="viewcode-block" id="GenericModel.addGeometricObjectsToGmshModel">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericModel.html#gmshModel.Model.GenericModel.GenericModel.addGeometricObjectsToGmshModel">[docs]</a>
+    <span class="k">def</span> <span class="nf">addGeometricObjectsToGmshModel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to add Gmsh representations of the gmshModels geometric objects&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometricObjects</span><span class="p">:</span>                                       <span class="c1"># loop over all geometric objects of the model</span>
+            <span class="n">gmshTag</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">addToGmshModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gmshAPI</span><span class="p">)</span>                            <span class="c1"># -&gt; add a Gmsh representation of the object to the model and save the correspondig tag</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">group</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gmshTag</span><span class="p">)</span>                              <span class="c1"># -&gt; add tag to the group of the geometric object</span></div>
+
+
+
+    <span class="c1">###############################################################</span>
+    <span class="c1"># Method to perform all boolean operations for the Gmsh model #</span>
+    <span class="c1">###############################################################</span>
+<div class="viewcode-block" id="GenericModel.performBooleanOperationsForGmshModel">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericModel.html#gmshModel.Model.GenericModel.GenericModel.performBooleanOperationsForGmshModel">[docs]</a>
+    <span class="k">def</span> <span class="nf">performBooleanOperationsForGmshModel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to perform defined boolean operations for the Gmsh model&quot;&quot;&quot;</span>
+
+        <span class="c1"># loop over all boolean operations of the model</span>
+        <span class="k">for</span> <span class="n">booleanOP</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">booleanOperations</span><span class="p">:</span>
+
+            <span class="c1"># get details of the boolean operation to be performed</span>
+            <span class="n">operation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getBooleanOperation</span><span class="p">(</span><span class="n">booleanOP</span><span class="p">[</span><span class="s2">&quot;operation&quot;</span><span class="p">])</span>
+            <span class="n">objectTags</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">[</span><span class="n">booleanOP</span><span class="p">[</span><span class="s2">&quot;object&quot;</span><span class="p">]]</span>
+            <span class="n">toolTags</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">[</span><span class="n">booleanOP</span><span class="p">[</span><span class="s2">&quot;tool&quot;</span><span class="p">]]</span>
+            <span class="n">removeObject</span><span class="o">=</span><span class="n">booleanOP</span><span class="p">[</span><span class="s2">&quot;removeObject&quot;</span><span class="p">]</span>
+            <span class="n">removeTool</span><span class="o">=</span><span class="n">booleanOP</span><span class="p">[</span><span class="s2">&quot;removeTool&quot;</span><span class="p">]</span>
+            <span class="n">resultingGroup</span><span class="o">=</span><span class="n">booleanOP</span><span class="p">[</span><span class="s2">&quot;resultingGroup&quot;</span><span class="p">]</span>
+
+            <span class="c1"># perform boolean operation</span>
+            <span class="n">outputTags</span><span class="p">,</span><span class="n">outputTagsMap</span><span class="o">=</span><span class="n">operation</span><span class="p">(</span><span class="n">objectTags</span><span class="p">,</span><span class="n">toolTags</span><span class="p">,</span><span class="n">tag</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span><span class="n">removeObject</span><span class="o">=</span><span class="n">removeObject</span><span class="p">,</span><span class="n">removeTool</span><span class="o">=</span><span class="n">removeTool</span><span class="p">)</span>
+
+            <span class="c1"># synchronize OCC-CAD representation with model</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gmshAPI</span><span class="o">.</span><span class="n">occ</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
+
+            <span class="c1"># update groups</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">[</span><span class="n">resultingGroup</span><span class="p">]</span><span class="o">=</span><span class="n">outputTags</span></div>
+
+
+
+    <span class="c1">###############################################</span>
+    <span class="c1"># Method to add physical groups to Gmsh model #</span>
+    <span class="c1">###############################################</span>
+<div class="viewcode-block" id="GenericModel.addPhysicalGroupsToGmshModel">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericModel.html#gmshModel.Model.GenericModel.GenericModel.addPhysicalGroupsToGmshModel">[docs]</a>
+    <span class="k">def</span> <span class="nf">addPhysicalGroupsToGmshModel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to add defined physical groups to the Gmsh model &quot;&quot;&quot;</span>
+
+        <span class="c1"># loop over all physical entities of the model</span>
+        <span class="k">for</span> <span class="n">physGrp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">physicalGroups</span><span class="p">:</span>
+
+            <span class="c1"># get details of the physical entity to add</span>
+            <span class="n">grpDim</span><span class="o">=</span><span class="n">physGrp</span><span class="p">[</span><span class="s2">&quot;dimension&quot;</span><span class="p">]</span>                                         <span class="c1"># get dimension of the physical group</span>
+            <span class="n">grpName</span><span class="o">=</span><span class="n">physGrp</span><span class="p">[</span><span class="s2">&quot;group&quot;</span><span class="p">]</span>                                            <span class="c1"># get the group of the physical entity (used as name)</span>
+            <span class="n">grpNumber</span><span class="o">=</span><span class="n">physGrp</span><span class="p">[</span><span class="s2">&quot;physicalNumber&quot;</span><span class="p">]</span>                                 <span class="c1"># get the number defined for the physical entity (used as material number)</span>
+            <span class="n">grpEntIDs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getIDsFromTags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">[</span><span class="n">grpName</span><span class="p">])</span>                 <span class="c1"># find Gmsh representations of all group members and get IDs from their tags</span>
+
+            <span class="c1"># set physical groups</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gmshAPI</span><span class="o">.</span><span class="n">addPhysicalGroup</span><span class="p">(</span><span class="n">grpDim</span><span class="p">,</span><span class="n">grpEntIDs</span><span class="p">,</span><span class="n">grpNumber</span><span class="p">)</span>           <span class="c1"># define the entity group as physical and set correct physical number</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gmshAPI</span><span class="o">.</span><span class="n">setPhysicalName</span><span class="p">(</span><span class="n">grpDim</span><span class="p">,</span><span class="n">grpNumber</span><span class="p">,</span><span class="n">grpName</span><span class="p">)</span>              <span class="c1"># set corresponding name of the physical group (equal to name of the group that is declared as physical for simplicity)</span></div>
+
+
+
+    <span class="c1">#################################################</span>
+    <span class="c1"># Method to add refinement fields to Gmsh model #</span>
+    <span class="c1">#################################################</span>
+<div class="viewcode-block" id="GenericModel.addRefinementFieldsToGmshModel">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericModel.html#gmshModel.Model.GenericModel.GenericModel.addRefinementFieldsToGmshModel">[docs]</a>
+    <span class="k">def</span> <span class="nf">addRefinementFieldsToGmshModel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to add defined refinement fields to the Gmsh model&quot;&quot;&quot;</span>
+
+        <span class="c1"># loop over all refinement fields defined for the model</span>
+        <span class="k">for</span> <span class="n">refineField</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">refinementFields</span><span class="p">:</span>
+
+            <span class="c1"># get details of the refinement field to add</span>
+            <span class="n">fieldType</span><span class="o">=</span><span class="n">refineField</span><span class="p">[</span><span class="s2">&quot;fieldType&quot;</span><span class="p">]</span>                                  <span class="c1"># get the type of refinement field</span>
+            <span class="n">fieldInfos</span><span class="o">=</span><span class="n">refineField</span><span class="p">[</span><span class="s2">&quot;fieldInfos&quot;</span><span class="p">]</span>                                <span class="c1"># get information required for this type of refinement field</span>
+
+            <span class="c1"># set refinement field</span>
+            <span class="n">fieldTag</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gmshAPI</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">fieldType</span><span class="p">,</span><span class="n">tag</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>              <span class="c1"># add new refinement field and save its number</span>
+            <span class="k">for</span> <span class="n">optName</span><span class="p">,</span> <span class="n">optVal</span> <span class="ow">in</span> <span class="n">fieldInfos</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>                          <span class="c1"># provide all necessary information for this field from fieldInfo dictionary</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">optVal</span><span class="p">,</span><span class="nb">str</span><span class="p">):</span>                                      <span class="c1"># -&gt; current option value is a string</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">gmshAPI</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">setString</span><span class="p">(</span><span class="n">fieldTag</span><span class="p">,</span><span class="n">optName</span><span class="p">,</span><span class="n">optVal</span><span class="p">)</span>  <span class="c1"># -&gt;-&gt; use built-in setString method of gmsh.model.mesh.field</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">optVal</span><span class="p">,</span><span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">optVal</span><span class="p">,</span><span class="nb">float</span><span class="p">):</span>        <span class="c1"># -&gt; current option value is a number</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">gmshAPI</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">setNumber</span><span class="p">(</span><span class="n">fieldTag</span><span class="p">,</span><span class="n">optName</span><span class="p">,</span><span class="n">optVal</span><span class="p">)</span>  <span class="c1"># -&gt;-&gt; use built-in setNumber method of gmsh.model.mesh.field</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">optVal</span><span class="p">,</span><span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">optVal</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>  <span class="c1"># -&gt; current option value is a list or numpy array</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">gmshAPI</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">setNumbers</span><span class="p">(</span><span class="n">fieldTag</span><span class="p">,</span><span class="n">optName</span><span class="p">,</span><span class="n">optVal</span><span class="p">)</span> <span class="c1"># -&gt;-&gt; use built-in setNumbers method of gmsh.model.mesh.field</span></div>
+
+
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">#           INTERFACING METHODS TO ADD GEOMETRIC OBJECTS TO THE MODEL          #</span>
+<span class="c1">################################################################################</span>
+
+    <span class="c1">##############################################################</span>
+    <span class="c1"># Method to add a single geometric object to the Gmsh model #</span>
+    <span class="c1">##############################################################</span>
+<div class="viewcode-block" id="GenericModel.addGeometricObject">
+<a class="viewcode-back" href="../../../gmshModel/Model/GenericModel.html#gmshModel.Model.GenericModel.GenericModel.addGeometricObject">[docs]</a>
+    <span class="k">def</span> <span class="nf">addGeometricObject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">objClassString</span><span class="p">,</span><span class="o">**</span><span class="n">objData</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to add one of the objects that are defined within the class</span>
+<span class="sd">        geometricObjects and its child classes to the Gmsh model.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        objClass: class</span>
+<span class="sd">            class the geometric object is defined in</span>
+<span class="sd">        objData: keyworded object data</span>
+<span class="sd">            enumeration of keyworded arguments needed for the creation of the</span>
+<span class="sd">            new geometric object of class objectClass</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">objClass</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getGeometricObjectClass</span><span class="p">(</span><span class="n">objClassString</span><span class="p">)</span>
+        <span class="n">objInstance</span><span class="o">=</span><span class="n">objClass</span><span class="p">(</span><span class="o">**</span><span class="n">objData</span><span class="p">)</span>
+        <span class="n">objGroup</span><span class="o">=</span><span class="n">objInstance</span><span class="o">.</span><span class="n">group</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geometricObjects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">objInstance</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">objGroup</span><span class="p">:</span> <span class="p">[]})</span> <span class="k">if</span> <span class="n">objGroup</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span></div>
+
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">#               PRIVATE/HIDDEN METHODS FOR INTERNAL USE ONLY                   #</span>
+<span class="c1">################################################################################</span>
+
+    <span class="c1">################################################</span>
+    <span class="c1"># Method to check file string for saving files #</span>
+    <span class="c1">################################################</span>
+    <span class="k">def</span> <span class="nf">_getFileParts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fileString</span><span class="p">,</span><span class="n">whatToSave</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Internal method to get the file directory, name and extension from</span>
+<span class="sd">        a fileString</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        fileString: string</span>
+<span class="sd">            string to analyze</span>
+<span class="sd">        whatToSave: string</span>
+<span class="sd">            flag that indicates whether &quot;geometry&quot;, &quot;mesh&quot; or &quot;model&quot; have to</span>
+<span class="sd">            be saved</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># check if no fileString was passed</span>
+        <span class="k">if</span> <span class="n">fileString</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>                                                  <span class="c1"># no file string passed</span>
+            <span class="n">fileString</span><span class="o">=</span><span class="s2">&quot;&quot;</span>                                                       <span class="c1"># -&gt; set empty file string</span>
+
+        <span class="c1"># process passed file string</span>
+        <span class="n">fileDir</span><span class="p">,</span><span class="n">fileName</span><span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">fileString</span><span class="p">)</span>                             <span class="c1"># get file directory and name (with extension)</span>
+        <span class="n">fileName</span><span class="p">,</span><span class="n">fileExt</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span>                             <span class="c1"># split file name into name and extension</span>
+        <span class="k">if</span> <span class="n">fileDir</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>                                                       <span class="c1"># check if file directory is empty</span>
+            <span class="n">fileDir</span><span class="o">=</span><span class="s2">&quot;.&quot;</span>                                                         <span class="c1"># -&gt; set default value (current directory)</span>
+        <span class="k">if</span> <span class="n">fileName</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>                                                      <span class="c1"># check if file name is empty</span>
+            <span class="n">fileName</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">modelName</span>                                             <span class="c1"># use unique model name as file name</span>
+        <span class="k">if</span> <span class="n">fileExt</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>                                                       <span class="c1"># check if file extension is empty</span>
+            <span class="n">fileExt</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_defaultFileExts</span><span class="p">[</span><span class="n">whatToSave</span><span class="p">]</span>                           <span class="c1"># -&gt; set default value (.gmshModel)</span>
+
+        <span class="c1"># return file parts</span>
+        <span class="k">return</span> <span class="n">fileDir</span><span class="p">,</span> <span class="n">fileName</span><span class="p">,</span> <span class="n">fileExt</span>
+
+
+    <span class="c1">########################################</span>
+    <span class="c1"># Method to toggle Gmsh console output #</span>
+    <span class="c1">########################################</span>
+    <span class="k">def</span> <span class="nf">_gmshOutput</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">switch</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to enable/disable Gmsh console output&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setGmshOption</span><span class="p">(</span><span class="n">optionName</span><span class="o">=</span><span class="s2">&quot;General.Terminal&quot;</span><span class="p">,</span><span class="n">optionValue</span><span class="o">=</span><span class="n">switch</span><span class="p">)</span>
+
+
+    <span class="c1">############################################################################</span>
+    <span class="c1"># Method to return the correct boolean operation from the operation string #</span>
+    <span class="c1">############################################################################</span>
+    <span class="k">def</span> <span class="nf">_getBooleanOperation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">operation</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Internal method to return the correct boolean operation function</span>
+<span class="sd">        from an operation string</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        operation: string</span>
+<span class="sd">            boolean operation to be performed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">operation</span> <span class="o">==</span> <span class="s2">&quot;cut&quot;</span><span class="p">:</span>                                                  <span class="c1"># operation to be performed is &quot;cut&quot;</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gmshAPI</span><span class="o">.</span><span class="n">occ</span><span class="o">.</span><span class="n">cut</span>                                         <span class="c1"># -&gt; use built-in gmsh.model.occ.cut method</span>
+        <span class="k">elif</span> <span class="n">operation</span> <span class="o">==</span> <span class="s2">&quot;fuse&quot;</span><span class="p">:</span>                                               <span class="c1"># operation to be performed is &quot;fuse&quot;</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gmshAPI</span><span class="o">.</span><span class="n">occ</span><span class="o">.</span><span class="n">fuse</span>                                        <span class="c1"># -&gt; use built-in gmsh.model.occ.fuse method</span>
+        <span class="k">elif</span> <span class="n">operation</span> <span class="o">==</span> <span class="s2">&quot;fragment&quot;</span><span class="p">:</span>                                           <span class="c1"># operation to be performed is &quot;fragment&quot;</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gmshAPI</span><span class="o">.</span><span class="n">occ</span><span class="o">.</span><span class="n">fragment</span>                                    <span class="c1"># -&gt; use built-in gmsh.model.occ.fragment method</span>
+        <span class="k">elif</span> <span class="n">operation</span> <span class="o">==</span> <span class="s2">&quot;intersect&quot;</span><span class="p">:</span>                                          <span class="c1"># operation to be performed is &quot;intersect&quot;</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gmshAPI</span><span class="o">.</span><span class="n">occ</span><span class="o">.</span><span class="n">intersect</span>                                   <span class="c1"># -&gt; use built-in gmsh.model.occ.intersect method</span>
+        <span class="k">else</span><span class="p">:</span>                                                                   <span class="c1"># operation to be performed is something different</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown boolean operation </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">operation</span><span class="p">))</span>  <span class="c1"># -&gt; raise error that type of boolean operation is not known</span>
+
+
+    <span class="c1">#########################################################</span>
+    <span class="c1"># Method to get defined geometric objects from a string #</span>
+    <span class="c1">#########################################################</span>
+    <span class="k">def</span> <span class="nf">_getGeometricObjectClass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">objString</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Internal method to return the correct geometric object class from</span>
+<span class="sd">        an object class string</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        objString: string</span>
+<span class="sd">            required geometric object class (as a string)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">objKey</span><span class="p">,</span> <span class="n">objClass</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmembers</span><span class="p">(</span><span class="n">geomObj</span><span class="p">,</span><span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">):</span>    <span class="c1"># get all classes from the geometricObjects file</span>
+            <span class="k">if</span> <span class="n">objKey</span> <span class="o">==</span> <span class="n">objString</span><span class="p">:</span>                                             <span class="c1"># check if class key matches the object string that was passed</span>
+                <span class="k">return</span> <span class="n">objClass</span>                                                 <span class="c1"># return class</span>
+
+
+    <span class="c1">###########################################################</span>
+    <span class="c1"># Method to calculate the overall Gmsh model bounding box #</span>
+    <span class="c1">###########################################################</span>
+    <span class="k">def</span> <span class="nf">_getGmshModelBoundingBox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Internal method to get the overall Gmsh model bounding box&quot;&quot;&quot;</span>
+        <span class="n">entityBBoxes</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">gmshAPI</span><span class="o">.</span><span class="n">getBoundingBox</span><span class="p">(</span><span class="o">*</span><span class="n">entTag</span><span class="p">)</span> <span class="k">for</span> <span class="n">entTag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">gmshAPI</span><span class="o">.</span><span class="n">getEntities</span><span class="p">()])</span>
+        <span class="n">modelBBox</span><span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">entityBBoxes</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)],</span> <span class="p">[</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">entityBBoxes</span><span class="p">[:,</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)]])</span>
+        <span class="k">return</span> <span class="n">modelBBox</span>
+
+
+    <span class="c1">##########################################################</span>
+    <span class="c1"># Method to convert meshes into meshio-supported formats #</span>
+    <span class="c1">##########################################################</span>
+    <span class="k">def</span> <span class="nf">_convertMesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">inFile</span><span class="p">,</span><span class="n">outFile</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Internal method to convert meshes between different file formats</span>
+<span class="sd">        using meshio</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        inFile: string</span>
+<span class="sd">            file string (directory/name.extension) for the input mesh file</span>
+<span class="sd">        outFile: string</span>
+<span class="sd">            file string (directory/name.extension) for the output mesh file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">mesh</span><span class="o">=</span><span class="n">meshio</span><span class="o">.</span><span class="n">Mesh</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">inFile</span><span class="p">)</span>                                           <span class="c1"># read file of mesh to convert with meshio (get mesh format from file extension)</span>
+        <span class="n">mesh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">outFile</span><span class="p">)</span>                                                     <span class="c1"># write file for converted mesh (get mesh format from file extension)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Philipp Metsch.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

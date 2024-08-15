@@ -298,7 +298,7 @@ class RandomInclusionRVE(InclusionRVE):
         self.placementInfo=np.zeros(np.shape(rSets))                            # information about placed inclusions for the individual sets
 
         # loop over all incSets
-        relevantAxesFlags=np.zeros((3,))                                        # creaty auxiliary flag variable to indicate axes which are relevant for inclusion center calculation
+        relevantAxesFlags=np.zeros((3,))                                        # create auxiliary flag variable to indicate axes which are relevant for inclusion center calculation
         relevantAxesFlags[self.relevantAxes]=1                                  # set relevantAxesFlags to 1 for the relevant axes
         for iSet in range(0,np.shape(rSets)[0]):
 

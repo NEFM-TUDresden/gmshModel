@@ -27,7 +27,7 @@ try:                                                                            
     PYTHONOCC_AVAILABLE=True                                                    # -> set availability flag to True
 except ImportError:                                                             # handle unavailable OCC module
     PYTHONOCC_AVAILABLE=False                                                   # -> set availability flag to False
-    logger.warning("The geometry visualization relies on the pythonocc package. To visualize the model geometry, install pythonocc.")
+    logger.warning("The geometry visualization is based on the pythonocc package. To visualize the model geometry, install pythonocc.")
 
 
 ######################################

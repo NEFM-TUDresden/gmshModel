@@ -15,7 +15,6 @@
 import os                                                                       # os for file handling (split extensions from file)
 import inspect                                                                  # inspect to search for classes in modules
 import datetime as dt                                                           # datetime for time stamps
-import copy as cp                                                               # copy for deepcopies of arrays
 import tempfile as tf                                                           # tempfile for generation of temprory files and folders
 import numpy as np                                                              # numpy for array computations
 import pickle                                                                   # pickle for saving and loading of gmshModels
@@ -296,12 +295,13 @@ class GenericModel:
         else:                                                                   # file extension is different from ".msh"
             if fileExt in SUPPORTED_MESH_FORMATS:                               # -> check if file extension is supported by meshio
                 with tf.TemporaryDirectory() as tmpDir:                         # ->-> create temporary directory
-                    tmpFile=tmpDir+"/"+self.modelName+".msh"                    # ->-> create temporary file
+                    tmpFile=os.path.normpath(tmpDir+"/"+self.modelName+".msh")  # ->-> create temporary file
+                    targetFile=os.path.normpath(fileDir+"/"+fileName+fileExt)   # ->-> get os-specific path to target file
                     gmshBinaryConfig=self.getGmshOption("Mesh.Binary")          # ->-> get Gmsh configuration for binary mesh export
                     self.setGmshOption("Mesh.Binary",1)                         # ->-> temporarily activate binary mesh export (reduce file size, increase speed)
                     gmsh.write(tmpFile)                                         # ->-> use built-in gmsh.write method to generate binary mesh in temporary folder
                     self.setGmshOption("Mesh.Binary",gmshBinaryConfig)          # ->-> reset Gmsh configuration
-                    self._convertMesh(tmpFile,fileDir+"/"+fileName+fileExt)     # ->-> convert mesh to required file format
+                    self._convertMesh(tmpFile,targetFile)                        # ->-> convert mesh to required file format
             else:                                                               # raise error if mesh file format is not supported by meshio
                 raise ValueError("Unknown mesh file extension {}. The output mesh format must be supported by the meshio library.".format(fileExt))
 
@@ -732,5 +732,5 @@ class GenericModel:
         outFile: string
             file string (directory/name.extension) for the output mesh file
         """
-        mesh=meshio.Mesh.read(inFile)                                           # read file of mesh to convert with meshio (get mesh format from file extension)
+        mesh=meshio.read(inFile)                                                # read file of mesh to convert with meshio (get mesh format from file extension)
         mesh.write(outFile)                                                     # write file for converted mesh (get mesh format from file extension)

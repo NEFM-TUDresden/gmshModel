@@ -19,7 +19,6 @@ logger=logging.getLogger(__name__)                                              
 import pyvista as pv                                                            # -> load pyVista visualization module
 import vtk                                                                      # -> load vtk since pyvista depends on it, i.e. it must be available
 
-
 ##################################
 # Define MeshVisualization class #
 ##################################
@@ -106,11 +105,15 @@ class MeshVisualization():
         # initialize arrays required for proper mesh visualization
         self.plotterObj=pv.Plotter(title="GmshModel Mesh Visualization")        # initialize plotterObj from pyvista and set title
         self.mesh=None                                                          # initialize mesh
+        self.surfaceMesh = None                                                 # initialize surface mesh for proper representation of higher order elements
+        self.edgeMesh = None                                                    # initialize edge mesh for proper representation of higher order elements
         self.thresholdAlgorithm=None                                            # initialize threshold algorithm
         self.extractionBox=vtk.vtkBox()                                         # initiliaze dummy extraction box to update information of boxWidget
         self.extractionBoxBounds=pv.PolyData()                                  # initialize dummy extraction box bounds to store information of boxWidget bounds
         self.extractionAlgorithm=None                                           # initialize extraction algorithm
         self.activeWidgets=[]                                                   # initialize list of active widgets
+        self.surfaceMeshActor = None
+        self.edgeMeshActor = None
 
         # visualize the model mesh
         self.visualizeMesh()
@@ -135,10 +138,15 @@ class MeshVisualization():
         with tf.TemporaryDirectory() as tmpDir:                                 # create temporary directory
             tmpFile=tmpDir+"/"+self.model.modelName+".vtu"                      # set name of file in temorary directory
             self.model.saveMesh(tmpFile)                                        # create temporary file
-
+            
+            # Get mesh
             self.mesh=pv.UnstructuredGrid(tmpFile)                              # load mesh from temporary file with pyvista
             self.mesh.set_active_scalars("gmsh:physical")                       # set gmsh:physical to be the active scalar
             self.scalars = self.mesh.active_scalars_info                        # get field ID and name of active scalar field
+
+            # Extract surface and edge mesh for proper representation of higher order elements
+            self.surfaceMesh = self.mesh.separate_cells().extract_surface(nonlinear_subdivision=4) 
+            self.edgeMesh = self.surfaceMesh.extract_feature_edges()
 
             # add widgets and key events
             self.addSliderWidgets()                                             # add slider widgets for threshold filter
@@ -146,7 +154,10 @@ class MeshVisualization():
             self.addKeyPressEvents()                                            # add defined key press events
 
             # add mesh to plotterObj
-            self.plotterObj.add_mesh(self.mesh,scalars=self.scalars[1],name="mesh",reset_camera=False,clim=[self.currentSettings["lowerThreshold"],self.currentSettings["upperThreshold"]],show_edges=True)
+            #self.plotterObj.add_mesh(self.mesh,scalars=self.scalars[1],name="mesh",reset_camera=False,clim=[self.currentSettings["lowerThreshold"],self.currentSettings["upperThreshold"]],show_edges=True)
+            self.surfaceMeshActor = self.plotterObj.add_mesh(self.surfaceMesh,scalars=self.scalars[1],name="mesh",reset_camera=False,clim=[self.currentSettings["lowerThreshold"],self.currentSettings["upperThreshold"]], style='surface')
+            self.edgeMeshActor = self.plotterObj.add_mesh(self.edgeMesh, style='wireframe', color='k')
+            self.edgeMeshActor.mapper.SetResolveCoincidentTopologyToPolygonOffset()
 
             # update settings of the rendering scene and show plot
             self.plotterObj.remove_scalar_bar()                                 # remove scalar bar (since no results will be shown but just the mesh)
@@ -167,7 +178,10 @@ class MeshVisualization():
         """
 
         # apply threshold filter
-        self.thresholdAlgorithm.ThresholdBetween(self.currentSettings["lowerThreshold"],self.currentSettings["upperThreshold"]) # set threshold values from slider widgets
+        self.thresholdAlgorithm.SetThresholdFunction(vtk.vtkThreshold.THRESHOLD_BETWEEN)
+        self.thresholdAlgorithm.SetLowerThreshold(self.currentSettings["lowerThreshold"])
+        self.thresholdAlgorithm.SetUpperThreshold(self.currentSettings["upperThreshold"])
+        #self.thresholdAlgorithm.threshold_percent([self.currentSettings["lowerThreshold"],self.currentSettings["upperThreshold"]]) # set threshold values from slider widgets
         self.thresholdAlgorithm.Update()                                        # update information stored in thresold algorithm
         self.mesh.shallow_copy(self.thresholdAlgorithm.GetOutput())             # store resulting information in the mesh -> update mesh to visualize
 
@@ -175,6 +189,9 @@ class MeshVisualization():
         self.extractionBox.SetBounds(*self.currentSettings["boxBounds"])        # set box bounds from box widget
         self.extractionAlgorithm.Update()                                       # update information stored in extraction algorithm
         self.mesh.shallow_copy(self.extractionAlgorithm.GetOutput())            # store resulting information in the mesh -> update mesh to visualize
+
+        self.surfaceMesh.shallow_copy(self.mesh.separate_cells().extract_surface(nonlinear_subdivision=4))
+        self.edgeMesh.shallow_copy(self.surfaceMesh.extract_feature_edges())
 
         # force update of the rendering scene
         self.plotterObj.render()                                                # if not done, the renderer might update only after the next interaction with the plot
@@ -234,7 +251,7 @@ class MeshVisualization():
         titles=["Min", "Max"]                                                   # define titles of slider widgets
         callbacks=[self._callbackLowerThreshold, self._callbackUpperThreshold]  # define callback methods of the slider widgets
         for iSlider in [0,1]:                                                   # loop over both sliders
-            slider=self.plotterObj.add_slider_widget(callback=callbacks[iSlider], value=initialValues[iSlider], rng=initialValues, title=titles[iSlider], color=[1,1,1]) # use add_slider_widget of pyvista to define the widgets
+            slider=self.plotterObj.add_slider_widget(callback=callbacks[iSlider], value=initialValues[iSlider], rng=initialValues, title=titles[iSlider], style='modern') # use add_slider_widget of pyvista to define the widgets
             slider.GetRepresentation().GetPoint1Coordinate().SetValue(pointsA[iSlider,0], pointsA[iSlider,1]) # properly set slider widget starting point (error in pyvista implementation (divide by int))
             slider.GetRepresentation().GetPoint2Coordinate().SetValue(pointsB[iSlider,0], pointsB[iSlider,1]) # properly set slider widget end point (error in pyvista implementation (divide by int))
             slider.GetRepresentation().SetSliderWidth(0.02)                     # set width of the slider (normalized coordinates)
@@ -269,9 +286,13 @@ class MeshVisualization():
     ##################################
     def addKeyPressEvents(self):
         """Method to add all user-defined key-press events"""
-        activeKeys=["h", "m", "d", "space", "x", "y", "z"]                      # define list of keys with active (user-defined) key press events
-        for key in activeKeys:                                                  # loop over all active keys
-            self.plotterObj.add_key_event(key,self._keyPressEvents)             # add corresponding key press events
+
+        self.plotterObj.iren.clear_events_for_key('w')
+        
+        # Define dict of keys and associated callbacks for active (user-defined) key press events
+        events={"h": self.showCommandLineHelp, "m": self.toggleMenu, "d": self.restoreDefaultSettings, "space": self.filterPipeline, "x": self.plotterObj.view_yz, "y": self.plotterObj.view_zx, "z": self.plotterObj.view_xy, "s": self.toggleSurfaceRepresentation, "e": self.toggleEdgeRepresentation}                      
+        for eventKey, eventCallback in events.items():                          # loop over all active keys
+            self.plotterObj.add_key_event(eventKey, eventCallback)              # add corresponding key press events
 
 
     ####################################
@@ -285,6 +306,20 @@ class MeshVisualization():
             toggleStatus=widget.GetEnabled()                                    # get widget state
             toggleFuncs[toggleStatus]()                                         # use toggle function according to current state
 
+
+    ############################################
+    # Method to toggle surface mesh visibility #
+    ############################################
+    def toggleSurfaceRepresentation(self):
+        """Method to toggle the surface mesh visibility"""
+        self.surfaceMeshActor.visibility = not(self.surfaceMeshActor.visibility)
+
+    #########################################
+    # Method to toggle edge mesh visibility #
+    #########################################
+    def toggleEdgeRepresentation(self):
+        """Method to toggle the edge mesh visibility"""
+        self.edgeMeshActor.visibility = not(self.edgeMeshActor.visibility)
 
     ######################################
     # Method to restore default settings #
@@ -307,8 +342,8 @@ class MeshVisualization():
         is displayed"""
         infoText=("\nUse one of the following key events to control the plot:\n"
                   "\n"
-                  "\ts \tactivate surface representation of objects\n"
-                  "\tw \tactivate wireframe representation if objects\n"
+                  "\ts \ttoggle surface representation of objects\n"
+                  "\te \ttoggle edge representation of objects\n"
                   "\tv \tenable isometric view\n"
                   "\tx \tset view to y-z-plane\n"
                   "\ty \tset view to z-x-plane\n"
@@ -366,29 +401,3 @@ class MeshVisualization():
         self.extractionBoxBounds.shallow_copy(boundsObj)                        # copy information of passed bounds object fom widget
         self.currentSettings["boxBounds"]=boundsObj.bounds                      # update current settings
 
-
-    ##############################################
-    # Internal method to define key press events #
-    ##############################################
-    def _keyPressEvents(self):
-        """Internal method setting up user-defined key-press events"""
-        if self.plotterObj.iren.GetKeySym() == "h":                             # check if "h"-key was pressed
-            self.showCommandLineHelp()                                          # -> show help
-
-        elif self.plotterObj.iren.GetKeySym() == "m":                           # check if "m"-key was pressed
-            self.toggleMenu()                                                   # -> toggle menu
-
-        elif self.plotterObj.iren.GetKeySym() == "d":                           # check if "d"-key was pressed
-            self.restoreDefaultSettings()                                       # restore defaults
-
-        elif self.plotterObj.iren.GetKeySym() == "space":                       # check if "space"-key was pressed
-            self.filterPipeline()                                               # update filter pipeline with confirmed settings
-
-        elif self.plotterObj.iren.GetKeySym() == "x":                           # check if "x"-key was pressed
-            self.plotterObj.view_yz()                                           # set view to y-z-plane
-
-        elif self.plotterObj.iren.GetKeySym() == "y":                           # check if "y"-key was pressed
-            self.plotterObj.view_zx()                                           # set view to z-x-plane
-
-        elif self.plotterObj.iren.GetKeySym() == "z":                           # check if "z"-key was pressed
-            self.plotterObj.view_xy()                                           # set view to x-y-plane

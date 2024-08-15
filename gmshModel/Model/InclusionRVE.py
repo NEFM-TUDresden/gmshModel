@@ -252,7 +252,7 @@ class InclusionRVE(GenericRVE):
             # get distance of inclusion to boundaries
             distBndsCenter=np.absolute(self._getDistanceVector(thisIncInfo[0,:],bndPoints,axes)) # calculate (per-direction) distance of inclusion center to domain boundaries
             distBnds=distBndsCenter-thisIncInfo[0,3]                                             # get corresponding distance of inclusion boundary
-            closeBnds=np.array(np.where((np.absolute(distBnds)<=relDistBnd*thisIncInfo[0,3]))) # check which inclusions are close to which boundaries of the domain
+            closeBnds = np.array(np.where((distBnds<=relDistBnd*thisIncInfo[0,3]) & (distBnds>0))) # check which inclusions are close to which boundaries of the domain; omit inclusions with negative distances to the boundaries, since they are already periodic copies of other inclusions and do not need to be checked separately
 
             # loop over all "close" boundaries
             for iBnd in range(0,np.shape(closeBnds)[1]):
@@ -303,9 +303,18 @@ class InclusionRVE(GenericRVE):
 
         # set refinement fields in loop over all inclusions
         for iInc in range(0,np.shape(incInfo)[0]):
+            
+            # Determine relevant parameters
+            minCenterMeshSize = incInfo[iInc,3]
             meshSize=2*np.pi*incInfo[iInc,3]/elementsPerCircumference           # get mesh size by dividing inclusion circumference by elementsPerCircumference
             refinementWidth=inclusionRefinementWidth*incInfo[iInc,3]            # determine refinementWidth
             sigma=refinementWidth/4                                             # determine standard deviation of gaussian function so that 95% of the area under the refinement function are within the given refinementWidth: sigma=refinementWidth/4
+
+            # Restrict maximum mesh size within the inclusions to their radius (prevent "pie slice" meshes, especially for small inclusions in sets of inclusions with different radii)
+            self._setMaxMeshSizeInInclusions(np.r_[incInfo[iInc,:], maxMeshSize, minCenterMeshSize])
+
+
+            # Set Gaussian MathEval field for the actual refinement
             self._setMathEvalField("gaussian",np.r_[incInfo[iInc,self.relevantAxes[:]],incInfo[iInc,-1],maxMeshSize,meshSize,sigma])
 
 
@@ -353,6 +362,7 @@ class InclusionRVE(GenericRVE):
             # check distance to all remaining other inclusions
             distIncs=self._getDistanceVector(thisInc,otherIncs,axes=axes)       # get center-center distance vectors (per direction) to other inclusions
             normDistIncs=np.linalg.norm(distIncs,axis=1,keepdims=True)          # get norm of center-center distance vectors
+            directors = distIncs/normDistIncs                                    # get distance director
             normDistIncBnds=normDistIncs-otherIncs[:,[3]]-thisInc[3]            # get norm of boundary-boundary distance vectors
 
             # decide which inclusion combinations have to be refined
@@ -360,14 +370,16 @@ class InclusionRVE(GenericRVE):
             # -> inclusion combinations is used to check whether - with this
             # -> mesh density (plus safety coefficient) - the required amount
             # -> of elements between the inclusions can be ensured
-            incsForRefinement=np.array(np.where( (normDistIncBnds.flatten()<=1.25*nElemsBetween*np.maximum(minMeshSizes[iInc,[0]],minMeshSizes[iInc+1:,[0]]).flatten()) & (normDistIncBnds.flatten() > 0) ))
+            incsForRefinement=np.array(np.where( (normDistIncBnds.flatten()<=1.5*nElemsBetween*np.maximum(minMeshSizes[iInc,[0]],minMeshSizes[iInc+1:,[0]]).flatten()) & (normDistIncBnds.flatten() > 0) ))
 
             # loop over all inclusion combinations that have to be refined
             for iRefine in incsForRefinement.flatten():
-                refineCenter=thisInc[axes]+0.5*distIncs[iRefine,:]              # get center of refinement (half the distance between the inclusions)
+                refineCenter=thisInc[axes]+(thisInc[3]+0.5*normDistIncBnds[iRefine])*directors[iRefine,:]              # get center of refinement
+                
                 meshSize=normDistIncBnds[iRefine]/nElemsBetween                 # get required mesh size (distance diveded by required amount of elements)
+
                 refineWidth=normDistIncBnds[iRefine]/2+transitionElements/2*meshSize # get refinement width, i.e. offset of tanh-function to jump from minimum to maximum value (allow coarsening within "transitionElems" elements)
-                C=self._getTransformationMatrix(distIncs[iRefine,:],axes)      # get transformation matrix to rotated system between inclusions under consideration
+                C=self._getTransformationMatrix(distIncs[iRefine,:],axes)       # get transformation matrix to rotated system between inclusions under consideration
 
                 # set refinement field
                 self._setMathEvalField("tanh",np.r_[C.reshape(C.size),refineCenter,refineWidth,maxMeshSize,meshSize,5.3/(transitionElements*meshSize),aspectRatio])
@@ -538,6 +550,57 @@ class InclusionRVE(GenericRVE):
         # update list of refinement fields
         self.refinementFields.append({"fieldType": "MathEval", "fieldInfos": { "F": refineFunction}})
 
+    ##################################################################
+    # Method to restrict the maximum mesh size within the inclusions #
+    ##################################################################
+    def _setMaxMeshSizeInInclusions(self, data):
+        """Internal method to restrict the maximum mesh size within the inclusions
+
+        This method defines refinement functions of the following type:
+
+            Spheres:
+            h(x1,x2,x3) = Ball(x1,x2,x3,r0) with VIn = r0 and VOut = h_max
+
+            Cylinders/Disks:
+            h(x1,x2,x3) = Cylinder(x1,x2,x3,r0) with VIn = r0, and VOut = h_Max
+
+        It restricts the maximum mesh size within the individual inclusions to
+        their radius and thus prevents center point/axis mesh sizes that are too 
+        large. The restriction, especially, helps within sets of inclusions of 
+        different radii, as the maximum mesh size h_max is hardly achievable 
+        using the internal Gaussian refinement, if the refinement width is chosen 
+        in a way that prevents overrefined meshes for the larger inclusions.
+
+        Parameters:
+        -----------
+        data: array
+            array containing all parameters for the refinement
+            -> data = [x1_0, x2_0, x3_0, r0, h_max, h_min]
+        """
+
+        if len(self.relevantAxes)==2:                                           # Cylinders/Disks
+            # Distinguish between disks and cylinders
+            if self.dimension == 2:                                             # Disks
+                center = data[0:3]
+                axis = np.array([0,0,1])
+            else:                                                               # Cylinders
+                axis = self.inclusionAxis/2
+                center = data[0:3] + axis
+            
+            # Adjust passed data, as the "Cylinder" refinement field uses the
+            # actual cylinder center as well as half of the axis legnth in each direction
+            data=np.r_[center, 1.1*axis, data[-3:]]
+            cylPropNames=["XCenter", "YCenter", "ZCenter", "XAxis", "YAxis", "ZAxis", "Radius", "VOut", "VIn"]
+            refineFieldInfo={cylPropNames[idx]: data[idx] for idx in range(0,len(cylPropNames))}
+            refineField = {"fieldType": "Cylinder", "fieldInfos": refineFieldInfo}
+        elif len(self.relevantAxes)==3:                                         # Spheres
+            spherePropNames=["XCenter", "YCenter", "ZCenter", "Radius", "VOut", "VIn"]
+            refineFieldInfo={spherePropNames[idx]: data[idx] for idx in range(0,len(spherePropNames))}
+            refineField = {"fieldType": "Ball", "fieldInfos": refineFieldInfo}
+
+        # Update list of refinement fields
+        self.refinementFields.append(refineField)
+        
 
     ###########################################################################
     # Method to calculate "Gaussian" MathEval fields for inclusion refinement #

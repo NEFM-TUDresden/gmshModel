@@ -47,7 +47,7 @@ def FeapExport(model):
         nElem = nElem + len(elemTags[i])
         currNodesPerElem = len(connectivity[i])/len(elemTags[i])
         if currNodesPerElem > maxNodesPerElem:
-        	maxNodesPerElem = int(currNodesPerElem)
+            maxNodesPerElem = int(currNodesPerElem)
     print("Number of elements:", nElem)
     print("Maximum number of nodes per element:",maxNodesPerElem)
 
@@ -70,8 +70,8 @@ def FeapExport(model):
 
     # write problem type file PROB_XXX with general definitions
     with open('PROB_'+meshfile,'wt') as outfile:
-    	outfile.writelines(str(nNodes)+' '+str(nElem)+' '+str(numberOfMat)+' '+str(dim)+' '+str(dim)+' '+str(maxNodesPerElem)+'\n')
-    	outfile.writelines('! nodes, elements, material sets, mesh dimension, maximum nodal DOF (default = dim), max nodes/element')
+        outfile.writelines(str(nNodes)+' '+str(nElem)+' '+str(numberOfMat)+' '+str(dim)+' '+str(dim)+' '+str(maxNodesPerElem)+'\n')
+        outfile.writelines('! nodes, elements, material sets, mesh dimension, maximum nodal DOF (default = dim), max nodes/element')
 
     # write mesh file MESH_XXX with nodal coordinates and element connectivity for every element type
     with open('MESH_'+meshfile,'wt') as outfile:

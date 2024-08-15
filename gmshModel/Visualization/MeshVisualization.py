@@ -118,8 +118,6 @@ class MeshVisualization():
         # visualize the model mesh
         self.visualizeMesh()
 
-
-
 ################################################################################
 #                 MAIN METHODS FOR GEOMETRY VISUALIZATION                      #
 ################################################################################
@@ -286,11 +284,8 @@ class MeshVisualization():
     ##################################
     def addKeyPressEvents(self):
         """Method to add all user-defined key-press events"""
-
-        self.plotterObj.iren.clear_events_for_key('w')
-        
         # Define dict of keys and associated callbacks for active (user-defined) key press events
-        events={"h": self.showCommandLineHelp, "m": self.toggleMenu, "d": self.restoreDefaultSettings, "space": self.filterPipeline, "x": self.plotterObj.view_yz, "y": self.plotterObj.view_zx, "z": self.plotterObj.view_xy, "s": self.toggleSurfaceRepresentation, "e": self.toggleEdgeRepresentation}                      
+        events={"h": self.showCommandLineHelp, "m": self.toggleMenu, "d": self.restoreDefaultSettings, "space": self.filterPipeline, "x": self.plotterObj.view_yz, "y": self.plotterObj.view_zx, "z": self.plotterObj.view_xy, "s": self.toggleSurfaceRepresentation, "l": self.toggleEdgeRepresentation}                      
         for eventKey, eventCallback in events.items():                          # loop over all active keys
             self.plotterObj.add_key_event(eventKey, eventCallback)              # add corresponding key press events
 
@@ -313,6 +308,7 @@ class MeshVisualization():
     def toggleSurfaceRepresentation(self):
         """Method to toggle the surface mesh visibility"""
         self.surfaceMeshActor.visibility = not(self.surfaceMeshActor.visibility)
+        self.plotterObj.render()
 
     #########################################
     # Method to toggle edge mesh visibility #
@@ -320,6 +316,7 @@ class MeshVisualization():
     def toggleEdgeRepresentation(self):
         """Method to toggle the edge mesh visibility"""
         self.edgeMeshActor.visibility = not(self.edgeMeshActor.visibility)
+        self.plotterObj.render()
 
     ######################################
     # Method to restore default settings #
@@ -343,7 +340,7 @@ class MeshVisualization():
         infoText=("\nUse one of the following key events to control the plot:\n"
                   "\n"
                   "\ts \ttoggle surface representation of objects\n"
-                  "\te \ttoggle edge representation of objects\n"
+                  "\tl \ttoggle edge representation of objects\n"
                   "\tv \tenable isometric view\n"
                   "\tx \tset view to y-z-plane\n"
                   "\ty \tset view to z-x-plane\n"

@@ -588,7 +588,7 @@ class InclusionRVE(GenericRVE):
                 center = data[0:3] + axis
             
             # Adjust passed data, as the "Cylinder" refinement field uses the
-            # actual cylinder center as well as half of the axis legnth in each direction
+            # actual cylinder center as well as half of the axis length in each direction
             data=np.r_[center, 1.1*axis, data[-3:]]
             cylPropNames=["XCenter", "YCenter", "ZCenter", "XAxis", "YAxis", "ZAxis", "Radius", "VOut", "VIn"]
             refineFieldInfo={cylPropNames[idx]: data[idx] for idx in range(0,len(cylPropNames))}

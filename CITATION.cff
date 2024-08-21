@@ -10,7 +10,7 @@ authors:
   orcid: https://orcid.org/0000-0002-8325-4043
 - family-names: Turan
   given-names: Ozgur Taylan
-title: gmshModel v1.1.1
+title: gmshModel
 version: 1.1.1
 doi: 10.5281/zenodo.13353550 
 date-released: 2024-08-21

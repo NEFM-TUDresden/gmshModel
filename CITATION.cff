@@ -1,0 +1,17 @@
+cff-version: 1.1.0
+message: "Currently, no publication for gmshModel exists. However, we created a Zenodo release to allow for a citation of our work. If you use this software in your work, please cite it as below."
+authors:
+- family-names: Metsch
+  given-names: Philipp
+  orcid: https://orcid.org/0000-0003-2645-6770
+  affiliation: "Institute of Solid Mechanics, Technische Universität Dresden"
+- family-names: Hansen-Dörr
+  given-names: Arne Claus
+  orcid: https://orcid.org/0000-0002-8325-4043
+- family-names: Turan
+  given-names: Ozgur Taylan
+title: gmshModel v1.1.1
+version: 1.1.1
+doi: 10.5281/zenodo.13353550 
+date-released: 2024-08-21
+url: "https://github.com/NEFM-TUDresden/gmshModel"

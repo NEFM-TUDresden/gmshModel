@@ -2,4 +2,6 @@ channels:
   - conda-forge
 dependencies:
   - gmshmodel
-  - sphinx_rtd_theme
+  - pip
+  pip:
+  - sphinx-rtd-theme

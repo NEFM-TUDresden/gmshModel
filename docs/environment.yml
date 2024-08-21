@@ -4,5 +4,5 @@ channels:
 dependencies:
   - gmshmodel
   - pip
-  pip:
-  - sphinx-rtd-theme
+  - pip:
+    - sphinx-rtd-theme
